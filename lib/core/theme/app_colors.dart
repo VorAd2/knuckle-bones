@@ -15,5 +15,6 @@ ThemeData buildAppTheme() {
     useMaterial3: true,
     colorScheme: colorScheme,
     brightness: Brightness.dark,
+    fontFamily: 'Poppins',
   );
 }
