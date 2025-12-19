@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_auth_row.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/confirm_button.dart';
 
@@ -20,11 +20,23 @@ class _SignupViewState extends State<SignupView> {
   final _usernameFormController = TextEditingController();
   File? _userAvatar;
 
+  @override
+  void dispose() {
+    _usernameFormController.dispose();
+    _emailFormController.dispose();
+    _passwordFormController.dispose();
+    super.dispose();
+  }
+
   void _onSubmit() {
     if (_formKey.currentState!.validate()) {
       debugPrint('Validado');
     }
   }
+
+  void _onGoogleAuth() {}
+
+  void _onGithubAuth() {}
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +62,10 @@ class _SignupViewState extends State<SignupView> {
                     const SizedBox(height: 32),
                     Text('Or sign up with', textAlign: TextAlign.center),
                     const SizedBox(height: 14),
-                    _buildAltSignup(cs),
+                    AlternativeAuthRow(
+                      onGoogleAuth: _onGoogleAuth,
+                      onGithubAuth: _onGithubAuth,
+                    ),
                     const Spacer(),
                     _buildSigninNavigate(),
                     const SizedBox(height: 4),
@@ -123,36 +138,6 @@ class _SignupViewState extends State<SignupView> {
         keyboardType: TextInputType.emailAddress,
       ),
     ];
-  }
-
-  Widget _buildAltSignup(ColorScheme cs) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: 16,
-      children: [
-        _socialButton(
-          SvgPicture.asset('assets/icons/google.svg', width: 24, height: 24),
-          'Google',
-        ),
-        _socialButton(
-          SvgPicture.asset(
-            'assets/icons/github.svg',
-            width: 32,
-            height: 32,
-            colorFilter: ColorFilter.mode(cs.onSurface, BlendMode.srcIn),
-          ),
-          'GitHub',
-        ),
-      ],
-    );
-  }
-
-  Widget _socialButton(Widget icon, String label) {
-    return OutlinedButton.icon(
-      onPressed: () {},
-      icon: icon,
-      label: Text(label),
-    );
   }
 
   Widget _buildSigninNavigate() {

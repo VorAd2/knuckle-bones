@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_auth_row.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/confirm_button.dart';
 
@@ -15,11 +15,22 @@ class _SigninViewState extends State<SigninView> {
   final _emailFormController = TextEditingController();
   final _passwordFormController = TextEditingController();
 
+  @override
+  void dispose() {
+    _emailFormController.dispose();
+    _passwordFormController.dispose();
+    super.dispose();
+  }
+
   void _onSubmit() {
     if (_formKey.currentState!.validate()) {
       debugPrint('Validado');
     }
   }
+
+  void _onGoogleAuth() {}
+
+  void _onGithubAuth() {}
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +56,10 @@ class _SigninViewState extends State<SigninView> {
                     const SizedBox(height: 32),
                     Text('Or signin with', textAlign: TextAlign.center),
                     const SizedBox(height: 14),
-                    _buildAltSignin(cs),
+                    AlternativeAuthRow(
+                      onGoogleAuth: _onGoogleAuth,
+                      onGithubAuth: _onGithubAuth,
+                    ),
                     const Spacer(),
                     _buildSignupNavigate(),
                     const SizedBox(height: 20),
@@ -96,36 +110,6 @@ class _SigninViewState extends State<SigninView> {
         keyboardType: TextInputType.visiblePassword,
       ),
     ];
-  }
-
-  Widget _buildAltSignin(ColorScheme cs) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: 16,
-      children: [
-        _socialButton(
-          SvgPicture.asset('assets/icons/google.svg', width: 24, height: 24),
-          'Google',
-        ),
-        _socialButton(
-          SvgPicture.asset(
-            'assets/icons/github.svg',
-            width: 32,
-            height: 32,
-            colorFilter: ColorFilter.mode(cs.onSurface, BlendMode.srcIn),
-          ),
-          'GitHub',
-        ),
-      ],
-    );
-  }
-
-  Widget _socialButton(Widget icon, String label) {
-    return OutlinedButton.icon(
-      onPressed: () {},
-      icon: icon,
-      label: Text(label),
-    );
   }
 
   Widget _buildSignupNavigate() {
