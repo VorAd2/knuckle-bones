@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
+import 'package:knuckle_bones/features/auth/presentation/widgets/confirm_button.dart';
 
 class SignupView extends StatefulWidget {
   const SignupView({super.key});
@@ -18,6 +19,12 @@ class _SignupViewState extends State<SignupView> {
   final _passwordFormController = TextEditingController();
   final _usernameFormController = TextEditingController();
   File? _userAvatar;
+
+  void _onSubmit() {
+    if (_formKey.currentState!.validate()) {
+      debugPrint('Validado');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +46,7 @@ class _SignupViewState extends State<SignupView> {
                     const SizedBox(height: 48),
                     AuthForm(formKey: _formKey, configs: _getConfigs()),
                     const SizedBox(height: 32),
-                    _buildConfirmButton(),
+                    ConfirmButton(onSubmit: _onSubmit),
                     const SizedBox(height: 32),
                     Text('Or sign up with', textAlign: TextAlign.center),
                     const SizedBox(height: 14),
@@ -116,24 +123,6 @@ class _SignupViewState extends State<SignupView> {
         keyboardType: TextInputType.emailAddress,
       ),
     ];
-  }
-
-  Widget _buildConfirmButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: FilledButton(
-        onPressed: () {
-          if (_formKey.currentState!.validate()) {
-            debugPrint("Validado!");
-          }
-        },
-        child: const Text(
-          'Confirm',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
   }
 
   Widget _buildAltSignup(ColorScheme cs) {

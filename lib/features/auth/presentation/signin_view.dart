@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
-
-enum _FormFieldType { email, password }
+import 'package:knuckle_bones/features/auth/presentation/widgets/confirm_button.dart';
 
 class SigninView extends StatefulWidget {
   const SigninView({super.key});
@@ -15,6 +14,12 @@ class _SigninViewState extends State<SigninView> {
   final _formKey = GlobalKey<FormState>();
   final _emailFormController = TextEditingController();
   final _passwordFormController = TextEditingController();
+
+  void _onSubmit() {
+    if (_formKey.currentState!.validate()) {
+      debugPrint('Validado');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +41,7 @@ class _SigninViewState extends State<SigninView> {
                     const SizedBox(height: 48),
                     AuthForm(formKey: _formKey, configs: _getConfigs()),
                     const SizedBox(height: 32),
-                    _buildConfirmButton(),
+                    ConfirmButton(onSubmit: _onSubmit),
                     const SizedBox(height: 32),
                     Text('Or signin with', textAlign: TextAlign.center),
                     const SizedBox(height: 14),
@@ -91,24 +96,6 @@ class _SigninViewState extends State<SigninView> {
         keyboardType: TextInputType.visiblePassword,
       ),
     ];
-  }
-
-  Widget _buildConfirmButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: FilledButton(
-        onPressed: () {
-          if (_formKey.currentState!.validate()) {
-            debugPrint("Validado!");
-          }
-        },
-        child: const Text(
-          'Confirm',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
   }
 
   Widget _buildAltSignin(ColorScheme cs) {
