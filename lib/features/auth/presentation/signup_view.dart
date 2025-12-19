@@ -1,10 +1,221 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-class SignupView extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+
+enum _FormFieldType { username, email, password }
+
+class SignupView extends StatefulWidget {
   const SignupView({super.key});
 
   @override
+  State<StatefulWidget> createState() => _SignupViewState();
+}
+
+class _SignupViewState extends State<SignupView> {
+  final _formKey = GlobalKey<FormState>();
+  String? _emailErrorFormMessage;
+  final _emailFormController = TextEditingController();
+  final _passFormController = TextEditingController();
+  final _usernameFormController = TextEditingController();
+  File? _userAvatar;
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(title: Text('Signup')));
+    final cs = Theme.of(context).colorScheme;
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - 48,
+              ),
+              child: IntrinsicHeight(
+                child: Column(
+                  children: [
+                    _buildAvatarSelection(cs),
+                    const SizedBox(height: 48),
+                    _buildForm(),
+                    const SizedBox(height: 32),
+                    _buildConfirmButton(),
+                    const SizedBox(height: 32),
+                    Text('Or sign up with', textAlign: TextAlign.center),
+                    const SizedBox(height: 14),
+                    _buildAltSignup(cs),
+                    const Spacer(),
+                    _buildSigninNavigate(),
+                    const SizedBox(height: 4),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: const Text(
+        'Sign up',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+      centerTitle: true,
+    );
+  }
+
+  Widget _buildAvatarSelection(ColorScheme cs) {
+    return CircleAvatar(
+      radius: 70,
+      child: Stack(
+        alignment: AlignmentGeometry.center,
+        children: [
+          Icon(
+            Icons.camera_alt_rounded,
+            size: 70,
+            color: cs.onPrimaryContainer.withAlpha(60),
+          ),
+          Icon(Icons.edit, size: 55),
+          Material(
+            color: Colors.transparent,
+            shape: CircleBorder(),
+            child: InkWell(onTap: () {}, customBorder: CircleBorder()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Form _buildForm() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        spacing: 20,
+        children: [
+          _buildFormField(_FormFieldType.username),
+          _buildFormField(_FormFieldType.email),
+          _buildFormField(_FormFieldType.password),
+        ],
+      ),
+    );
+  }
+
+  TextFormField _buildFormField(_FormFieldType type) {
+    TextEditingController controller;
+    bool obscureText;
+    TextInputType keyboardType;
+    String labelText;
+    Widget prefixIcon;
+    String? Function(String? value) validate;
+    switch (type) {
+      case _FormFieldType.username:
+        controller = _usernameFormController;
+        obscureText = false;
+        keyboardType = TextInputType.name;
+        labelText = 'Username';
+        prefixIcon = Icon(Icons.person_2_rounded);
+        validate = (value) => null;
+        break;
+      case _FormFieldType.email:
+        controller = _emailFormController;
+        obscureText = false;
+        keyboardType = TextInputType.emailAddress;
+        labelText = 'Email';
+        prefixIcon = Icon(Icons.mail_rounded);
+        validate = (value) {
+          if (!value!.contains('@')) return 'Insert a valid email';
+          return null;
+        };
+        break;
+      case _FormFieldType.password:
+        controller = _passFormController;
+        obscureText = true;
+        keyboardType = TextInputType.visiblePassword;
+        labelText = 'Password';
+        prefixIcon = Icon(Icons.key_rounded);
+        validate = (value) {
+          if (value!.length < 5) return 'At least 5 characters';
+          return null;
+        };
+    }
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      validator: (value) {
+        if (value == null || value.isEmpty) return 'Fill in the field';
+        return validate(value);
+      },
+      decoration: InputDecoration(
+        labelText: labelText,
+        prefixIcon: prefixIcon,
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 14,
+          horizontal: 12,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConfirmButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: FilledButton(
+        onPressed: () {
+          if (_formKey.currentState!.validate()) {
+            debugPrint("Validado!");
+          }
+        },
+        child: const Text(
+          'Confirm',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAltSignup(ColorScheme cs) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      spacing: 16,
+      children: [
+        _socialButton(
+          SvgPicture.asset('assets/icons/google.svg', width: 24, height: 24),
+          'Google',
+        ),
+        _socialButton(
+          SvgPicture.asset(
+            'assets/icons/github.svg',
+            width: 32,
+            height: 32,
+            colorFilter: ColorFilter.mode(cs.onSurface, BlendMode.srcIn),
+          ),
+          'GitHub',
+        ),
+      ],
+    );
+  }
+
+  Widget _socialButton(Widget icon, String label) {
+    return OutlinedButton.icon(
+      onPressed: () {},
+      icon: icon,
+      label: Text(label),
+    );
+  }
+
+  Widget _buildSigninNavigate() {
+    return TextButton(
+      onPressed: () {},
+      child: Text("Already have an account?"),
+    );
   }
 }
