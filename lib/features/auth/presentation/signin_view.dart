@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:knuckle_bones/features/auth/presentation/signup_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_auth_row.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/confirm_button.dart';
@@ -105,7 +106,11 @@ class _SigninViewState extends State<SigninView> {
 
   Widget _buildSignupNavigate() {
     return TextButton(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.of(
+          context,
+        ).pushReplacement(MaterialPageRoute(builder: (_) => SignupView()));
+      },
       child: Text("Don't have an account yet?"),
     );
   }
