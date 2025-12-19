@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:knuckle_bones/features/auth/presentation/signin.dart';
-import 'package:knuckle_bones/features/auth/presentation/signup.dart';
+import 'package:knuckle_bones/features/auth/presentation/signin_view.dart';
+import 'package:knuckle_bones/features/auth/presentation/signup_view.dart';
 
 class AuthGateView extends StatelessWidget {
   const AuthGateView({super.key});
