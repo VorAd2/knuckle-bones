@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:knuckle_bones/features/auth/presentation/signin_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/signup_view.dart';
+import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AuthGateView extends StatelessWidget {
@@ -12,9 +13,8 @@ class AuthGateView extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final textTheme = theme.textTheme;
-
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar: MyAppBar(title: 'Welcome'),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -50,16 +50,6 @@ class AuthGateView extends StatelessWidget {
 
   void _navigateTo(BuildContext context, Widget destination) {
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => destination));
-  }
-
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      centerTitle: true,
-      title: const Text(
-        'Welcome',
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-    );
   }
 
   Widget _buildCentralContent({

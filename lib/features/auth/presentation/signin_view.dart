@@ -4,6 +4,7 @@ import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_aut
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/confirm_button.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
+import 'package:knuckle_bones/features/home/home_view.dart';
 
 class SigninView extends StatefulWidget {
   const SigninView({super.key});
@@ -25,6 +26,13 @@ class _SigninViewState extends State<SigninView> {
   }
 
   void _onSubmit() {
+    final email = _emailFormController.text.trim();
+    final password = _passwordFormController.text.trim();
+    if (email == 'admin' && password == 'admin') {
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => HomeView()));
+    }
     if (_formKey.currentState!.validate()) {
       debugPrint('Validado');
     }
