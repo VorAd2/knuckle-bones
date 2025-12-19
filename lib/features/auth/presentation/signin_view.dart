@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_auth_row.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/confirm_button.dart';
+import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
 
 class SigninView extends StatefulWidget {
   const SigninView({super.key});
@@ -36,7 +37,7 @@ class _SigninViewState extends State<SigninView> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar: MyAppBar(title: 'Sign up'),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) => SingleChildScrollView(
@@ -70,16 +71,6 @@ class _SigninViewState extends State<SigninView> {
           ),
         ),
       ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      title: const Text(
-        'Sign in',
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      centerTitle: true,
     );
   }
 
