@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:knuckle_bones/features/auth/presentation/signin_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/signup_view.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AuthGateView extends StatelessWidget {
   const AuthGateView({super.key});
@@ -33,7 +34,7 @@ class AuthGateView extends StatelessWidget {
                           onSignup: () => _navigateTo(context, SignupView()),
                         ),
                         const Spacer(),
-                        _buildFooter(cs),
+                        _buildFooter(context, cs),
                         const SizedBox(height: 24),
                       ],
                     ),
@@ -77,9 +78,29 @@ class AuthGateView extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter(ColorScheme cs) {
+  Widget _buildFooter(BuildContext context, ColorScheme cs) {
+    final githubUrl = 'https://github.com/VorAd2';
+    Future<void> openGithub(BuildContext context) async {
+      final Uri url = Uri.parse(githubUrl);
+      try {
+        final bool success = await launchUrl(
+          url,
+          mode: LaunchMode.externalApplication,
+        );
+        if (!success) {
+          if (!context.mounted) return;
+          _showPopup(context, 'The link could not be opened');
+        }
+      } catch (e) {
+        if (!context.mounted) return;
+        _showPopup(context, 'Unknown error: $e');
+      }
+    }
+
     return IconButton(
-      onPressed: () {},
+      onPressed: () {
+        openGithub(context);
+      },
       iconSize: 32,
       icon: SvgPicture.asset(
         'assets/icons/github.svg',
@@ -87,7 +108,25 @@ class AuthGateView extends StatelessWidget {
         height: 32,
         colorFilter: ColorFilter.mode(cs.onSurfaceVariant, BlendMode.srcIn),
       ),
-      tooltip: 'Visite nosso GitHub',
+      tooltip: 'Visit me',
+    );
+  }
+
+  void _showPopup(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Ops!'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 
