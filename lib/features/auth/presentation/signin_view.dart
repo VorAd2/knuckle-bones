@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
 
 enum _FormFieldType { email, password }
 
@@ -33,7 +34,7 @@ class _SigninViewState extends State<SigninView> {
                   children: [
                     _buildGenericAvatar(cs),
                     const SizedBox(height: 48),
-                    _buildForm(),
+                    AuthForm(formKey: _formKey, configs: _getConfigs()),
                     const SizedBox(height: 32),
                     _buildConfirmButton(),
                     const SizedBox(height: 32),
@@ -71,50 +72,25 @@ class _SigninViewState extends State<SigninView> {
     );
   }
 
-  Form _buildForm() {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          _buildFormField(_FormFieldType.email),
-          const SizedBox(height: 20),
-          _buildFormField(_FormFieldType.password),
-        ],
+  List<AuthFieldConfig> _getConfigs() {
+    return [
+      AuthFieldConfig(
+        controller: _emailFormController,
+        label: 'Email',
+        icon: Icons.mail_lock_rounded,
+        validator: (v) => !v!.contains('@') ? 'Invalid email' : null,
+        isPassword: false,
+        keyboardType: TextInputType.emailAddress,
       ),
-    );
-  }
-
-  TextFormField _buildFormField(_FormFieldType type) {
-    final isPassword = type == _FormFieldType.password;
-    return TextFormField(
-      controller: isPassword ? _passwordFormController : _emailFormController,
-      obscureText: isPassword,
-      textInputAction: isPassword ? TextInputAction.done : TextInputAction.next,
-      keyboardType: isPassword
-          ? TextInputType.visiblePassword
-          : TextInputType.emailAddress,
-      validator: (value) {
-        if (value == null || value.isEmpty) return 'Fill in the field';
-        if (!isPassword && !value.contains('@')) {
-          return 'Insert a valid email';
-        }
-        if (isPassword && value.length < 5) {
-          return 'At least 5 characters';
-        }
-        return null;
-      },
-      decoration: InputDecoration(
-        labelText: isPassword ? 'Password' : 'Email',
-        prefixIcon: Icon(isPassword ? Icons.key_rounded : Icons.mail),
-        border: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 14,
-          horizontal: 12,
-        ),
+      AuthFieldConfig(
+        controller: _passwordFormController,
+        label: 'Password',
+        icon: Icons.key_rounded,
+        validator: (v) => v!.length < 6 ? 'Min 6 chars' : null,
+        isPassword: true,
+        keyboardType: TextInputType.visiblePassword,
       ),
-    );
+    ];
   }
 
   Widget _buildConfirmButton() {

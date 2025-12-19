@@ -2,8 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-
-enum _FormFieldType { username, email, password }
+import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
 
 class SignupView extends StatefulWidget {
   const SignupView({super.key});
@@ -16,7 +15,7 @@ class _SignupViewState extends State<SignupView> {
   final _formKey = GlobalKey<FormState>();
   String? _emailErrorFormMessage;
   final _emailFormController = TextEditingController();
-  final _passFormController = TextEditingController();
+  final _passwordFormController = TextEditingController();
   final _usernameFormController = TextEditingController();
   File? _userAvatar;
 
@@ -38,7 +37,7 @@ class _SignupViewState extends State<SignupView> {
                   children: [
                     _buildAvatarSelection(cs),
                     const SizedBox(height: 48),
-                    _buildForm(),
+                    AuthForm(formKey: _formKey, configs: _getConfigs()),
                     const SizedBox(height: 32),
                     _buildConfirmButton(),
                     const SizedBox(height: 32),
@@ -90,78 +89,33 @@ class _SignupViewState extends State<SignupView> {
     );
   }
 
-  Form _buildForm() {
-    return Form(
-      key: _formKey,
-      child: Column(
-        spacing: 20,
-        children: [
-          _buildFormField(_FormFieldType.username),
-          _buildFormField(_FormFieldType.email),
-          _buildFormField(_FormFieldType.password),
-        ],
+  List<AuthFieldConfig> _getConfigs() {
+    return [
+      AuthFieldConfig(
+        controller: _usernameFormController,
+        label: 'Username',
+        icon: Icons.person_2_rounded,
+        validator: (v) => null,
+        isPassword: false,
+        keyboardType: TextInputType.name,
       ),
-    );
-  }
-
-  TextFormField _buildFormField(_FormFieldType type) {
-    TextEditingController controller;
-    bool obscureText;
-    TextInputType keyboardType;
-    String labelText;
-    Widget prefixIcon;
-    String? Function(String? value) validate;
-    switch (type) {
-      case _FormFieldType.username:
-        controller = _usernameFormController;
-        obscureText = false;
-        keyboardType = TextInputType.name;
-        labelText = 'Username';
-        prefixIcon = Icon(Icons.person_2_rounded);
-        validate = (value) => null;
-        break;
-      case _FormFieldType.email:
-        controller = _emailFormController;
-        obscureText = false;
-        keyboardType = TextInputType.emailAddress;
-        labelText = 'Email';
-        prefixIcon = Icon(Icons.mail_rounded);
-        validate = (value) {
-          if (!value!.contains('@')) return 'Insert a valid email';
-          return null;
-        };
-        break;
-      case _FormFieldType.password:
-        controller = _passFormController;
-        obscureText = true;
-        keyboardType = TextInputType.visiblePassword;
-        labelText = 'Password';
-        prefixIcon = Icon(Icons.key_rounded);
-        validate = (value) {
-          if (value!.length < 5) return 'At least 5 characters';
-          return null;
-        };
-    }
-    return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      validator: (value) {
-        if (value == null || value.isEmpty) return 'Fill in the field';
-        return validate(value);
-      },
-      decoration: InputDecoration(
-        labelText: labelText,
-        prefixIcon: prefixIcon,
-        border: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 14,
-          horizontal: 12,
-        ),
+      AuthFieldConfig(
+        controller: _emailFormController,
+        label: 'Email',
+        icon: Icons.mail,
+        validator: (v) => !v!.contains('@') ? 'Invalid email' : null,
+        isPassword: false,
+        keyboardType: TextInputType.emailAddress,
       ),
-    );
+      AuthFieldConfig(
+        controller: _passwordFormController,
+        label: 'Password',
+        icon: Icons.key_rounded,
+        validator: (v) => v!.length < 6 ? 'Min 6 chars' : null,
+        isPassword: true,
+        keyboardType: TextInputType.emailAddress,
+      ),
+    ];
   }
 
   Widget _buildConfirmButton() {
