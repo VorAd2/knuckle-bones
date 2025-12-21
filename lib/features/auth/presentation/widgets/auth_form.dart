@@ -28,22 +28,59 @@ class AuthForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Form(
       key: formKey,
-      child: Column(spacing: 20, children: configs.map(_buildField).toList()),
+      child: Column(
+        spacing: 20,
+        children: configs.map((config) => _AuthField(config: config)).toList(),
+      ),
     );
   }
+}
 
-  Widget _buildField(AuthFieldConfig config) {
+class _AuthField extends StatefulWidget {
+  final AuthFieldConfig config;
+
+  const _AuthField({required this.config});
+
+  @override
+  State<_AuthField> createState() => _AuthFieldState();
+}
+
+class _AuthFieldState extends State<_AuthField> {
+  late bool _isObscure;
+
+  @override
+  void initState() {
+    super.initState();
+    _isObscure = widget.config.isPassword;
+  }
+
+  void _toggleVisibility() {
+    setState(() {
+      _isObscure = !_isObscure;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return TextFormField(
-      controller: config.controller,
-      obscureText: config.isPassword,
-      keyboardType: config.keyboardType,
+      controller: widget.config.controller,
+      obscureText: _isObscure,
+      keyboardType: widget.config.keyboardType,
       validator: (v) {
-        if (v == null || v.isEmpty) return 'Required';
-        return config.validator(v);
+        if (v == null || v.isEmpty) return 'Obrigatório';
+        return widget.config.validator(v);
       },
       decoration: InputDecoration(
-        labelText: config.label,
-        prefixIcon: Icon(config.icon),
+        labelText: widget.config.label,
+        prefixIcon: Icon(widget.config.icon),
+        suffixIcon: widget.config.isPassword
+            ? IconButton(
+                icon: Icon(
+                  _isObscure ? Icons.visibility : Icons.visibility_off,
+                ),
+                onPressed: _toggleVisibility,
+              )
+            : null,
         border: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
