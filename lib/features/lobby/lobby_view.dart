@@ -33,7 +33,7 @@ class LobbyView extends StatelessWidget {
             ThreeDButton(
               buttonBackground: cs.secondary,
               buttonForeground: cs.onSecondary,
-              icon: Icons.start,
+              icon: Icons.input,
               textString: 'Join match',
               onClick: () {},
             ),
