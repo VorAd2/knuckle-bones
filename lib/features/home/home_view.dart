@@ -11,7 +11,7 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   int _currentIndex = 0;
-  final List<Widget> _views = const [LobbyView(), ProfileView()];
+  final List<Widget> _views = [LobbyView(), ProfileView()];
 
   @override
   Widget build(BuildContext context) {

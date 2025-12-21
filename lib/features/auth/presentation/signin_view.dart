@@ -96,7 +96,7 @@ class _SigninViewState extends State<SigninView> {
       AuthFieldConfig(
         controller: _emailFormController,
         label: 'Email',
-        icon: Icons.mail_lock_rounded,
+        icon: Icon(Icons.mail_lock_rounded),
         validator: (v) => !v!.contains('@') ? 'Invalid email' : null,
         isPassword: false,
         keyboardType: TextInputType.emailAddress,
@@ -104,7 +104,7 @@ class _SigninViewState extends State<SigninView> {
       AuthFieldConfig(
         controller: _passwordFormController,
         label: 'Password',
-        icon: Icons.key_rounded,
+        icon: Icon(Icons.key_rounded),
         validator: (v) => v!.length < 6 ? 'Min 6 chars' : null,
         isPassword: true,
         keyboardType: TextInputType.visiblePassword,
