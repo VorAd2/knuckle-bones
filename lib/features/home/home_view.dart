@@ -24,17 +24,27 @@ class _HomeViewState extends State<HomeView> {
             _currentIndex = index;
           });
         },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.videogame_asset_outlined),
-            label: 'Play',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_2_outlined),
-            label: 'Profile',
-          ),
+        destinations: [
+          NavigationDestination(icon: _getIcon(0), label: 'Play'),
+          NavigationDestination(icon: _getIcon(1), label: 'Profile'),
         ],
       ),
     );
+  }
+
+  Icon _getIcon(int destinationIndex) {
+    return switch (destinationIndex) {
+      0 => Icon(
+        destinationIndex == _currentIndex
+            ? Icons.videogame_asset
+            : Icons.videogame_asset_outlined,
+      ),
+      1 => Icon(
+        destinationIndex == _currentIndex
+            ? Icons.person_2
+            : Icons.person_2_outlined,
+      ),
+      _ => Icon(Icons.error),
+    };
   }
 }
