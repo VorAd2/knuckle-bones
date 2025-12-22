@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:knuckle_bones/core/ui/icons/app_icons.dart';
 
 class MyTextFormField extends StatefulWidget {
   final TextEditingController controller;
@@ -41,6 +42,7 @@ class _MyTextFormFieldState extends State<MyTextFormField> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return TextFormField(
       controller: widget.controller,
       obscureText: widget.isPassword ? _isObscure : false,
@@ -52,9 +54,9 @@ class _MyTextFormFieldState extends State<MyTextFormField> {
         prefixIcon: widget.icon,
         suffixIcon: widget.isPassword
             ? IconButton(
-                icon: Icon(
-                  _isObscure ? Icons.visibility : Icons.visibility_off,
-                ),
+                icon: _isObscure
+                    ? AppIcons.eyeClosed(color: cs.onSurfaceVariant)
+                    : Icon(Icons.visibility),
                 onPressed: _toggleVisibility,
               )
             : null,
