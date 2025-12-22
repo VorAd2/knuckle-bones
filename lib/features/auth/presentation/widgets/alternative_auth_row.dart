@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:knuckle_bones/core/ui/icons/app_icons.dart';
 
 class AlternativeAuthRow extends StatelessWidget {
   final VoidCallback onGoogleAuth;
@@ -19,21 +20,12 @@ class AlternativeAuthRow extends StatelessWidget {
       spacing: 16,
       children: [
         _socialButton(
-          icon: SvgPicture.asset(
-            'assets/icons/google.svg',
-            width: 24,
-            height: 24,
-          ),
+          icon: AppIcons.google(size: 24),
           label: 'Google',
           callback: onGoogleAuth,
         ),
         _socialButton(
-          icon: SvgPicture.asset(
-            'assets/icons/github.svg',
-            width: 32,
-            height: 32,
-            colorFilter: ColorFilter.mode(cs.onSurface, BlendMode.srcIn),
-          ),
+          icon: AppIcons.github(size: 32, color: cs.onSurface),
           label: 'GitHub',
           callback: onGithubAuth,
         ),

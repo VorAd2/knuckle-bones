@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:knuckle_bones/core/ui/icons/app_icons.dart';
 import 'package:knuckle_bones/features/auth/presentation/signin_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/signup_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
@@ -68,58 +68,6 @@ class AuthGateView extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter(BuildContext context, ColorScheme cs) {
-    final githubUrl = 'https://github.com/VorAd2';
-    Future<void> openGithub(BuildContext context) async {
-      final Uri url = Uri.parse(githubUrl);
-      try {
-        final bool success = await launchUrl(
-          url,
-          mode: LaunchMode.externalApplication,
-        );
-        if (!success) {
-          if (!context.mounted) return;
-          _showPopup(context, 'The link could not be opened');
-        }
-      } catch (e) {
-        if (!context.mounted) return;
-        _showPopup(context, 'Unknown error: $e');
-      }
-    }
-
-    return IconButton(
-      onPressed: () {
-        openGithub(context);
-      },
-      iconSize: 32,
-      icon: SvgPicture.asset(
-        'assets/icons/github.svg',
-        width: 32,
-        height: 32,
-        colorFilter: ColorFilter.mode(cs.onSurfaceVariant, BlendMode.srcIn),
-      ),
-      tooltip: 'Visit me',
-    );
-  }
-
-  void _showPopup(BuildContext context, String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Ops!'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   List<Widget> _buildBrandWidgets(TextTheme textTheme, ColorScheme cs) {
     return [
       Container(
@@ -130,11 +78,7 @@ class AuthGateView extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         padding: const EdgeInsets.all(32),
-        child: SvgPicture.asset(
-          'assets/icons/logo.svg',
-          colorFilter: ColorFilter.mode(cs.onPrimaryContainer, BlendMode.srcIn),
-          fit: BoxFit.contain,
-        ),
+        child: AppIcons.logo(color: cs.onPrimaryContainer),
       ),
       const SizedBox(height: 24),
       Text(
@@ -172,6 +116,53 @@ class AuthGateView extends StatelessWidget {
           child: const Text('Sign up'),
         ),
       ],
+    );
+  }
+
+  Widget _buildFooter(BuildContext context, ColorScheme cs) {
+    final githubUrl = 'https://github.com/VorAd2';
+    Future<void> openGithub(BuildContext context) async {
+      final Uri url = Uri.parse(githubUrl);
+      try {
+        final bool success = await launchUrl(
+          url,
+          mode: LaunchMode.externalApplication,
+        );
+        if (!success) {
+          if (!context.mounted) return;
+          _showPopup(context, 'The link could not be opened');
+        }
+      } catch (e) {
+        if (!context.mounted) return;
+        _showPopup(context, 'Unknown error: $e');
+      }
+    }
+
+    return IconButton(
+      onPressed: () {
+        openGithub(context);
+      },
+      iconSize: 32,
+      icon: AppIcons.github(size: 32, color: cs.onSurfaceVariant),
+      tooltip: 'Visit me',
+    );
+  }
+
+  void _showPopup(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Ops!'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

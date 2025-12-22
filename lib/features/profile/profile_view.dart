@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:knuckle_bones/core/domain/session_controller.dart';
-import 'package:knuckle_bones/core/widgets/my_text_form_field.dart';
-import 'package:knuckle_bones/core/widgets/three_d_button.dart';
+import 'package:knuckle_bones/core/ui/widgets/my_text_form_field.dart';
+import 'package:knuckle_bones/core/ui/widgets/three_d_button.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
 
 class ProfileView extends StatefulWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:knuckle_bones/core/widgets/my_text_form_field.dart';
+import 'package:knuckle_bones/core/ui/widgets/my_text_form_field.dart';
 
 class AuthFieldConfig {
   final TextEditingController controller;
