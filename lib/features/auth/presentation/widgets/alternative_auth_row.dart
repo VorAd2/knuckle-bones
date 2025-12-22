@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:knuckle_bones/core/ui/icons/app_icons.dart';
 
 class AlternativeAuthRow extends StatelessWidget {
