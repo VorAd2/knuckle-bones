@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 class MyTextFormField extends StatefulWidget {
   final TextEditingController controller;
   final String label;
-  final Icon? icon;
-  final bool isPassword;
   final TextInputType keyboardType;
+  final Icon? icon;
   final String? Function(String?)? validator;
-  final bool readOnly;
+  final bool isPassword;
+  final bool isEditing;
 
   const MyTextFormField({
     super.key,
@@ -15,9 +15,9 @@ class MyTextFormField extends StatefulWidget {
     required this.label,
     required this.keyboardType,
     this.icon,
-    this.isPassword = false,
     this.validator,
-    this.readOnly = false,
+    this.isPassword = false,
+    this.isEditing = true,
   });
 
   @override
@@ -46,7 +46,7 @@ class _MyTextFormFieldState extends State<MyTextFormField> {
       obscureText: widget.isPassword ? _isObscure : false,
       keyboardType: widget.keyboardType,
       validator: widget.validator,
-      readOnly: widget.readOnly,
+      canRequestFocus: widget.isEditing,
       decoration: InputDecoration(
         labelText: widget.label,
         prefixIcon: widget.icon,
@@ -61,11 +61,6 @@ class _MyTextFormFieldState extends State<MyTextFormField> {
         border: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
-
-        // Remove o fundo se for readonly ou adiciona cor, conforme seu design
-        filled: widget.readOnly,
-        fillColor: widget.readOnly ? Colors.grey[200] : null,
-
         contentPadding: const EdgeInsets.symmetric(
           vertical: 14,
           horizontal: 12,
