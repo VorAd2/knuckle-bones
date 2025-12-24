@@ -39,8 +39,8 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   void _handleTabChange() {
-    final currentTabIndex = widget.tabIndexNotifier.value;
-    if (currentTabIndex != widget.profileTabIndex && _isEditing) {
+    final newTabIndex = widget.tabIndexNotifier.value;
+    if (newTabIndex != widget.profileTabIndex && _isEditing) {
       _onCancel();
     }
   }
