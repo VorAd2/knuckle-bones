@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:knuckle_bones/core/domain/session_controller.dart';
+import 'package:knuckle_bones/core/ui/theme/app_theme.dart';
 import 'package:knuckle_bones/core/ui/widgets/my_text_form_field.dart';
 import 'package:knuckle_bones/core/ui/widgets/three_d_button.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
@@ -67,8 +68,8 @@ class _ProfileViewState extends State<ProfileView> {
             ),
             const SizedBox(height: 48),
             ThreeDButton.wide(
-              backgroundColor: cs.tertiary,
-              foregroundColor: cs.onTertiary,
+              backgroundColor: cs.secondaryContainer,
+              foregroundColor: cs.onSecondaryContainer,
               icon: Icons.history,
               text: 'Match history',
               width: double.infinity,
@@ -94,11 +95,21 @@ class _ProfileViewState extends State<ProfileView> {
 
   List<Widget> _buildActions() {
     final editingActions = [
-      IconButton(onPressed: _onCancel, icon: Icon(Icons.close)),
-      IconButton(onPressed: _onSave, icon: Icon(Icons.save)),
+      IconButton(
+        onPressed: _onCancel,
+        icon: Icon(Icons.close, color: colorScheme.secondary),
+      ),
+      IconButton(
+        onPressed: _onSave,
+        icon: Icon(Icons.save, color: colorScheme.secondary),
+      ),
     ];
     return [
-      if (!_isEditing) IconButton(onPressed: _onEdit, icon: Icon(Icons.edit)),
+      if (!_isEditing)
+        IconButton(
+          onPressed: _onEdit,
+          icon: Icon(Icons.edit, color: colorScheme.primary),
+        ),
       if (_isEditing) ...editingActions,
     ];
   }

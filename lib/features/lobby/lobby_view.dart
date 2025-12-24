@@ -24,16 +24,16 @@ class LobbyView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ThreeDButton.wide(
-              backgroundColor: cs.primary,
-              foregroundColor: cs.onPrimary,
+              backgroundColor: cs.primaryContainer,
+              foregroundColor: cs.onPrimaryContainer,
               icon: Icons.add,
               text: 'Create match',
               width: double.infinity,
               onClick: () {},
             ),
             ThreeDButton.wide(
-              backgroundColor: cs.secondary,
-              foregroundColor: cs.onSecondary,
+              backgroundColor: cs.secondaryContainer,
+              foregroundColor: cs.onSecondaryContainer,
               icon: Icons.input,
               text: 'Join match',
               width: double.infinity,
