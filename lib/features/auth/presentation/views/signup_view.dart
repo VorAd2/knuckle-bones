@@ -1,38 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:knuckle_bones/features/auth/presentation/signup_view.dart';
+import 'package:knuckle_bones/features/auth/presentation/views/signin_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_auth_row.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/confirm_button.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
-import 'package:knuckle_bones/features/home/home_view.dart';
 
-class SigninView extends StatefulWidget {
-  const SigninView({super.key});
+class SignupView extends StatefulWidget {
+  const SignupView({super.key});
 
   @override
-  State<StatefulWidget> createState() => _SigninViewState();
+  State<StatefulWidget> createState() => _SignupViewState();
 }
 
-class _SigninViewState extends State<SigninView> {
+class _SignupViewState extends State<SignupView> {
   final _formKey = GlobalKey<FormState>();
   final _emailFormController = TextEditingController();
   final _passwordFormController = TextEditingController();
+  final _usernameFormController = TextEditingController();
 
   @override
   void dispose() {
+    _usernameFormController.dispose();
     _emailFormController.dispose();
     _passwordFormController.dispose();
     super.dispose();
   }
 
   void _onSubmit() {
-    final email = _emailFormController.text.trim();
-    final password = _passwordFormController.text.trim();
-    if (email == 'admin' && password == 'admin') {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => HomeView()));
-    }
     if (_formKey.currentState!.validate()) {
       debugPrint('Validado');
     }
@@ -50,7 +44,7 @@ class _SigninViewState extends State<SigninView> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) => SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 minHeight: constraints.maxHeight - 48,
@@ -58,21 +52,21 @@ class _SigninViewState extends State<SigninView> {
               child: IntrinsicHeight(
                 child: Column(
                   children: [
-                    _buildGenericAvatar(cs),
+                    _buildAvatarSelection(cs),
                     const SizedBox(height: 48),
                     AuthForm(formKey: _formKey, configs: _getConfigs()),
                     const SizedBox(height: 32),
                     ConfirmButton(onSubmit: _onSubmit),
                     const SizedBox(height: 32),
-                    Text('Or signin with', textAlign: TextAlign.center),
+                    Text('Or sign up with', textAlign: TextAlign.center),
                     const SizedBox(height: 14),
                     AlternativeAuthRow(
                       onGoogleAuth: _onGoogleAuth,
                       onGithubAuth: _onGithubAuth,
                     ),
                     const Spacer(),
-                    _buildSignupNavigate(),
-                    const SizedBox(height: 20),
+                    _buildSigninNavigate(),
+                    const SizedBox(height: 4),
                   ],
                 ),
               ),
@@ -83,20 +77,42 @@ class _SigninViewState extends State<SigninView> {
     );
   }
 
-  Widget _buildGenericAvatar(ColorScheme cs) {
+  Widget _buildAvatarSelection(ColorScheme cs) {
     return CircleAvatar(
-      radius: 60,
-      backgroundColor: cs.primaryContainer,
-      child: Icon(Icons.person, size: 64, color: cs.onPrimaryContainer),
+      radius: 70,
+      child: Stack(
+        alignment: AlignmentGeometry.center,
+        children: [
+          Icon(
+            Icons.camera_alt_rounded,
+            size: 70,
+            color: cs.onPrimaryContainer.withAlpha(60),
+          ),
+          Icon(Icons.edit, size: 55),
+          Material(
+            color: Colors.transparent,
+            shape: CircleBorder(),
+            child: InkWell(onTap: () {}, customBorder: CircleBorder()),
+          ),
+        ],
+      ),
     );
   }
 
   List<AuthFieldConfig> _getConfigs() {
     return [
       AuthFieldConfig(
+        controller: _usernameFormController,
+        label: 'Username',
+        icon: Icon(Icons.person_2_rounded),
+        validator: (v) => null,
+        isPassword: false,
+        keyboardType: TextInputType.name,
+      ),
+      AuthFieldConfig(
         controller: _emailFormController,
         label: 'Email',
-        icon: Icon(Icons.mail_lock_rounded),
+        icon: Icon(Icons.mail),
         validator: (v) => !v!.contains('@') ? 'Invalid email' : null,
         isPassword: false,
         keyboardType: TextInputType.emailAddress,
@@ -107,19 +123,19 @@ class _SigninViewState extends State<SigninView> {
         icon: Icon(Icons.key_rounded),
         validator: (v) => v!.length < 6 ? 'Min 6 chars' : null,
         isPassword: true,
-        keyboardType: TextInputType.visiblePassword,
+        keyboardType: TextInputType.emailAddress,
       ),
     ];
   }
 
-  Widget _buildSignupNavigate() {
+  Widget _buildSigninNavigate() {
     return TextButton(
       onPressed: () {
         Navigator.of(
           context,
-        ).pushReplacement(MaterialPageRoute(builder: (_) => SignupView()));
+        ).pushReplacement(MaterialPageRoute(builder: (_) => SigninView()));
       },
-      child: Text("Don't have an account yet?"),
+      child: Text('Already have an account?'),
     );
   }
 }

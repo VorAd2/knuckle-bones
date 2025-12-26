@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:knuckle_bones/core/domain/session_controller.dart';
-import 'package:knuckle_bones/core/ui/theme/app_theme.dart';
-import 'package:knuckle_bones/core/ui/widgets/my_text_form_field.dart';
-import 'package:knuckle_bones/core/ui/widgets/three_d_button.dart';
+import 'package:knuckle_bones/core/infra/user_model.dart';
+import 'package:knuckle_bones/core/presentation/theme/app_theme.dart';
+import 'package:knuckle_bones/core/presentation/widgets/my_text_form_field.dart';
+import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
 
 class ProfileView extends StatefulWidget {
@@ -21,8 +21,8 @@ class ProfileView extends StatefulWidget {
 
 class _ProfileViewState extends State<ProfileView> {
   final _usernameFormController = TextEditingController();
-  final _session = GetIt.I<SessionController>();
   bool _isEditing = false;
+  final _user = GetIt.I<UserModel>();
 
   @override
   void initState() {
@@ -46,7 +46,7 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   void _resetProfileData() {
-    _usernameFormController.text = _session.currentUser.name;
+    _usernameFormController.text = _user.name;
   }
 
   @override
@@ -127,14 +127,16 @@ class _ProfileViewState extends State<ProfileView> {
     _resetProfileData();
   }
 
-  void _onSave() {
+  void _onSave() async {
     setState(() {
       _isEditing = false;
     });
-    _session.editUsername(_usernameFormController.text.trim());
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Name updated successfully')));
+    _user.name = _usernameFormController.text.trim();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Name updated successfully')),
+      );
+    }
   }
 
   Widget _buildGenericAvatar(ColorScheme cs) {

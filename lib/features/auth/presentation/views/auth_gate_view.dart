@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:knuckle_bones/core/ui/icons/app_icons.dart';
-import 'package:knuckle_bones/features/auth/presentation/signin_view.dart';
-import 'package:knuckle_bones/features/auth/presentation/signup_view.dart';
+import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
+import 'package:knuckle_bones/features/auth/presentation/views/signin_view.dart';
+import 'package:knuckle_bones/features/auth/presentation/views/signup_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
