@@ -85,9 +85,13 @@ class _SigninViewState extends State<SigninView> {
 
   Widget _buildGenericAvatar(ColorScheme cs) {
     return CircleAvatar(
-      radius: 60,
+      radius: 70,
       backgroundColor: cs.primaryContainer,
-      child: Icon(Icons.person, size: 64, color: cs.onPrimaryContainer),
+      child: Icon(
+        Icons.person,
+        size: 70,
+        color: cs.onPrimaryContainer.withAlpha(127),
+      ),
     );
   }
 
