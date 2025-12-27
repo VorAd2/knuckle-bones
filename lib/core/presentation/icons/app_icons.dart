@@ -42,4 +42,22 @@ class AppIcons {
       colorFilter: _getColorFilter(color),
     );
   }
+
+  static Widget peopleArrows({double size = 24, Color? color}) {
+    return SvgPicture.asset(
+      'assets/icons/others/people_arrows.svg',
+      width: size,
+      height: size,
+      colorFilter: _getColorFilter(color),
+    );
+  }
+
+  static Widget robot({double size = 24, Color? color}) {
+    return SvgPicture.asset(
+      'assets/icons/others/robot.svg',
+      width: size,
+      height: size,
+      colorFilter: _getColorFilter(color),
+    );
+  }
 }

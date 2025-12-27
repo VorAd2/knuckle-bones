@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
+import 'package:knuckle_bones/core/presentation/theme/app_theme.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
 
@@ -8,51 +10,15 @@ class LobbyView extends StatefulWidget {
   State<StatefulWidget> createState() => _LobbyViewState();
 }
 
+enum _OpponentType { human, bot }
+
+enum _BotDifficulty { lovelace, turing }
+
 class _LobbyViewState extends State<LobbyView> {
   final _codeFormKey = GlobalKey<FormState>();
   final _codeFieldController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Scaffold(
-      appBar: MyAppBar(title: 'Lobby'),
-      body: _buildContent(context, cs),
-    );
-  }
-
-  Widget _buildContent(BuildContext context, ColorScheme cs) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsGeometry.all(24),
-        child: Column(
-          spacing: 56,
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ThreeDButton.wide(
-              backgroundColor: cs.primaryContainer,
-              foregroundColor: cs.onPrimaryContainer,
-              icon: Icons.add,
-              text: 'Create match',
-              width: double.infinity,
-              onClick: () {},
-            ),
-            ThreeDButton.wide(
-              backgroundColor: cs.secondaryContainer,
-              foregroundColor: cs.onSecondaryContainer,
-              icon: Icons.input,
-              text: 'Join match',
-              width: double.infinity,
-              onClick: () {
-                _onJoin(context);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  _OpponentType _opponentTypeView = _OpponentType.human;
+  _BotDifficulty? _botDiff = _BotDifficulty.lovelace;
 
   void _onJoin(BuildContext context) {
     showDialog(
@@ -105,5 +71,125 @@ class _LobbyViewState extends State<LobbyView> {
 
   bool _validateMatchCode() {
     return _codeFormKey.currentState!.validate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Scaffold(
+      appBar: MyAppBar(title: 'Lobby'),
+      body: _buildBody(context, cs),
+    );
+  }
+
+  Center _buildBody(BuildContext context, ColorScheme cs) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsetsGeometry.all(24),
+        child: Column(
+          spacing: 56,
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [_buildSegmentedButton(), ..._buildMainActions()],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSegmentedButton() {
+    return SegmentedButton<_OpponentType>(
+      showSelectedIcon: false,
+      segments: [
+        ButtonSegment(
+          value: _OpponentType.human,
+          icon: AppIcons.peopleArrows(color: colorScheme.onSurfaceVariant),
+          label: const Text('Human'),
+        ),
+        ButtonSegment(
+          value: _OpponentType.bot,
+          icon: AppIcons.robot(color: colorScheme.onSurfaceVariant),
+          label: const Text('Robot'),
+        ),
+      ],
+      selected: <_OpponentType>{_opponentTypeView},
+      onSelectionChanged: (newSelection) {
+        setState(() {
+          _opponentTypeView = newSelection.first;
+        });
+      },
+    );
+  }
+
+  List<Widget> _buildMainActions() {
+    if (_opponentTypeView == _OpponentType.human) {
+      return [
+        ThreeDButton.wide(
+          backgroundColor: colorScheme.primaryContainer,
+          foregroundColor: colorScheme.onPrimaryContainer,
+          icon: Icons.add,
+          text: 'Create match',
+          width: double.infinity,
+          onClick: () {},
+        ),
+        ThreeDButton.wide(
+          backgroundColor: colorScheme.tertiaryContainer,
+          foregroundColor: colorScheme.onTertiaryContainer,
+          icon: Icons.input,
+          text: 'Join match',
+          width: double.infinity,
+          onClick: () {
+            _onJoin(context);
+          },
+        ),
+      ];
+    }
+    return [
+      _buildChips(),
+      ThreeDButton.wide(
+        backgroundColor: colorScheme.primaryContainer,
+        foregroundColor: colorScheme.onPrimaryContainer,
+        icon: Icons.play_arrow,
+        text: 'Start',
+        width: double.infinity,
+        onClick: () => showDialog(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Oops'),
+            content: const Text('This feature has not yet been implemented'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                },
+                child: Text('Ok'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ];
+  }
+
+  Widget _buildChips() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      spacing: 12,
+      children: [
+        ChoiceChip(
+          label: const Text('Lovelace'),
+          selected: _botDiff == _BotDifficulty.lovelace,
+          onSelected: (bool selected) {
+            if (selected) setState(() => _botDiff = _BotDifficulty.lovelace);
+          },
+        ),
+        ChoiceChip(
+          label: const Text('Turing'),
+          selected: _botDiff == _BotDifficulty.turing,
+          onSelected: (bool selected) {
+            if (selected) setState(() => _botDiff = _BotDifficulty.turing);
+          },
+        ),
+      ],
+    );
   }
 }
