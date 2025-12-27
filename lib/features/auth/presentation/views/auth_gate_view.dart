@@ -49,7 +49,9 @@ class AuthGateView extends StatelessWidget {
   }
 
   void _navigateTo(BuildContext context, Widget destination) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => destination));
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => destination));
   }
 
   Widget _buildCentralContent({
