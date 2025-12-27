@@ -16,6 +16,7 @@ dependencies:
   flutter_svg: ^2.2.3
   url_launcher: ^6.3.2
   get_it: ^9.2.0
+  image_picker: ^1.2.1
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:knuckle_bones/features/auth/presentation/views/signin_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_auth_row.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
@@ -17,6 +20,8 @@ class _SignupViewState extends State<SignupView> {
   final _emailFormController = TextEditingController();
   final _passwordFormController = TextEditingController();
   final _usernameFormController = TextEditingController();
+  File? _userAvatarFile;
+  final _imagePicker = ImagePicker();
 
   @override
   void dispose() {
@@ -36,11 +41,35 @@ class _SignupViewState extends State<SignupView> {
 
   void _onGithubAuth() {}
 
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? pickedFile = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 80,
+      );
+      if (pickedFile != null) {
+        setState(() {
+          _userAvatarFile = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('An error has occurred. Please, try again.'),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: MyAppBar(title: 'Sign up'),
+      appBar: const MyAppBar(title: 'Sign up'),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) => SingleChildScrollView(
@@ -78,24 +107,89 @@ class _SignupViewState extends State<SignupView> {
   }
 
   Widget _buildAvatarSelection(ColorScheme cs) {
-    return CircleAvatar(
-      radius: 70,
+    final imageProvider = _userAvatarFile != null
+        ? FileImage(_userAvatarFile!)
+        : null;
+    return Center(
       child: Stack(
-        alignment: AlignmentGeometry.center,
         children: [
-          Icon(
-            Icons.camera_alt_rounded,
-            size: 70,
-            color: cs.onPrimaryContainer.withAlpha(60),
+          CircleAvatar(
+            radius: 70,
+            backgroundColor: cs.primaryContainer,
+            backgroundImage: imageProvider,
+            child: _userAvatarFile == null
+                ? Icon(
+                    Icons.person,
+                    size: 70,
+                    color: cs.onPrimaryContainer.withAlpha(127),
+                  )
+                : null,
           ),
-          Icon(Icons.edit, size: 55),
-          Material(
-            color: Colors.transparent,
-            shape: CircleBorder(),
-            child: InkWell(onTap: () {}, customBorder: CircleBorder()),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Material(
+              color: cs.primary,
+              shape: const CircleBorder(),
+              elevation: 4,
+              child: InkWell(
+                onTap: _showPickerOptions,
+                customBorder: const CircleBorder(),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Icon(
+                    _userAvatarFile == null ? Icons.add_a_photo : Icons.edit,
+                    color: cs.onPrimary,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  void _showPickerOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext modalContext) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Gallery'),
+                onTap: () {
+                  _pickImage(ImageSource.gallery);
+                  Navigator.of(modalContext).pop();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Camera'),
+                onTap: () {
+                  _pickImage(ImageSource.camera);
+                  Navigator.of(modalContext).pop();
+                },
+              ),
+              if (_userAvatarFile != null)
+                ListTile(
+                  leading: const Icon(Icons.delete, color: Colors.red),
+                  title: const Text(
+                    'Remove',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  onTap: () {
+                    setState(() => _userAvatarFile = null);
+                    Navigator.of(modalContext).pop();
+                  },
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 
