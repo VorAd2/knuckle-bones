@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:knuckle_bones/core/infra/user_model.dart';
-import 'package:knuckle_bones/core/presentation/theme/app_theme.dart';
 import 'package:knuckle_bones/core/presentation/widgets/image_picker_sheet.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
 import 'package:knuckle_bones/core/utils/media_helper.dart';
@@ -54,6 +53,31 @@ class _ProfileViewState extends State<ProfileView> {
     _usernameFormController.text = _user.name;
   }
 
+  void _onEdit() {
+    setState(() {
+      _isEditing = true;
+    });
+  }
+
+  void _onCancel() {
+    setState(() {
+      _isEditing = false;
+    });
+    _resetProfileData();
+  }
+
+  void _onSave() async {
+    setState(() {
+      _isEditing = false;
+    });
+    _user.name = _usernameFormController.text.trim();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Name updated successfully')),
+      );
+    }
+  }
+
   Future<void> _pickImage(ImageSource source) async {
     try {
       final file = await MediaHelper.pickImage(source);
@@ -77,14 +101,24 @@ class _ProfileViewState extends State<ProfileView> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: MyAppBar(title: 'Profile', actions: _buildActions()),
+      appBar: MyAppBar(title: 'Profile', actions: _buildActions(cs)),
       body: Padding(
         padding: const EdgeInsetsGeometry.all(24),
         child: Column(
           children: [
-            _buildGenericAvatar(cs),
+            _ProfileAvatar(
+              imageFile: _userAvatarFile,
+              isEditing: _isEditing,
+              onPickImage: _pickImage,
+              onRemoveImage: () {
+                setState(() => _userAvatarFile = null);
+              },
+            ),
             const SizedBox(height: 48),
-            _buildTextField(),
+            _ProfileNameField(
+              controller: _usernameFormController,
+              isEditing: _isEditing,
+            ),
             const SizedBox(height: 48),
             ThreeDButton.wide(
               backgroundColor: cs.secondaryContainer,
@@ -112,56 +146,48 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  List<Widget> _buildActions() {
-    final editingActions = [
-      IconButton(
-        onPressed: _onCancel,
-        icon: Icon(Icons.close, color: colorScheme.secondary),
-      ),
-      IconButton(
-        onPressed: _onSave,
-        icon: Icon(Icons.save, color: colorScheme.secondary),
-      ),
-    ];
-    return [
-      if (!_isEditing)
+  List<Widget> _buildActions(ColorScheme cs) {
+    if (_isEditing) {
+      return [
         IconButton(
-          onPressed: _onEdit,
-          icon: Icon(Icons.edit, color: colorScheme.primary),
+          onPressed: _onCancel,
+          icon: Icon(Icons.close, color: cs.secondary),
+          tooltip: 'Cancel',
         ),
-      if (_isEditing) ...editingActions,
+        IconButton(
+          onPressed: _onSave,
+          icon: Icon(Icons.save, color: cs.secondary),
+          tooltip: 'Save',
+        ),
+      ];
+    }
+    return [
+      IconButton(
+        onPressed: _onEdit,
+        icon: Icon(Icons.edit, color: cs.primary),
+        tooltip: 'Edit Profile',
+      ),
     ];
   }
+}
 
-  void _onEdit() {
-    setState(() {
-      _isEditing = true;
-    });
-  }
+class _ProfileAvatar extends StatelessWidget {
+  final File? imageFile;
+  final bool isEditing;
+  final Function(ImageSource) onPickImage;
+  final VoidCallback onRemoveImage;
 
-  void _onCancel() {
-    setState(() {
-      _isEditing = false;
-    });
-    _resetProfileData();
-  }
+  const _ProfileAvatar({
+    required this.imageFile,
+    required this.isEditing,
+    required this.onPickImage,
+    required this.onRemoveImage,
+  });
 
-  void _onSave() async {
-    setState(() {
-      _isEditing = false;
-    });
-    _user.name = _usernameFormController.text.trim();
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Name updated successfully')),
-      );
-    }
-  }
-
-  Widget _buildGenericAvatar(ColorScheme cs) {
-    final imageProvider = _userAvatarFile != null
-        ? FileImage(_userAvatarFile!)
-        : null;
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final imageProvider = imageFile != null ? FileImage(imageFile!) : null;
     return CircleAvatar(
       radius: 70,
       backgroundImage: imageProvider,
@@ -169,15 +195,15 @@ class _ProfileViewState extends State<ProfileView> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          if (_userAvatarFile == null)
+          if (imageFile == null)
             Icon(
               Icons.person,
               size: 70,
               color: cs.onPrimaryContainer.withAlpha(127),
             ),
-          if (_isEditing)
+          if (isEditing)
             Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.black38,
                 shape: BoxShape.circle,
               ),
@@ -189,16 +215,12 @@ class _ProfileViewState extends State<ProfileView> {
             shape: const CircleBorder(),
             clipBehavior: Clip.hardEdge,
             child: InkWell(
-              onTap: _isEditing
+              onTap: isEditing
                   ? () {
                       ImagePickerSheet.show(
                         context: context,
-                        onPick: _pickImage,
-                        onRemove: _userAvatarFile == null
-                            ? null
-                            : () {
-                                setState(() => _userAvatarFile = null);
-                              },
+                        onPick: onPickImage,
+                        onRemove: imageFile == null ? null : onRemoveImage,
                       );
                     }
                   : null,
@@ -208,24 +230,33 @@ class _ProfileViewState extends State<ProfileView> {
       ),
     );
   }
+}
 
-  TextFormField _buildTextField() {
+class _ProfileNameField extends StatelessWidget {
+  final TextEditingController controller;
+  final bool isEditing;
+
+  const _ProfileNameField({required this.controller, required this.isEditing});
+
+  @override
+  Widget build(BuildContext context) {
     return TextFormField(
-      controller: _usernameFormController,
-      canRequestFocus: _isEditing,
-      keyboardType: TextInputType.text,
+      controller: controller,
+      canRequestFocus: isEditing,
+      keyboardType: TextInputType.name,
+      readOnly: !isEditing,
       decoration: InputDecoration(
         labelText: 'Username',
-        border: _isEditing
+        border: isEditing
             ? const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(12)),
               )
-            : null,
+            : InputBorder.none,
         contentPadding: const EdgeInsets.symmetric(
           vertical: 14,
           horizontal: 12,
         ),
-        suffixIcon: _isEditing ? Icon(Icons.edit) : null,
+        suffixIcon: isEditing ? const Icon(Icons.edit) : null,
       ),
     );
   }

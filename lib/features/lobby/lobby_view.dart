@@ -18,7 +18,7 @@ class _LobbyViewState extends State<LobbyView> {
   final _codeFormKey = GlobalKey<FormState>();
   final _codeFieldController = TextEditingController();
   _OpponentType _opponentTypeView = _OpponentType.human;
-  _BotDifficulty? _botDiff = _BotDifficulty.lovelace;
+  _BotDifficulty _botDiff = _BotDifficulty.lovelace;
 
   void _onJoin(BuildContext context) {
     showDialog(
@@ -77,63 +77,45 @@ class _LobbyViewState extends State<LobbyView> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: MyAppBar(title: 'Lobby'),
-      body: _buildBody(context, cs),
-    );
-  }
-
-  Center _buildBody(BuildContext context, ColorScheme cs) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsGeometry.all(24),
-        child: Column(
-          spacing: 56,
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [_buildSegmentedButton(), ..._buildMainActions()],
+      appBar: const MyAppBar(title: 'Lobby'),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsetsGeometry.all(24),
+          child: Column(
+            spacing: 56,
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _OpponentSegmentedButton(
+                opponentTypeView: _opponentTypeView,
+                onChange: (newSelection) {
+                  setState(() {
+                    _opponentTypeView = newSelection.first;
+                  });
+                },
+              ),
+              ..._buildMainActions(cs),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildSegmentedButton() {
-    return SegmentedButton<_OpponentType>(
-      showSelectedIcon: false,
-      segments: [
-        ButtonSegment(
-          value: _OpponentType.human,
-          icon: AppIcons.peopleArrows(color: colorScheme.onSurfaceVariant),
-          label: const Text('Human'),
-        ),
-        ButtonSegment(
-          value: _OpponentType.bot,
-          icon: AppIcons.robot(color: colorScheme.onSurfaceVariant),
-          label: const Text('Robot'),
-        ),
-      ],
-      selected: <_OpponentType>{_opponentTypeView},
-      onSelectionChanged: (newSelection) {
-        setState(() {
-          _opponentTypeView = newSelection.first;
-        });
-      },
-    );
-  }
-
-  List<Widget> _buildMainActions() {
+  List<Widget> _buildMainActions(ColorScheme cs) {
     if (_opponentTypeView == _OpponentType.human) {
       return [
         ThreeDButton.wide(
-          backgroundColor: colorScheme.primaryContainer,
-          foregroundColor: colorScheme.onPrimaryContainer,
+          backgroundColor: cs.primaryContainer,
+          foregroundColor: cs.onPrimaryContainer,
           icon: Icons.add,
           text: 'Create match',
           width: double.infinity,
           onClick: () {},
         ),
         ThreeDButton.wide(
-          backgroundColor: colorScheme.tertiaryContainer,
-          foregroundColor: colorScheme.onTertiaryContainer,
+          backgroundColor: cs.tertiaryContainer,
+          foregroundColor: cs.onTertiaryContainer,
           icon: Icons.input,
           text: 'Join match',
           width: double.infinity,
@@ -144,10 +126,15 @@ class _LobbyViewState extends State<LobbyView> {
       ];
     }
     return [
-      _buildChips(),
+      _BotChips(
+        botDiff: _botDiff,
+        onSelect: (newSelection) {
+          setState(() => _botDiff = newSelection);
+        },
+      ),
       ThreeDButton.wide(
-        backgroundColor: colorScheme.primaryContainer,
-        foregroundColor: colorScheme.onPrimaryContainer,
+        backgroundColor: cs.primaryContainer,
+        foregroundColor: cs.onPrimaryContainer,
         icon: Icons.play_arrow,
         text: 'Start',
         width: double.infinity,
@@ -161,7 +148,7 @@ class _LobbyViewState extends State<LobbyView> {
                 onPressed: () {
                   Navigator.pop(dialogContext);
                 },
-                child: Text('Ok'),
+                child: const Text('Ok'),
               ),
             ],
           ),
@@ -169,27 +156,62 @@ class _LobbyViewState extends State<LobbyView> {
       ),
     ];
   }
+}
 
-  Widget _buildChips() {
+class _OpponentSegmentedButton extends StatelessWidget {
+  final _OpponentType opponentTypeView;
+  final void Function(Set<_OpponentType>) onChange;
+
+  const _OpponentSegmentedButton({
+    required this.opponentTypeView,
+    required this.onChange,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return SegmentedButton<_OpponentType>(
+      showSelectedIcon: false,
+      segments: [
+        ButtonSegment(
+          value: _OpponentType.human,
+          icon: AppIcons.peopleArrows(color: cs.onSurfaceVariant),
+          label: const Text('Human'),
+        ),
+        ButtonSegment(
+          value: _OpponentType.bot,
+          icon: AppIcons.robot(color: cs.onSurfaceVariant),
+          label: const Text('Robot'),
+        ),
+      ],
+      selected: <_OpponentType>{opponentTypeView},
+      onSelectionChanged: onChange,
+    );
+  }
+}
+
+class _BotChips extends StatelessWidget {
+  final _BotDifficulty botDiff;
+  final void Function(_BotDifficulty newSelection) onSelect;
+
+  const _BotChips({required this.botDiff, required this.onSelect});
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       spacing: 12,
-      children: [
-        ChoiceChip(
-          label: const Text('Lovelace'),
-          selected: _botDiff == _BotDifficulty.lovelace,
+      children: _BotDifficulty.values.map((difficulty) {
+        return ChoiceChip(
+          label: Text(
+            difficulty.name[0].toUpperCase() + difficulty.name.substring(1),
+          ),
+          selected: botDiff == difficulty,
           onSelected: (bool selected) {
-            if (selected) setState(() => _botDiff = _BotDifficulty.lovelace);
+            if (selected) onSelect(difficulty);
           },
-        ),
-        ChoiceChip(
-          label: const Text('Turing'),
-          selected: _botDiff == _BotDifficulty.turing,
-          onSelected: (bool selected) {
-            if (selected) setState(() => _botDiff = _BotDifficulty.turing);
-          },
-        ),
-      ],
+        );
+      }).toList(),
     );
   }
 }

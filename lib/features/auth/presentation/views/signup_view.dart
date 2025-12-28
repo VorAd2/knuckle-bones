@@ -63,7 +63,6 @@ class _SignupViewState extends State<SignupView> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: const MyAppBar(title: 'Sign up'),
       body: SafeArea(
@@ -77,20 +76,33 @@ class _SignupViewState extends State<SignupView> {
               child: IntrinsicHeight(
                 child: Column(
                   children: [
-                    _buildAvatarSelection(cs),
+                    AvatarSelector(
+                      avatarFile: _userAvatarFile,
+                      onPick: _pickImage,
+                      onRemove: _userAvatarFile == null
+                          ? null
+                          : () => setState(() => _userAvatarFile = null),
+                    ),
                     const SizedBox(height: 48),
                     AuthForm(formKey: _formKey, configs: _getConfigs()),
                     const SizedBox(height: 32),
                     ConfirmButton(onSubmit: _onSubmit),
                     const SizedBox(height: 32),
-                    Text('Or sign up with', textAlign: TextAlign.center),
+                    const Text('Or sign up with', textAlign: TextAlign.center),
                     const SizedBox(height: 14),
                     AlternativeAuthRow(
                       onGoogleAuth: _onGoogleAuth,
                       onGithubAuth: _onGithubAuth,
                     ),
                     const Spacer(),
-                    _buildSigninNavigate(),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (_) => SigninView()),
+                        );
+                      },
+                      child: Text('Already have an account?'),
+                    ),
                     const SizedBox(height: 4),
                   ],
                 ),
@@ -98,61 +110,6 @@ class _SignupViewState extends State<SignupView> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildAvatarSelection(ColorScheme cs) {
-    final imageProvider = _userAvatarFile != null
-        ? FileImage(_userAvatarFile!)
-        : null;
-    return Center(
-      child: Stack(
-        children: [
-          CircleAvatar(
-            radius: 70,
-            backgroundColor: cs.primaryContainer,
-            backgroundImage: imageProvider,
-            child: _userAvatarFile == null
-                ? Icon(
-                    Icons.person,
-                    size: 70,
-                    color: cs.onPrimaryContainer.withAlpha(127),
-                  )
-                : null,
-          ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: Material(
-              color: cs.primary,
-              shape: const CircleBorder(),
-              elevation: 4,
-              child: InkWell(
-                onTap: () {
-                  ImagePickerSheet.show(
-                    context: context,
-                    onPick: _pickImage,
-                    onRemove: _userAvatarFile == null
-                        ? null
-                        : () {
-                            setState(() => _userAvatarFile = null);
-                          },
-                  );
-                },
-                customBorder: const CircleBorder(),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Icon(
-                    _userAvatarFile == null ? Icons.add_a_photo : Icons.edit,
-                    color: cs.onPrimary,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -185,15 +142,68 @@ class _SignupViewState extends State<SignupView> {
       ),
     ];
   }
+}
 
-  Widget _buildSigninNavigate() {
-    return TextButton(
-      onPressed: () {
-        Navigator.of(
-          context,
-        ).pushReplacement(MaterialPageRoute(builder: (_) => SigninView()));
-      },
-      child: Text('Already have an account?'),
+class AvatarSelector extends StatelessWidget {
+  final File? avatarFile;
+  final Function(ImageSource) onPick;
+  final VoidCallback? onRemove;
+
+  const AvatarSelector({
+    super.key,
+    required this.avatarFile,
+    required this.onPick,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final imageProvider = avatarFile != null ? FileImage(avatarFile!) : null;
+    return Center(
+      child: Stack(
+        children: [
+          CircleAvatar(
+            radius: 70,
+            backgroundColor: cs.primaryContainer,
+            backgroundImage: imageProvider,
+            child: avatarFile == null
+                ? Icon(
+                    Icons.person,
+                    size: 70,
+                    color: cs.onPrimaryContainer.withAlpha(127),
+                  )
+                : null,
+          ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Material(
+              color: cs.primary,
+              shape: const CircleBorder(),
+              elevation: 4,
+              child: InkWell(
+                onTap: () {
+                  ImagePickerSheet.show(
+                    context: context,
+                    onPick: onPick,
+                    onRemove: onRemove,
+                  );
+                },
+                customBorder: const CircleBorder(),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Icon(
+                    avatarFile == null ? Icons.add_a_photo : Icons.edit,
+                    color: cs.onPrimary,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
