@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
-import 'package:knuckle_bones/core/presentation/theme/app_theme.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
 
