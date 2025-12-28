@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:knuckle_bones/core/infra/user_model.dart';
 import 'package:knuckle_bones/core/presentation/theme/app_theme.dart';
+import 'package:knuckle_bones/core/presentation/widgets/image_picker_sheet.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
+import 'package:knuckle_bones/core/utils/media_helper.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
 
 class ProfileView extends StatefulWidget {
@@ -20,6 +25,7 @@ class ProfileView extends StatefulWidget {
 
 class _ProfileViewState extends State<ProfileView> {
   final _usernameFormController = TextEditingController();
+  File? _userAvatarFile;
   bool _isEditing = false;
   final _user = GetIt.I<UserModel>();
 
@@ -46,6 +52,25 @@ class _ProfileViewState extends State<ProfileView> {
 
   void _resetProfileData() {
     _usernameFormController.text = _user.name;
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final file = await MediaHelper.pickImage(source);
+      if (file != null) {
+        setState(() {
+          _userAvatarFile = file;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('An error has occurred. Please, try again.'),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -134,21 +159,26 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   Widget _buildGenericAvatar(ColorScheme cs) {
+    final imageProvider = _userAvatarFile != null
+        ? FileImage(_userAvatarFile!)
+        : null;
     return CircleAvatar(
       radius: 70,
+      backgroundImage: imageProvider,
       backgroundColor: cs.primaryContainer,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Icon(
-            Icons.person,
-            size: 70,
-            color: cs.onPrimaryContainer.withAlpha(127),
-          ),
+          if (_userAvatarFile == null)
+            Icon(
+              Icons.person,
+              size: 70,
+              color: cs.onPrimaryContainer.withAlpha(127),
+            ),
           if (_isEditing)
             Container(
               decoration: BoxDecoration(
-                color: Colors.black26,
+                color: Colors.black38,
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
@@ -158,7 +188,21 @@ class _ProfileViewState extends State<ProfileView> {
             color: Colors.transparent,
             shape: const CircleBorder(),
             clipBehavior: Clip.hardEdge,
-            child: InkWell(onTap: _isEditing ? () {} : null),
+            child: InkWell(
+              onTap: _isEditing
+                  ? () {
+                      ImagePickerSheet.show(
+                        context: context,
+                        onPick: _pickImage,
+                        onRemove: _userAvatarFile == null
+                            ? null
+                            : () {
+                                setState(() => _userAvatarFile = null);
+                              },
+                      );
+                    }
+                  : null,
+            ),
           ),
         ],
       ),
