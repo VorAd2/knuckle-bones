@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:knuckle_bones/core/presentation/widgets/image_picker_sheet.dart';
+import 'package:knuckle_bones/core/utils/media_helper.dart';
 import 'package:knuckle_bones/features/auth/presentation/views/signin_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_auth_row.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
@@ -21,7 +23,6 @@ class _SignupViewState extends State<SignupView> {
   final _passwordFormController = TextEditingController();
   final _usernameFormController = TextEditingController();
   File? _userAvatarFile;
-  final _imagePicker = ImagePicker();
 
   @override
   void dispose() {
@@ -43,18 +44,13 @@ class _SignupViewState extends State<SignupView> {
 
   Future<void> _pickImage(ImageSource source) async {
     try {
-      final XFile? pickedFile = await _imagePicker.pickImage(
-        source: source,
-        maxWidth: 800,
-        maxHeight: 800,
-        imageQuality: 80,
-      );
-      if (pickedFile != null) {
+      final file = await MediaHelper.pickImage(source);
+      if (file != null) {
         setState(() {
-          _userAvatarFile = File(pickedFile.path);
+          _userAvatarFile = file;
         });
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -133,7 +129,17 @@ class _SignupViewState extends State<SignupView> {
               shape: const CircleBorder(),
               elevation: 4,
               child: InkWell(
-                onTap: _showPickerOptions,
+                onTap: () {
+                  ImagePickerSheet.show(
+                    context: context,
+                    onPick: _pickImage,
+                    onRemove: _userAvatarFile == null
+                        ? null
+                        : () {
+                            setState(() => _userAvatarFile = null);
+                          },
+                  );
+                },
                 customBorder: const CircleBorder(),
                 child: Padding(
                   padding: const EdgeInsets.all(12),
@@ -148,48 +154,6 @@ class _SignupViewState extends State<SignupView> {
           ),
         ],
       ),
-    );
-  }
-
-  void _showPickerOptions() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext modalContext) {
-        return SafeArea(
-          child: Wrap(
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Gallery'),
-                onTap: () {
-                  _pickImage(ImageSource.gallery);
-                  Navigator.of(modalContext).pop();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Camera'),
-                onTap: () {
-                  _pickImage(ImageSource.camera);
-                  Navigator.of(modalContext).pop();
-                },
-              ),
-              if (_userAvatarFile != null)
-                ListTile(
-                  leading: const Icon(Icons.delete, color: Colors.red),
-                  title: const Text(
-                    'Remove',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  onTap: () {
-                    setState(() => _userAvatarFile = null);
-                    Navigator.of(modalContext).pop();
-                  },
-                ),
-            ],
-          ),
-        );
-      },
     );
   }
 
