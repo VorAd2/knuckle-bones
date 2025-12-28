@@ -39,7 +39,7 @@ class _HomeViewState extends State<HomeView> {
           });
         },
         destinations: [
-          NavigationDestination(icon: _getIcon(0), label: 'Play'),
+          NavigationDestination(icon: _getIcon(0), label: 'Lobby'),
           NavigationDestination(icon: _getIcon(1), label: 'Profile'),
         ],
       ),
