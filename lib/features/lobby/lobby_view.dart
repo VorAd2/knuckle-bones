@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
+import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
 
@@ -137,20 +138,13 @@ class _LobbyViewState extends State<LobbyView> {
         icon: Icons.play_arrow,
         text: 'Start',
         width: double.infinity,
-        onClick: () => showDialog(
+        onClick: () => MyDialog.show(
           context: context,
-          builder: (dialogContext) => AlertDialog(
-            title: const Text('Oops'),
-            content: const Text('This feature has not yet been implemented'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(dialogContext);
-                },
-                child: const Text('Ok'),
-              ),
-            ],
-          ),
+          titleString: 'Oops',
+          contentString: 'This feature has not yet been implemented',
+          onConfirm: () {},
+          hasCancel: false,
+          mainActionString: 'Ok',
         ),
       ),
     ];

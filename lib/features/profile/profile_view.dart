@@ -5,8 +5,10 @@ import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:knuckle_bones/core/infra/user_model.dart';
 import 'package:knuckle_bones/core/presentation/widgets/image_picker_sheet.dart';
+import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
 import 'package:knuckle_bones/core/utils/media_helper.dart';
+import 'package:knuckle_bones/features/auth/presentation/views/auth_gate_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
 
 class ProfileView extends StatefulWidget {
@@ -24,7 +26,7 @@ class ProfileView extends StatefulWidget {
 
 class _ProfileViewState extends State<ProfileView> {
   final _usernameFormController = TextEditingController();
-  File? _userAvatarFile;
+  File? _avatarFile;
   bool _isEditing = false;
   final _user = GetIt.I<UserModel>();
 
@@ -83,7 +85,7 @@ class _ProfileViewState extends State<ProfileView> {
       final file = await MediaHelper.pickImage(source);
       if (file != null) {
         setState(() {
-          _userAvatarFile = file;
+          _avatarFile = file;
         });
       }
     } catch (_) {
@@ -101,17 +103,17 @@ class _ProfileViewState extends State<ProfileView> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: MyAppBar(title: 'Profile', actions: _buildActions(cs)),
+      appBar: MyAppBar(title: 'Profile', actions: _buildAppBarActions(cs)),
       body: Padding(
         padding: const EdgeInsetsGeometry.all(24),
         child: Column(
           children: [
             _ProfileAvatar(
-              imageFile: _userAvatarFile,
+              imageFile: _avatarFile,
               isEditing: _isEditing,
               onPickImage: _pickImage,
               onRemoveImage: () {
-                setState(() => _userAvatarFile = null);
+                setState(() => _avatarFile = null);
               },
             ),
             const SizedBox(height: 48),
@@ -138,7 +140,18 @@ class _ProfileViewState extends State<ProfileView> {
                 Colors.black,
                 0.3,
               ),
-              onClick: () {},
+              onClick: () => MyDialog.show(
+                context: context,
+                titleString: 'Log out',
+                contentString:
+                    'Are you sure you want to log out of your account?',
+                onConfirm: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AuthGateView()),
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -146,7 +159,7 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  List<Widget> _buildActions(ColorScheme cs) {
+  List<Widget> _buildAppBarActions(ColorScheme cs) {
     if (_isEditing) {
       return [
         IconButton(
