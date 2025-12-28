@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:knuckle_bones/core/infra/user_model.dart';
 import 'package:knuckle_bones/core/presentation/theme/app_theme.dart';
-import 'package:knuckle_bones/core/presentation/widgets/my_text_form_field.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
 
@@ -55,17 +54,12 @@ class _ProfileViewState extends State<ProfileView> {
     return Scaffold(
       appBar: MyAppBar(title: 'Profile', actions: _buildActions()),
       body: Padding(
-        padding: EdgeInsetsGeometry.all(24),
+        padding: const EdgeInsetsGeometry.all(24),
         child: Column(
           children: [
             _buildGenericAvatar(cs),
             const SizedBox(height: 48),
-            MyTextFormField(
-              controller: _usernameFormController,
-              label: 'Username',
-              keyboardType: TextInputType.name,
-              isEditing: _isEditing,
-            ),
+            _buildTextField(),
             const SizedBox(height: 48),
             ThreeDButton.wide(
               backgroundColor: cs.secondaryContainer,
@@ -141,9 +135,54 @@ class _ProfileViewState extends State<ProfileView> {
 
   Widget _buildGenericAvatar(ColorScheme cs) {
     return CircleAvatar(
-      radius: 60,
+      radius: 70,
       backgroundColor: cs.primaryContainer,
-      child: Icon(Icons.person, size: 64, color: cs.onPrimaryContainer),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Icon(
+            Icons.person,
+            size: 70,
+            color: cs.onPrimaryContainer.withAlpha(127),
+          ),
+          if (_isEditing)
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.black26,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Icon(Icons.edit, size: 40, color: cs.onPrimaryContainer),
+            ),
+          Material(
+            color: Colors.transparent,
+            shape: const CircleBorder(),
+            clipBehavior: Clip.hardEdge,
+            child: InkWell(onTap: _isEditing ? () {} : null),
+          ),
+        ],
+      ),
+    );
+  }
+
+  TextFormField _buildTextField() {
+    return TextFormField(
+      controller: _usernameFormController,
+      canRequestFocus: _isEditing,
+      keyboardType: TextInputType.text,
+      decoration: InputDecoration(
+        labelText: 'Username',
+        border: _isEditing
+            ? const OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              )
+            : null,
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 14,
+          horizontal: 12,
+        ),
+        suffixIcon: _isEditing ? Icon(Icons.edit) : null,
+      ),
     );
   }
 }

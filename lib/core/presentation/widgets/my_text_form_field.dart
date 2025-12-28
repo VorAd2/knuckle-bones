@@ -8,7 +8,6 @@ class MyTextFormField extends StatefulWidget {
   final Icon? icon;
   final String? Function(String?)? validator;
   final bool isPassword;
-  final bool isEditing;
 
   const MyTextFormField({
     super.key,
@@ -18,7 +17,6 @@ class MyTextFormField extends StatefulWidget {
     this.icon,
     this.validator,
     this.isPassword = false,
-    this.isEditing = true,
   });
 
   @override
@@ -48,7 +46,6 @@ class _MyTextFormFieldState extends State<MyTextFormField> {
       obscureText: widget.isPassword ? _isObscure : false,
       keyboardType: widget.keyboardType,
       validator: widget.validator,
-      canRequestFocus: widget.isEditing,
       decoration: InputDecoration(
         labelText: widget.label,
         prefixIcon: widget.icon,
