@@ -3,6 +3,7 @@ import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
+import 'package:knuckle_bones/features/match/presentation/views/match_view.dart';
 
 class LobbyView extends StatefulWidget {
   const LobbyView({super.key});
@@ -19,6 +20,12 @@ class _LobbyViewState extends State<LobbyView> {
   final _codeFieldController = TextEditingController();
   _OpponentType _opponentTypeView = _OpponentType.human;
   _BotDifficulty _botDiff = _BotDifficulty.lovelace;
+
+  void _onCreate(BuildContext context) {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const MatchView()));
+  }
 
   void _onJoin(BuildContext context) {
     showDialog(
@@ -111,7 +118,9 @@ class _LobbyViewState extends State<LobbyView> {
           icon: Icons.add,
           text: 'Create match',
           width: double.infinity,
-          onClick: () {},
+          onClick: () {
+            _onCreate(context);
+          },
         ),
         ThreeDButton.wide(
           backgroundColor: cs.tertiaryContainer,
@@ -138,13 +147,10 @@ class _LobbyViewState extends State<LobbyView> {
         icon: Icons.play_arrow,
         text: 'Start',
         width: double.infinity,
-        onClick: () => MyDialog.show(
+        onClick: () => MyDialog.alert(
           context: context,
           titleString: 'Oops',
           contentString: 'This feature has not yet been implemented',
-          onConfirm: () {},
-          hasCancel: false,
-          mainActionString: 'Ok',
         ),
       ),
     ];

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 
 class MyDialog {
-  static void show({
+  static Future<bool> show({
     required BuildContext context,
     required String titleString,
     required String contentString,
-    required VoidCallback onConfirm,
     bool hasCancel = true,
     String mainActionString = 'Confirm',
-  }) {
-    showDialog(
+  }) async {
+    final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
@@ -19,19 +18,33 @@ class MyDialog {
           if (hasCancel)
             TextButton(
               onPressed: () {
-                Navigator.pop(dialogContext);
+                Navigator.pop(dialogContext, false);
               },
               child: const Text('Cancel'),
             ),
           TextButton(
             onPressed: () {
-              Navigator.pop(dialogContext);
-              onConfirm();
+              Navigator.pop(dialogContext, true);
             },
             child: Text(mainActionString),
           ),
         ],
       ),
+    );
+    return result ?? false;
+  }
+
+  static Future<void> alert({
+    required BuildContext context,
+    required String titleString,
+    required String contentString,
+  }) {
+    return show(
+      context: context,
+      titleString: titleString,
+      contentString: contentString,
+      hasCancel: false,
+      mainActionString: 'Ok',
     );
   }
 }

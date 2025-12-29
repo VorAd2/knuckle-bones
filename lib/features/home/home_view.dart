@@ -22,7 +22,7 @@ class _HomeViewState extends State<HomeView> {
           return IndexedStack(
             index: currentIndex,
             children: [
-              LobbyView(),
+              const LobbyView(),
               ProfileView(
                 tabIndexNotifier: _tabIndexNotifier,
                 profileTabIndex: _profileTabIndex,
