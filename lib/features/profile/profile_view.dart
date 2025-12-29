@@ -140,18 +140,20 @@ class _ProfileViewState extends State<ProfileView> {
                 Colors.black,
                 0.3,
               ),
-              onClick: () => MyDialog.show(
-                context: context,
-                titleString: 'Log out',
-                contentString:
-                    'Are you sure you want to log out of your account?',
-                onConfirm: () {
+              onClick: () async {
+                final shouldLogout = await MyDialog.show(
+                  context: context,
+                  titleString: 'Log out',
+                  contentString:
+                      'Are you sure you want to log out of your account?',
+                );
+                if (context.mounted && shouldLogout) {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (_) => const AuthGateView()),
                   );
-                },
-              ),
+                }
+              },
             ),
           ],
         ),
