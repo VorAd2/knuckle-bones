@@ -7,8 +7,8 @@ import 'package:knuckle_bones/core/utils/media_helper.dart';
 import 'package:knuckle_bones/features/auth/presentation/views/signin_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_auth_row.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/confirm_button.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
+import 'package:knuckle_bones/features/auth/presentation/widgets/auth_confirm_button.dart';
+import 'package:knuckle_bones/core/presentation/widgets/my_app_bar.dart';
 
 class SignupView extends StatefulWidget {
   const SignupView({super.key});
@@ -86,7 +86,7 @@ class _SignupViewState extends State<SignupView> {
                     const SizedBox(height: 48),
                     AuthForm(formKey: _formKey, configs: _getConfigs()),
                     const SizedBox(height: 32),
-                    ConfirmButton(onSubmit: _onSubmit),
+                    AuthConfirmButton(onSubmit: _onSubmit),
                     const SizedBox(height: 32),
                     const Text('Or sign up with', textAlign: TextAlign.center),
                     const SizedBox(height: 14),

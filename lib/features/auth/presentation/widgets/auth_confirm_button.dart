@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class ConfirmButton extends StatelessWidget {
+class AuthConfirmButton extends StatelessWidget {
   final VoidCallback onSubmit;
 
-  const ConfirmButton({super.key, required this.onSubmit});
+  const AuthConfirmButton({super.key, required this.onSubmit});
 
   @override
   Widget build(BuildContext context) {

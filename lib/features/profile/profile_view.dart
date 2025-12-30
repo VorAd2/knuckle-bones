@@ -9,7 +9,7 @@ import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
 import 'package:knuckle_bones/core/utils/media_helper.dart';
 import 'package:knuckle_bones/features/auth/presentation/views/auth_gate_view.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
+import 'package:knuckle_bones/core/presentation/widgets/my_app_bar.dart';
 
 class ProfileView extends StatefulWidget {
   final ValueNotifier<int> tabIndexNotifier;

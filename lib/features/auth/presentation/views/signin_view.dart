@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:knuckle_bones/features/auth/presentation/views/signup_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_auth_row.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/confirm_button.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
+import 'package:knuckle_bones/features/auth/presentation/widgets/auth_confirm_button.dart';
+import 'package:knuckle_bones/core/presentation/widgets/my_app_bar.dart';
 import 'package:knuckle_bones/features/home/home_view.dart';
 
 class SigninView extends StatefulWidget {
@@ -91,7 +91,7 @@ class _SigninViewState extends State<SigninView> {
                     const SizedBox(height: 48),
                     AuthForm(formKey: _formKey, configs: _getConfigs()),
                     const SizedBox(height: 32),
-                    ConfirmButton(onSubmit: _onSubmit),
+                    AuthConfirmButton(onSubmit: _onSubmit),
                     const SizedBox(height: 32),
                     const Text('Or signin with', textAlign: TextAlign.center),
                     const SizedBox(height: 14),
