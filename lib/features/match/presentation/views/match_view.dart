@@ -25,9 +25,21 @@ class MatchView extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              Expanded(child: _PlayerSection(isTop: true)),
-              const Divider(height: 2, thickness: 2),
-              Expanded(child: _PlayerSection(isTop: false)),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: _PlayerSection(isTop: true),
+                ),
+              ),
+              const SizedBox(height: 42),
+              const Divider(height: 2, thickness: 1),
+              const SizedBox(height: 42),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: _PlayerSection(isTop: false),
+                ),
+              ),
             ],
           ),
         ),
@@ -42,28 +54,41 @@ class _PlayerSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(14),
       child: Row(
+        spacing: 18,
         children: [
-          SizedBox(
-            width: 80,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (isTop) ...[
-                  const PlayerAvatar(),
-                  const SizedBox(height: 16),
-                  const _Oracle(), //rolagem do dado
-                ] else ...[
-                  const _Oracle(), //rolagem do dado
-                  const SizedBox(height: 16),
-                  const PlayerAvatar(),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(child: const Board()),
+          _Shrine(isTop: isTop),
+          Expanded(child: Board(isTop: isTop)),
+        ],
+      ),
+    );
+  }
+}
+
+class _Shrine extends StatelessWidget {
+  final bool isTop;
+  const _Shrine({required this.isTop});
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 80,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isTop) ...[
+            const PlayerAvatar(),
+            const SizedBox(height: 4),
+            const Text('Ada Lovelace', style: TextStyle(fontSize: 8)),
+            const SizedBox(height: 36),
+            const _Oracle(),
+          ] else ...[
+            const _Oracle(),
+            const SizedBox(height: 36),
+            const PlayerAvatar(),
+            const SizedBox(height: 4),
+            const Text('Alan Turing', style: TextStyle(fontSize: 8)),
+          ],
         ],
       ),
     );
@@ -74,12 +99,12 @@ class _Oracle extends StatelessWidget {
   const _Oracle();
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       width: 50,
       height: 50,
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.black45),
+        color: cs.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Center(child: Text("D6")),
