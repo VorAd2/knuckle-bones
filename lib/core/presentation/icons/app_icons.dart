@@ -60,4 +60,13 @@ class AppIcons {
       colorFilter: _getColorFilter(color),
     );
   }
+
+  static Widget dice({required int face, double size = 58, Color? color}) {
+    return SvgPicture.asset(
+      'assets/icons/die/dice$face.svg',
+      width: size,
+      height: size,
+      colorFilter: _getColorFilter(color),
+    );
+  }
 }

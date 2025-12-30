@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
+import 'package:knuckle_bones/core/presentation/theme/app_theme.dart';
 
 class Tile extends StatelessWidget {
   final int? value;
@@ -9,6 +11,7 @@ class Tile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final diceColors = Theme.of(context).extension<DiceColors>();
     return Material(
       color: cs.surfaceBright,
       borderRadius: BorderRadius.circular(12),
@@ -16,35 +19,35 @@ class Tile extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
-        child: Center(child: value == null ? null : _getIconForValue(value!)),
+        child: Center(
+          child: value == null
+              ? null
+              : _getIconForValue(val: value!, cs: cs, dc: diceColors!),
+        ),
       ),
     );
   }
 
-  Widget _getIconForValue(int val) {
-    IconData iconData;
+  Widget _getIconForValue({
+    required int val,
+    required ColorScheme cs,
+    required DiceColors dc,
+  }) {
     switch (val) {
       case 1:
-        iconData = Icons.looks_one;
-        break;
+        return AppIcons.dice(face: 1, color: cs.onSurfaceVariant);
       case 2:
-        iconData = Icons.looks_two;
-        break;
+        return AppIcons.dice(face: 2, color: cs.onSurfaceVariant);
       case 3:
-        iconData = Icons.looks_3;
-        break;
+        return AppIcons.dice(face: 3, color: cs.onSurfaceVariant);
       case 4:
-        iconData = Icons.looks_4;
-        break;
+        return AppIcons.dice(face: 4, color: dc.redDice);
       case 5:
-        iconData = Icons.looks_5;
-        break;
+        return AppIcons.dice(face: 5, color: cs.onSurfaceVariant);
       case 6:
-        iconData = Icons.looks_6;
-        break;
+        return AppIcons.dice(face: 6, color: cs.tertiary);
       default:
-        iconData = Icons.error;
+        return Icon(Icons.error, size: 40, color: Colors.red);
     }
-    return Icon(iconData, size: 40, color: Colors.deepPurple);
   }
 }
