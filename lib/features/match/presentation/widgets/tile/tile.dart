@@ -32,7 +32,10 @@ class Tile extends StatelessWidget {
               final value = getState().value;
               return value == null
                   ? SizedBox.shrink()
-                  : _getIconForValue(val: value, cs: cs, dc: diceColors!);
+                  : _getIconForValue(
+                      val: value,
+                      color: _getColor(cs: cs, role: getState().role),
+                    );
             },
           ),
         ),
@@ -40,26 +43,19 @@ class Tile extends StatelessWidget {
     );
   }
 
-  Widget _getIconForValue({
-    required int val,
-    required ColorScheme cs,
-    required DiceColors dc,
-  }) {
-    switch (val) {
-      case 1:
-        return AppIcons.dice(face: 1, color: cs.onSurfaceVariant);
-      case 2:
-        return AppIcons.dice(face: 2, color: cs.onSurfaceVariant);
-      case 3:
-        return AppIcons.dice(face: 3, color: cs.onSurfaceVariant);
-      case 4:
-        return AppIcons.dice(face: 4, color: cs.onSurfaceVariant);
-      case 5:
-        return AppIcons.dice(face: 5, color: cs.onSurfaceVariant);
-      case 6:
-        return AppIcons.dice(face: 6, color: cs.onSurfaceVariant);
-      default:
-        return Icon(Icons.error, size: 40, color: Colors.red);
+  Color _getColor({required ColorScheme cs, required TileRole role}) {
+    switch (role) {
+      case TileRole.alone:
+        return cs.onSurfaceVariant;
+      case TileRole.paired:
+        return cs.tertiary;
     }
+  }
+
+  Widget _getIconForValue({required int val, required Color color}) {
+    if (val < 1 || val > 6) {
+      return Icon(Icons.error, size: 40, color: Colors.red);
+    }
+    return AppIcons.dice(face: val, color: color);
   }
 }

@@ -19,7 +19,7 @@ class BoardController extends ChangeNotifier {
     List<List<TileUiState>> grid = List.generate(3, (rowIndex) {
       return List.generate(3, (colIndex) {
         return TileUiState(
-          value: null,
+          role: TileRole.alone,
           rowIndex: rowIndex,
           columnIndex: colIndex,
           onSelected: () =>
@@ -41,9 +41,11 @@ class BoardController extends ChangeNotifier {
   }) {
     final tileState = state.tileStates[rowIndex][colIndex];
     if (tileState.value != null) return MoveResult.notEmpty;
+
     tileState.value = diceValue;
     state.filledTiles += 1;
-    state.scores = _calculateScores();
+    _evaluateMyColumn(colIndex, diceValue);
+
     notifyListeners();
     if (state.filledTiles == 9) {
       return MoveResult.endgame;
@@ -51,14 +53,24 @@ class BoardController extends ChangeNotifier {
     return MoveResult.success;
   }
 
-  List<int> _calculateScores() {
-    return List.generate(3, (col) {
-      int score = 0;
-      for (int row = 0; row < 3; row++) {
-        final value = state.tileStates[row][col].value;
-        score += value ?? 0;
+  void _evaluateMyColumn(int colIndex, int diceValue) {
+    final tiles = state.tileStates;
+    final paired = <TileUiState>[];
+    int newColScore = 0;
+
+    for (var row in tiles) {
+      final member = row[colIndex];
+      newColScore += member.value ?? 0;
+      if (member.value == diceValue) {
+        paired.add(member);
       }
-      return score;
-    });
+    }
+    if (paired.length > 1) {
+      for (var tile in paired) {
+        tile.role = TileRole.paired;
+      }
+    }
+
+    state.scores[colIndex] = newColScore;
   }
 }
