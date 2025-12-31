@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:knuckle_bones/features/match/match_types.dart';
+import 'package:knuckle_bones/features/match/types/match_types.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/tile/tile_ui_state.dart';
 import 'board_ui_state.dart';
 
