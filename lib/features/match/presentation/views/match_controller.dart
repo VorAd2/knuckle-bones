@@ -2,10 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/board/board_controller.dart';
+import 'package:knuckle_bones/features/match/types/match_types.dart';
 import 'dart:math';
 import 'match_ui_state.dart';
-
-enum MoveResult { notEmpty, success, endgame }
 
 class MatchController extends ChangeNotifier {
   late final MatchUiState state;
@@ -61,11 +60,16 @@ class MatchController extends ChangeNotifier {
   }) {
     if (!_allowInteraction(isTopBoard)) return;
     final result = _triggerMove(isTopBoard: isTopBoard, row: row, col: col);
-    if (result == MoveResult.endgame) {
-      state.isEndGame = true;
-      notifyListeners();
-    } else if (result == MoveResult.success) {
-      _nextTurn();
+    switch (result) {
+      case MoveResult.occupied:
+        break;
+      case MoveResult.placed:
+        _nextTurn();
+        break;
+      case MoveResult.matchEnded:
+        state.isEndGame = true;
+        notifyListeners();
+        break;
     }
   }
 

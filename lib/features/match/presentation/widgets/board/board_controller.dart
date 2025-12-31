@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:knuckle_bones/features/match/presentation/views/match_controller.dart';
 import 'package:knuckle_bones/features/match/types/match_types.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/tile/tile_ui_state.dart';
 import 'board_ui_state.dart';
@@ -19,7 +18,7 @@ class BoardController extends ChangeNotifier {
     List<List<TileUiState>> grid = List.generate(3, (rowIndex) {
       return List.generate(3, (colIndex) {
         return TileUiState(
-          role: TileRole.alone,
+          role: TileStatus.single,
           rowIndex: rowIndex,
           columnIndex: colIndex,
           onSelected: () =>
@@ -40,7 +39,7 @@ class BoardController extends ChangeNotifier {
     required int diceValue,
   }) {
     final tileState = state.tileStates[rowIndex][colIndex];
-    if (tileState.value != null) return MoveResult.notEmpty;
+    if (tileState.value != null) return MoveResult.occupied;
 
     tileState.value = diceValue;
     state.filledTiles += 1;
@@ -48,9 +47,9 @@ class BoardController extends ChangeNotifier {
 
     notifyListeners();
     if (state.filledTiles == 9) {
-      return MoveResult.endgame;
+      return MoveResult.matchEnded;
     }
-    return MoveResult.success;
+    return MoveResult.placed;
   }
 
   void _evaluateMyColumn(int colIndex, int diceValue) {
@@ -67,7 +66,7 @@ class BoardController extends ChangeNotifier {
     }
     if (paired.length > 1) {
       for (var tile in paired) {
-        tile.role = TileRole.paired;
+        tile.role = TileStatus.stacked;
       }
     }
 

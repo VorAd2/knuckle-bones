@@ -3,6 +3,7 @@ import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
 import 'package:knuckle_bones/core/presentation/theme/app_theme.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/board/board_controller.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/tile/tile_ui_state.dart';
+import 'package:knuckle_bones/features/match/types/match_types.dart';
 
 class Tile extends StatelessWidget {
   final BoardController boardController;
@@ -43,11 +44,11 @@ class Tile extends StatelessWidget {
     );
   }
 
-  Color _getColor({required ColorScheme cs, required TileRole role}) {
+  Color _getColor({required ColorScheme cs, required TileStatus role}) {
     switch (role) {
-      case TileRole.alone:
+      case TileStatus.single:
         return cs.onSurfaceVariant;
-      case TileRole.paired:
+      case TileStatus.stacked:
         return cs.tertiary;
     }
   }

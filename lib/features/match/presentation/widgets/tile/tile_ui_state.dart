@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-
-enum TileRole { alone, paired }
+import 'package:knuckle_bones/features/match/types/match_types.dart';
 
 class TileUiState {
   final int rowIndex;
   final int columnIndex;
   final VoidCallback onSelected;
-  TileRole role;
+  TileStatus role;
   int? value;
 
   TileUiState({
