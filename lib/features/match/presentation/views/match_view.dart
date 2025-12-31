@@ -1,10 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
-import 'package:knuckle_bones/features/match/presentation/widgets/board.dart';
-import 'package:knuckle_bones/features/match/presentation/widgets/player_avatar.dart';
+import 'package:knuckle_bones/features/match/presentation/views/match_controller.dart';
+import 'package:knuckle_bones/features/match/presentation/widgets/board/board.dart';
+import 'package:knuckle_bones/features/match/presentation/widgets/board/board_controller.dart';
+import 'package:knuckle_bones/features/match/presentation/widgets/oracle/oracle.dart';
+import 'package:knuckle_bones/features/match/presentation/widgets/player_avatar/player_avatar.dart';
 
-class MatchView extends StatelessWidget {
+class MatchView extends StatefulWidget {
   const MatchView({super.key});
+  @override
+  State<MatchView> createState() => _MatchViewState();
+}
+
+class _MatchViewState extends State<MatchView> {
+  late final MatchController _controller = MatchController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _controller.startMatch();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -28,7 +52,11 @@ class MatchView extends StatelessWidget {
               Expanded(
                 child: Align(
                   alignment: Alignment.bottomCenter,
-                  child: _PlayerSection(isTop: true),
+                  child: _PlayerSection(
+                    forTop: true,
+                    matchController: _controller,
+                    boardController: _controller.topBoardController,
+                  ),
                 ),
               ),
               const SizedBox(height: 42),
@@ -37,7 +65,11 @@ class MatchView extends StatelessWidget {
               Expanded(
                 child: Align(
                   alignment: Alignment.topCenter,
-                  child: _PlayerSection(isTop: false),
+                  child: _PlayerSection(
+                    forTop: false,
+                    matchController: _controller,
+                    boardController: _controller.bottomBoardController,
+                  ),
                 ),
               ),
             ],
@@ -49,26 +81,50 @@ class MatchView extends StatelessWidget {
 }
 
 class _PlayerSection extends StatelessWidget {
-  final bool isTop;
-  const _PlayerSection({required this.isTop});
+  final bool forTop;
+  final MatchController matchController;
+  final BoardController boardController;
+
+  const _PlayerSection({
+    required this.forTop,
+    required this.matchController,
+    required this.boardController,
+  });
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      child: Row(
-        spacing: 18,
-        children: [
-          _Shrine(isTop: isTop),
-          Expanded(child: Board(isTop: isTop)),
-        ],
+    return ListenableBuilder(
+      listenable: matchController,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          spacing: 18,
+          children: [
+            _Shrine(forTop: forTop, matchController: matchController),
+            Expanded(
+              child: Board(controller: boardController, isTop: forTop),
+            ),
+          ],
+        ),
       ),
+      builder: (context, child) {
+        final isMyTurn = forTop == matchController.state.isPlayerTopTurn;
+        return AnimatedOpacity(
+          duration: const Duration(milliseconds: 300),
+          opacity: isMyTurn ? 1.0 : 0.7,
+          child: child,
+        );
+      },
     );
   }
 }
 
 class _Shrine extends StatelessWidget {
-  final bool isTop;
-  const _Shrine({required this.isTop});
+  final bool forTop;
+  final MatchController matchController;
+
+  const _Shrine({required this.forTop, required this.matchController});
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -76,38 +132,21 @@ class _Shrine extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (isTop) ...[
+          if (forTop) ...[
             const PlayerAvatar(),
             const SizedBox(height: 4),
-            const Text('Ada Lovelace', style: TextStyle(fontSize: 8)),
+            const Text('Ada Lovelace', style: TextStyle(fontSize: 9)),
             const SizedBox(height: 36),
-            const _Oracle(),
+            Oracle(forTop: forTop, matchController: matchController),
           ] else ...[
-            const _Oracle(),
+            Oracle(forTop: forTop, matchController: matchController),
             const SizedBox(height: 36),
             const PlayerAvatar(),
             const SizedBox(height: 4),
-            const Text('Alan Turing', style: TextStyle(fontSize: 8)),
+            const Text('Alan Turing', style: TextStyle(fontSize: 9)),
           ],
         ],
       ),
-    );
-  }
-}
-
-class _Oracle extends StatelessWidget {
-  const _Oracle();
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      width: 50,
-      height: 50,
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: const Center(child: Text("D6")),
     );
   }
 }

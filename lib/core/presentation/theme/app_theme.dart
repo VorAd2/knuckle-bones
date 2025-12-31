@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 final seed = Color(0xFF6a1256);
-const redDice = Color(0xFFF42D3D);
+const redDice = Color(0xFFF54553);
 final colorScheme = ColorScheme.fromSeed(
   seedColor: seed,
   brightness: Brightness.dark,

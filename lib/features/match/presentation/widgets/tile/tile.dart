@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
 import 'package:knuckle_bones/core/presentation/theme/app_theme.dart';
+import 'package:knuckle_bones/features/match/presentation/widgets/board/board_controller.dart';
+import 'package:knuckle_bones/features/match/presentation/widgets/tile/tile_ui_state.dart';
 
 class Tile extends StatelessWidget {
-  final int? value;
-  final VoidCallback onTap;
+  final BoardController boardController;
+  final TileUiState Function() getState;
 
-  const Tile({super.key, required this.value, required this.onTap});
+  const Tile({
+    super.key,
+    required this.boardController,
+    required this.getState,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,11 +24,17 @@ class Tile extends StatelessWidget {
       elevation: 2.5,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
+        onTap: getState().onSelected,
         child: Center(
-          child: value == null
-              ? null
-              : _getIconForValue(val: value!, cs: cs, dc: diceColors!),
+          child: ListenableBuilder(
+            listenable: boardController,
+            builder: (context, _) {
+              final value = getState().value;
+              return value == null
+                  ? SizedBox.shrink()
+                  : _getIconForValue(val: value, cs: cs, dc: diceColors!);
+            },
+          ),
         ),
       ),
     );
@@ -37,7 +49,7 @@ class Tile extends StatelessWidget {
       case 1:
         return AppIcons.dice(face: 1, color: cs.onSurfaceVariant);
       case 2:
-        return AppIcons.dice(face: 2, color: cs.onSurfaceVariant);
+        return AppIcons.dice(face: 2, color: cs.tertiary);
       case 3:
         return AppIcons.dice(face: 3, color: cs.onSurfaceVariant);
       case 4:

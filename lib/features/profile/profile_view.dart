@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:knuckle_bones/core/infra/user_model.dart';
+import 'package:knuckle_bones/core/data/user_model.dart';
 import 'package:knuckle_bones/core/presentation/widgets/image_picker_sheet.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
