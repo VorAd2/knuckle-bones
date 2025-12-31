@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:knuckle_bones/features/match/presentation/views/match_controller.dart';
 import 'package:knuckle_bones/features/match/types/match_types.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/tile/tile_ui_state.dart';
 import 'board_ui_state.dart';
@@ -33,17 +34,21 @@ class BoardController extends ChangeNotifier {
     return state.tileStates[rowIndex][colIndex];
   }
 
-  bool placeDice({
+  MoveResult placeDice({
     required int rowIndex,
     required int colIndex,
     required int diceValue,
   }) {
     final tileState = state.tileStates[rowIndex][colIndex];
-    if (tileState.value != null) return false;
+    if (tileState.value != null) return MoveResult.notEmpty;
     tileState.value = diceValue;
+    state.filledTiles += 1;
     state.scores = _calculateScores();
     notifyListeners();
-    return true;
+    if (state.filledTiles == 9) {
+      return MoveResult.endgame;
+    }
+    return MoveResult.success;
   }
 
   List<int> _calculateScores() {

@@ -49,15 +49,15 @@ class Tile extends StatelessWidget {
       case 1:
         return AppIcons.dice(face: 1, color: cs.onSurfaceVariant);
       case 2:
-        return AppIcons.dice(face: 2, color: cs.tertiary);
+        return AppIcons.dice(face: 2, color: cs.onSurfaceVariant);
       case 3:
         return AppIcons.dice(face: 3, color: cs.onSurfaceVariant);
       case 4:
-        return AppIcons.dice(face: 4, color: dc.redDice);
+        return AppIcons.dice(face: 4, color: cs.onSurfaceVariant);
       case 5:
         return AppIcons.dice(face: 5, color: cs.onSurfaceVariant);
       case 6:
-        return AppIcons.dice(face: 6, color: cs.tertiary);
+        return AppIcons.dice(face: 6, color: cs.onSurfaceVariant);
       default:
         return Icon(Icons.error, size: 40, color: Colors.red);
     }

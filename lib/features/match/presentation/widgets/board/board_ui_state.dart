@@ -4,6 +4,7 @@ class BoardUiState {
   final bool forTop;
   final List<List<TileUiState>> tileStates;
   List<int> scores;
+  int filledTiles = 0;
 
   BoardUiState({
     required this.forTop,

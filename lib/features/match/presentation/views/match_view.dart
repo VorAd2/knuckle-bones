@@ -18,6 +18,7 @@ class _MatchViewState extends State<MatchView> {
   @override
   void initState() {
     super.initState();
+    _controller.addListener(_onStateChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _controller.startMatch();
     });
@@ -29,12 +30,27 @@ class _MatchViewState extends State<MatchView> {
     super.dispose();
   }
 
+  void _onStateChanged() {
+    if (_controller.state.isEndGame) {
+      if (!mounted) return;
+      MyDialog.alert(
+        context: context,
+        titleString: 'End Game',
+        contentString: 'We have a winner',
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
+        if (_controller.state.isEndGame || context.mounted) {
+          Navigator.of(context).pop();
+          return;
+        }
         final bool shouldQuit = await MyDialog.show(
           context: context,
           titleString: 'Quit the match',

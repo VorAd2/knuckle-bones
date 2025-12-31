@@ -1,13 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/board/board_controller.dart';
 import 'dart:math';
 import 'match_ui_state.dart';
 
+enum MoveResult { notEmpty, success, endgame }
+
 class MatchController extends ChangeNotifier {
   late final MatchUiState state;
   late final BoardController topBoardController;
   late final BoardController bottomBoardController;
-  bool _isDisposed = false;
+  Timer? _rollingTimer;
 
   MatchController() {
     state = MatchUiState();
@@ -23,28 +27,22 @@ class MatchController extends ChangeNotifier {
     );
   }
 
-  void _handleInteraction({
-    required bool isTopBoard,
-    required int row,
-    required int col,
-  }) {
-    if (state.isRolling) return;
-    if (isTopBoard != state.isPlayerTopTurn) return;
-    final activeBoard = isTopBoard ? topBoardController : bottomBoardController;
-    final success = activeBoard.placeDice(
-      rowIndex: row,
-      colIndex: col,
-      diceValue: state.currentOracleValue,
-    );
-    if (success) _nextTurn();
+  @override
+  void dispose() {
+    _rollingTimer?.cancel();
+    topBoardController.dispose();
+    bottomBoardController.dispose();
+    super.dispose();
   }
 
+  void startMatch() => _nextTurn(isFirstTurn: true);
+
   void _nextTurn({bool isFirstTurn = false}) {
-    if (!isFirstTurn) _togglePlayerTurn();
+    if (!isFirstTurn) _toggleTurn();
     state.isRolling = true;
     notifyListeners();
-    Future.delayed(const Duration(milliseconds: 4000), () {
-      if (_isDisposed) return;
+    _rollingTimer?.cancel();
+    _rollingTimer = Timer(const Duration(milliseconds: 4000), () {
       final nextDice = Random().nextInt(6) + 1;
       state.isRolling = false;
       state.currentOracleValue = nextDice;
@@ -52,17 +50,45 @@ class MatchController extends ChangeNotifier {
     });
   }
 
-  void _togglePlayerTurn() {
+  void _toggleTurn() {
     state.isPlayerTopTurn = !state.isPlayerTopTurn;
   }
 
-  void startMatch() => _nextTurn(isFirstTurn: true);
+  void _handleInteraction({
+    required bool isTopBoard,
+    required int row,
+    required int col,
+  }) {
+    if (!_allowInteraction(isTopBoard)) return;
+    final result = _triggerMove(isTopBoard: isTopBoard, row: row, col: col);
+    if (result == MoveResult.endgame) {
+      state.isEndGame = true;
+      notifyListeners();
+    } else if (result == MoveResult.success) {
+      _nextTurn();
+    }
+  }
 
-  @override
-  void dispose() {
-    _isDisposed = true;
-    topBoardController.dispose();
-    bottomBoardController.dispose();
-    super.dispose();
+  bool _allowInteraction(bool isTopBoard) {
+    if ((state.isRolling) ||
+        (isTopBoard != state.isPlayerTopTurn) ||
+        (state.isEndGame)) {
+      return false;
+    }
+    return true;
+  }
+
+  MoveResult _triggerMove({
+    required bool isTopBoard,
+    required int row,
+    required int col,
+  }) {
+    final activeBoard = isTopBoard ? topBoardController : bottomBoardController;
+    final result = activeBoard.placeDice(
+      rowIndex: row,
+      colIndex: col,
+      diceValue: state.currentOracleValue,
+    );
+    return result;
   }
 }
