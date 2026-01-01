@@ -1,106 +1,131 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:knuckle_bones/features/match/domain/match_player.dart'; // Importe a nova entidade
 import 'package:knuckle_bones/features/match/presentation/widgets/board/board_controller.dart';
 import 'package:knuckle_bones/features/match/types/match_types.dart';
-import 'dart:math';
 import 'match_ui_state.dart';
 
 class MatchController extends ChangeNotifier {
   late final MatchUiState state;
-  late final BoardController topBoardController;
-  late final BoardController bottomBoardController;
+  late final MatchPlayer localPlayer;
+  late final MatchPlayer remotePlayer;
   Timer? _rollingTimer;
+  bool _isDisposed = false;
+
+  bool get isMyTurn => state.currentTurnPlayerId == localPlayer.id;
 
   MatchController() {
     state = MatchUiState();
-    topBoardController = BoardController(
-      forTop: true,
-      onTileSelected: ({required rowIndex, required colIndex}) =>
-          _handleInteraction(isTopBoard: true, row: rowIndex, col: colIndex),
-    );
-    bottomBoardController = BoardController(
-      forTop: false,
-      onTileSelected: ({required rowIndex, required colIndex}) =>
-          _handleInteraction(isTopBoard: false, row: rowIndex, col: colIndex),
-    );
+    _initializePlayers();
   }
 
   @override
   void dispose() {
+    _isDisposed = true;
     _rollingTimer?.cancel();
-    topBoardController.dispose();
-    bottomBoardController.dispose();
+    localPlayer.dispose();
+    remotePlayer.dispose();
     super.dispose();
+  }
+
+  void _initializePlayers() {
+    localPlayer = MatchPlayer(
+      id: 'p_local',
+      name: 'Ada Lovelace',
+      boardController: BoardController(
+        onTileSelected: ({required rowIndex, required colIndex}) =>
+            _handleLocalInteraction(row: rowIndex, col: colIndex),
+      ),
+    );
+    remotePlayer = MatchPlayer(
+      id: 'p_remote',
+      name: 'Alan Turing',
+      boardController: BoardController(
+        onTileSelected: ({required rowIndex, required colIndex}) {},
+      ),
+    );
+    state.currentTurnPlayerId = localPlayer.id;
   }
 
   void startMatch() => _nextTurn(isFirstTurn: true);
 
+  void _toggleTurnPlayer() {
+    state.currentTurnPlayerId = isMyTurn ? remotePlayer.id : localPlayer.id;
+  }
+
   void _nextTurn({bool isFirstTurn = false}) {
-    if (!isFirstTurn) _toggleTurn();
+    if (!isFirstTurn) _toggleTurnPlayer();
+
     state.isRolling = true;
     notifyListeners();
+
     _rollingTimer?.cancel();
-    _rollingTimer = Timer(const Duration(milliseconds: 4000), () {
+    _rollingTimer = Timer(const Duration(milliseconds: 2000), () {
       final nextDice = Random().nextInt(6) + 1;
       state.isRolling = false;
       state.currentOracleValue = nextDice;
       notifyListeners();
+
+      if (!isMyTurn) {
+        _simulateRemoteInteraction();
+      }
     });
   }
 
-  void _toggleTurn() {
-    state.isPlayerTopTurn = !state.isPlayerTopTurn;
-  }
-
-  void _handleInteraction({
-    required bool isTopBoard,
+  Future<void> _handleLocalInteraction({
     required int row,
     required int col,
   }) async {
-    if (!_allowInteraction(isTopBoard)) return;
-    final result = _triggerMove(isTopBoard: isTopBoard, row: row, col: col);
-    switch (result) {
-      case MoveResult.occupied:
-        break;
-      case MoveResult.placed:
-        final targetBoard = isTopBoard
-            ? bottomBoardController
-            : topBoardController;
-        final diceValue = state.currentOracleValue;
-        await targetBoard.destroyDieWithValue(
-          colIndex: col,
-          valueToDestroy: diceValue,
-        );
-        _nextTurn();
-        break;
-      case MoveResult.matchEnded:
-        state.isEndGame = true;
-        notifyListeners();
-        break;
-    }
-  }
+    if (!isMyTurn || state.isRolling || state.isEndGame) return;
 
-  bool _allowInteraction(bool isTopBoard) {
-    if ((state.isRolling) ||
-        (isTopBoard != state.isPlayerTopTurn) ||
-        (state.isEndGame)) {
-      return false;
-    }
-    return true;
-  }
-
-  MoveResult _triggerMove({
-    required bool isTopBoard,
-    required int row,
-    required int col,
-  }) {
-    final activeBoard = isTopBoard ? topBoardController : bottomBoardController;
-    final result = activeBoard.placeDice(
+    final diceValue = state.currentOracleValue;
+    final result = localPlayer.boardController.placeDice(
       rowIndex: row,
       colIndex: col,
-      diceValue: state.currentOracleValue,
+      diceValue: diceValue,
     );
-    return result;
+    if (result == MoveResult.placed) {
+      await remotePlayer.boardController.destroyDieWithValue(
+        colIndex: col,
+        valueToDestroy: diceValue,
+      );
+      if (_isDisposed) return;
+      _nextTurn();
+    } else if (result == MoveResult.matchEnded) {
+      _triggerEndGame();
+    }
+  }
+
+  Future<void> _simulateRemoteInteraction() async {
+    await Future.delayed(const Duration(seconds: 1));
+    if (_isDisposed) return;
+    final diceValue = state.currentOracleValue;
+    int col = Random().nextInt(3);
+    int row = Random().nextInt(3);
+    final result = remotePlayer.boardController.placeDice(
+      rowIndex: row,
+      colIndex: col,
+      diceValue: diceValue,
+    );
+    if (result == MoveResult.placed) {
+      await localPlayer.boardController.destroyDieWithValue(
+        colIndex: col,
+        valueToDestroy: diceValue,
+      );
+      if (_isDisposed) return;
+      _nextTurn();
+    } else if (result == MoveResult.matchEnded) {
+      _triggerEndGame();
+    } else {
+      // Maquina erra, tenta denovo
+      _simulateRemoteInteraction();
+    }
+  }
+
+  void _triggerEndGame() {
+    state.isEndGame = true;
+    notifyListeners();
   }
 }

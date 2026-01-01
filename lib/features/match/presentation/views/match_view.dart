@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
+import 'package:knuckle_bones/features/match/domain/match_player.dart';
 import 'package:knuckle_bones/features/match/presentation/views/match_controller.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/board/board.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/board/board_controller.dart';
@@ -47,7 +48,7 @@ class _MatchViewState extends State<MatchView> {
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
-        if (_controller.state.isEndGame || context.mounted) {
+        if (_controller.state.isEndGame && context.mounted) {
           Navigator.of(context).pop();
           return;
         }
@@ -71,7 +72,7 @@ class _MatchViewState extends State<MatchView> {
                   child: _PlayerSection(
                     forTop: true,
                     matchController: _controller,
-                    boardController: _controller.topBoardController,
+                    player: _controller.remotePlayer,
                   ),
                 ),
               ),
@@ -84,7 +85,7 @@ class _MatchViewState extends State<MatchView> {
                   child: _PlayerSection(
                     forTop: false,
                     matchController: _controller,
-                    boardController: _controller.bottomBoardController,
+                    player: _controller.localPlayer,
                   ),
                 ),
               ),
@@ -99,12 +100,12 @@ class _MatchViewState extends State<MatchView> {
 class _PlayerSection extends StatelessWidget {
   final bool forTop;
   final MatchController matchController;
-  final BoardController boardController;
+  final MatchPlayer player;
 
   const _PlayerSection({
     required this.forTop,
     required this.matchController,
-    required this.boardController,
+    required this.player,
   });
 
   @override
@@ -116,18 +117,22 @@ class _PlayerSection extends StatelessWidget {
         child: Row(
           spacing: 18,
           children: [
-            _Shrine(forTop: forTop, matchController: matchController),
+            _Shrine(
+              forTop: forTop,
+              matchController: matchController,
+              player: player,
+            ),
             Expanded(
-              child: Board(controller: boardController, isTop: forTop),
+              child: Board(controller: player.boardController, forTop: forTop),
             ),
           ],
         ),
       ),
       builder: (context, child) {
-        final isMyTurn = forTop == matchController.state.isPlayerTopTurn;
+        final isTurn = matchController.state.currentTurnPlayerId == player.id;
         return AnimatedOpacity(
           duration: const Duration(milliseconds: 300),
-          opacity: isMyTurn ? 1.0 : 0.7,
+          opacity: isTurn ? 1.0 : 0.7,
           child: child,
         );
       },
@@ -138,8 +143,13 @@ class _PlayerSection extends StatelessWidget {
 class _Shrine extends StatelessWidget {
   final bool forTop;
   final MatchController matchController;
+  final MatchPlayer player;
 
-  const _Shrine({required this.forTop, required this.matchController});
+  const _Shrine({
+    required this.forTop,
+    required this.matchController,
+    required this.player,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -151,15 +161,23 @@ class _Shrine extends StatelessWidget {
           if (forTop) ...[
             const PlayerAvatar(),
             const SizedBox(height: 4),
-            const Text('Ada Lovelace', style: TextStyle(fontSize: 9)),
+            Text(player.name, style: TextStyle(fontSize: 9)),
             const SizedBox(height: 36),
-            Oracle(forTop: forTop, matchController: matchController),
+            Oracle(
+              forTop: forTop,
+              matchController: matchController,
+              player: player,
+            ),
           ] else ...[
-            Oracle(forTop: forTop, matchController: matchController),
+            Oracle(
+              forTop: forTop,
+              matchController: matchController,
+              player: player,
+            ),
             const SizedBox(height: 36),
             const PlayerAvatar(),
             const SizedBox(height: 4),
-            const Text('Alan Turing', style: TextStyle(fontSize: 9)),
+            Text(player.name, style: TextStyle(fontSize: 9)),
           ],
         ],
       ),

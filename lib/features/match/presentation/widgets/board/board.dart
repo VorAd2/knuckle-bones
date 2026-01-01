@@ -4,8 +4,8 @@ import 'package:knuckle_bones/features/match/presentation/widgets/tile/tile.dart
 
 class Board extends StatelessWidget {
   final BoardController controller;
-  final bool isTop;
-  const Board({super.key, required this.controller, required this.isTop});
+  final bool forTop;
+  const Board({super.key, required this.controller, required this.forTop});
 
   @override
   Widget build(BuildContext context) {
@@ -13,14 +13,14 @@ class Board extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (!isTop) ...[
+        if (!forTop) ...[
           Transform.translate(
             offset: const Offset(0, -textOffset),
             child: _ScoreRow(controller),
           ),
         ],
         _TileGrid(controller),
-        if (isTop) ...[
+        if (forTop) ...[
           Transform.translate(
             offset: const Offset(0, textOffset),
             child: _ScoreRow(controller),

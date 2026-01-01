@@ -6,15 +6,19 @@ import 'board_ui_state.dart';
 class BoardController extends ChangeNotifier {
   final TileSelectionCallback onTileSelected;
   late final BoardUiState state;
+  bool _isDisposed = false;
 
-  BoardController({required bool forTop, required this.onTileSelected}) {
-    state = _createInitialState(forTop, onTileSelected);
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 
-  BoardUiState _createInitialState(
-    bool forTop,
-    TileSelectionCallback onTileSelected,
-  ) {
+  BoardController({required this.onTileSelected}) {
+    state = _createInitialState(onTileSelected);
+  }
+
+  BoardUiState _createInitialState(TileSelectionCallback onTileSelected) {
     List<List<TileUiState>> grid = List.generate(3, (rowIndex) {
       return List.generate(3, (colIndex) {
         return TileUiState(
@@ -26,40 +30,11 @@ class BoardController extends ChangeNotifier {
         );
       });
     });
-    return BoardUiState(forTop: forTop, tileStates: grid, scores: [0, 0, 0]);
+    return BoardUiState(tileStates: grid, scores: [0, 0, 0]);
   }
 
   TileUiState getTileState({required int rowIndex, required int colIndex}) {
     return state.tileStates[rowIndex][colIndex];
-  }
-
-  Future<bool> destroyDieWithValue({
-    required int colIndex,
-    required int valueToDestroy,
-  }) async {
-    final tiles = state.tileStates;
-    final targets = <TileUiState>[];
-    for (int r = 0; r < 3; r++) {
-      final tile = tiles[r][colIndex];
-      if (tile.value == valueToDestroy) {
-        targets.add(tile);
-      }
-    }
-    if (targets.isEmpty) return false;
-    for (var tile in targets) {
-      tile.isDestroying = true;
-      state.filledTiles -= 1;
-    }
-    notifyListeners(); // Atualiza UI para iniciar animação
-    await Future.delayed(const Duration(milliseconds: 1100));
-    for (var tile in targets) {
-      tile.value = null;
-      tile.isDestroying = false;
-      tile.status = TileStatus.single;
-    }
-    _evaluateColumn(colIndex);
-    notifyListeners();
-    return true;
   }
 
   MoveResult placeDice({
@@ -75,10 +50,44 @@ class BoardController extends ChangeNotifier {
     _evaluateColumn(colIndex);
 
     notifyListeners();
-    if (state.filledTiles == 9) {
-      return MoveResult.matchEnded;
-    }
+    if (state.filledTiles == 9) return MoveResult.matchEnded;
+
     return MoveResult.placed;
+  }
+
+  Future<bool> destroyDieWithValue({
+    required int colIndex,
+    required int valueToDestroy,
+  }) async {
+    final tiles = state.tileStates;
+    final targets = <TileUiState>[];
+
+    for (int r = 0; r < 3; r++) {
+      final tile = tiles[r][colIndex];
+      if (tile.value == valueToDestroy) targets.add(tile);
+    }
+
+    if (targets.isEmpty) return false;
+
+    // Fase 1: Animação
+    for (var tile in targets) {
+      tile.isDestroying = true;
+      state.filledTiles -= 1;
+    }
+    notifyListeners();
+
+    await Future.delayed(const Duration(milliseconds: 1100));
+    if (_isDisposed) return false;
+
+    // Fase 2: Limpeza
+    for (var tile in targets) {
+      tile.value = null;
+      tile.isDestroying = false;
+      tile.status = TileStatus.single;
+    }
+    _evaluateColumn(colIndex);
+    notifyListeners();
+    return true;
   }
 
   void _evaluateColumn(int colIndex) {
@@ -91,13 +100,11 @@ class BoardController extends ChangeNotifier {
       final val = tile.value;
       if (val != null) {
         newColScore += val;
-
         if (valueGroups[val] == null) valueGroups[val] = [];
         valueGroups[val]!.add(tile);
       }
     }
 
-    // Lógica de Highlight (Amarelo)
     valueGroups.forEach((val, list) {
       final status = list.length > 1 ? TileStatus.stacked : TileStatus.single;
       for (var tile in list) {
