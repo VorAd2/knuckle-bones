@@ -5,13 +5,15 @@ class TileUiState {
   final int rowIndex;
   final int columnIndex;
   final VoidCallback onSelected;
-  TileStatus role;
+  TileStatus status;
   int? value;
+  bool isDestroying;
 
   TileUiState({
-    required this.role,
+    required this.status,
     required this.rowIndex,
     required this.columnIndex,
     required this.onSelected,
+    this.isDestroying = false,
   });
 }

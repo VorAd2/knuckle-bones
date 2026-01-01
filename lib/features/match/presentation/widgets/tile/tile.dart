@@ -18,7 +18,7 @@ class Tile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final diceColors = Theme.of(context).extension<DiceColors>();
+    final diceColors = Theme.of(context).extension<DiceColors>()!;
     return Material(
       color: cs.surfaceBright,
       borderRadius: BorderRadius.circular(12),
@@ -30,13 +30,25 @@ class Tile extends StatelessWidget {
           child: ListenableBuilder(
             listenable: boardController,
             builder: (context, _) {
-              final value = getState().value;
-              return value == null
-                  ? SizedBox.shrink()
-                  : _getIconForValue(
-                      val: value,
-                      color: _getColor(cs: cs, role: getState().role),
-                    );
+              final state = getState();
+              final value = state.value;
+              return AnimatedScale(
+                duration: const Duration(
+                  milliseconds: 1000,
+                ), // Um pouco menor que o await do controller
+                curve: Curves
+                    .easeInOutBack, // Efeito de "pulo" antes de sumir fica legal
+                scale: state.isDestroying ? 0.0 : 1.0,
+                child: value == null
+                    ? const SizedBox.shrink()
+                    : _getIconForValue(
+                        val: value,
+                        // Se destruindo fica VERMELHO (Error color), senão usa lógica normal
+                        color: state.isDestroying
+                            ? diceColors.redDice!
+                            : _getColor(cs: cs, status: state.status),
+                      ),
+              );
             },
           ),
         ),
@@ -44,8 +56,8 @@ class Tile extends StatelessWidget {
     );
   }
 
-  Color _getColor({required ColorScheme cs, required TileStatus role}) {
-    switch (role) {
+  Color _getColor({required ColorScheme cs, required TileStatus status}) {
+    switch (status) {
       case TileStatus.single:
         return cs.onSurfaceVariant;
       case TileStatus.stacked:

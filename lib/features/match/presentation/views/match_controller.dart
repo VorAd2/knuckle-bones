@@ -57,13 +57,21 @@ class MatchController extends ChangeNotifier {
     required bool isTopBoard,
     required int row,
     required int col,
-  }) {
+  }) async {
     if (!_allowInteraction(isTopBoard)) return;
     final result = _triggerMove(isTopBoard: isTopBoard, row: row, col: col);
     switch (result) {
       case MoveResult.occupied:
         break;
       case MoveResult.placed:
+        final targetBoard = isTopBoard
+            ? bottomBoardController
+            : topBoardController;
+        final diceValue = state.currentOracleValue;
+        await targetBoard.destroyDieWithValue(
+          colIndex: col,
+          valueToDestroy: diceValue,
+        );
         _nextTurn();
         break;
       case MoveResult.matchEnded:

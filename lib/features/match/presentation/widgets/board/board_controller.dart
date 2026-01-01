@@ -18,7 +18,7 @@ class BoardController extends ChangeNotifier {
     List<List<TileUiState>> grid = List.generate(3, (rowIndex) {
       return List.generate(3, (colIndex) {
         return TileUiState(
-          role: TileStatus.single,
+          status: TileStatus.single,
           rowIndex: rowIndex,
           columnIndex: colIndex,
           onSelected: () =>
@@ -33,6 +33,35 @@ class BoardController extends ChangeNotifier {
     return state.tileStates[rowIndex][colIndex];
   }
 
+  Future<bool> destroyDieWithValue({
+    required int colIndex,
+    required int valueToDestroy,
+  }) async {
+    final tiles = state.tileStates;
+    final targets = <TileUiState>[];
+    for (int r = 0; r < 3; r++) {
+      final tile = tiles[r][colIndex];
+      if (tile.value == valueToDestroy) {
+        targets.add(tile);
+      }
+    }
+    if (targets.isEmpty) return false;
+    for (var tile in targets) {
+      tile.isDestroying = true;
+      state.filledTiles -= 1;
+    }
+    notifyListeners(); // Atualiza UI para iniciar animação
+    await Future.delayed(const Duration(milliseconds: 1100));
+    for (var tile in targets) {
+      tile.value = null;
+      tile.isDestroying = false;
+      tile.status = TileStatus.single;
+    }
+    _evaluateColumn(colIndex);
+    notifyListeners();
+    return true;
+  }
+
   MoveResult placeDice({
     required int rowIndex,
     required int colIndex,
@@ -43,7 +72,7 @@ class BoardController extends ChangeNotifier {
 
     tileState.value = diceValue;
     state.filledTiles += 1;
-    _evaluateMyColumn(colIndex, diceValue);
+    _evaluateColumn(colIndex);
 
     notifyListeners();
     if (state.filledTiles == 9) {
@@ -52,23 +81,29 @@ class BoardController extends ChangeNotifier {
     return MoveResult.placed;
   }
 
-  void _evaluateMyColumn(int colIndex, int diceValue) {
+  void _evaluateColumn(int colIndex) {
     final tiles = state.tileStates;
-    final paired = <TileUiState>[];
+    final Map<int, List<TileUiState>> valueGroups = {};
     int newColScore = 0;
 
-    for (var row in tiles) {
-      final member = row[colIndex];
-      newColScore += member.value ?? 0;
-      if (member.value == diceValue) {
-        paired.add(member);
+    for (int row = 0; row < 3; row++) {
+      final tile = tiles[row][colIndex];
+      final val = tile.value;
+      if (val != null) {
+        newColScore += val;
+
+        if (valueGroups[val] == null) valueGroups[val] = [];
+        valueGroups[val]!.add(tile);
       }
     }
-    if (paired.length > 1) {
-      for (var tile in paired) {
-        tile.role = TileStatus.stacked;
+
+    // Lógica de Highlight (Amarelo)
+    valueGroups.forEach((val, list) {
+      final status = list.length > 1 ? TileStatus.stacked : TileStatus.single;
+      for (var tile in list) {
+        tile.status = status;
       }
-    }
+    });
 
     state.scores[colIndex] = newColScore;
   }
