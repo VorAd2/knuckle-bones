@@ -99,6 +99,28 @@ class _ProfileViewState extends State<ProfileView> {
     }
   }
 
+  void _showHistory() {
+    MyDialog.alert(
+      context: context,
+      titleString: 'Oops',
+      contentString: 'This feature has not yet been implemented',
+    );
+  }
+
+  Future<void> _onLogout() async {
+    final shouldLogout = await MyDialog.show(
+      context: context,
+      titleString: 'Log out',
+      contentString: 'Are you sure you want to log out of your account?',
+    );
+    if (mounted && shouldLogout) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const AuthGateView()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -128,7 +150,7 @@ class _ProfileViewState extends State<ProfileView> {
               icon: Icons.history,
               text: 'Match history',
               width: double.infinity,
-              onClick: () {},
+              onClick: () => _showHistory(),
             ),
             const SizedBox(height: 48),
             ThreeDButton.icon(
@@ -140,20 +162,7 @@ class _ProfileViewState extends State<ProfileView> {
                 Colors.black,
                 0.3,
               ),
-              onClick: () async {
-                final shouldLogout = await MyDialog.show(
-                  context: context,
-                  titleString: 'Log out',
-                  contentString:
-                      'Are you sure you want to log out of your account?',
-                );
-                if (context.mounted && shouldLogout) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AuthGateView()),
-                  );
-                }
-              },
+              onClick: () => _onLogout(),
             ),
           ],
         ),

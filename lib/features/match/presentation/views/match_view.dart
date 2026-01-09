@@ -47,7 +47,7 @@ class _MatchViewState extends State<MatchView> {
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
-        if (_controller.state.isEndGame && context.mounted) {
+        if (context.mounted && _controller.state.isEndGame) {
           Navigator.of(context).pop();
           return;
         }
@@ -57,7 +57,7 @@ class _MatchViewState extends State<MatchView> {
           contentString:
               'Sure you want to quit the match? The progress will be lost.',
         );
-        if (shouldQuit && context.mounted) {
+        if (context.mounted && shouldQuit) {
           Navigator.of(context).pop();
         }
       },
