@@ -34,15 +34,6 @@ class AppIcons {
     );
   }
 
-  static Widget eyeClosed({double size = 24, Color? color}) {
-    return SvgPicture.asset(
-      'assets/icons/others/eye_closed.svg',
-      width: size,
-      height: size,
-      colorFilter: _getColorFilter(color),
-    );
-  }
-
   static Widget peopleArrows({double size = 24, Color? color}) {
     return SvgPicture.asset(
       'assets/icons/others/people_arrows.svg',
