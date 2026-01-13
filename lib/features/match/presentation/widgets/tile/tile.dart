@@ -7,12 +7,14 @@ import 'package:knuckle_bones/features/match/types/match_types.dart';
 
 class Tile extends StatelessWidget {
   final BoardController boardController;
-  final TileUiState Function() getState;
+  final TileUiState state;
+  final bool isInteractive;
 
   const Tile({
     super.key,
     required this.boardController,
-    required this.getState,
+    required this.state,
+    required this.isInteractive,
   });
 
   @override
@@ -25,12 +27,11 @@ class Tile extends StatelessWidget {
       elevation: 2.5,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: getState().onSelected,
+        onTap: isInteractive ? state.onSelected : null,
         child: Center(
           child: ListenableBuilder(
             listenable: boardController,
             builder: (context, _) {
-              final state = getState();
               final value = state.value;
               return AnimatedScale(
                 duration: const Duration(

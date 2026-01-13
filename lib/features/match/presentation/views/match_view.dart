@@ -122,7 +122,11 @@ class _PlayerSection extends StatelessWidget {
               player: player,
             ),
             Expanded(
-              child: Board(controller: player.boardController, forTop: forTop),
+              child: Board(
+                controller: player.boardController,
+                isInteractive: !forTop,
+                forTop: forTop,
+              ),
             ),
           ],
         ),

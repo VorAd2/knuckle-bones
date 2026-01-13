@@ -5,7 +5,14 @@ import 'package:knuckle_bones/features/match/presentation/widgets/tile/tile.dart
 class Board extends StatelessWidget {
   final BoardController controller;
   final bool forTop;
-  const Board({super.key, required this.controller, required this.forTop});
+  final bool isInteractive;
+
+  const Board({
+    super.key,
+    required this.controller,
+    required this.forTop,
+    required this.isInteractive,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +26,7 @@ class Board extends StatelessWidget {
             child: _ScoreRow(controller),
           ),
         ],
-        _TileGrid(controller),
+        _TileGrid(controller: controller, isInteractive: isInteractive),
         if (forTop) ...[
           Transform.translate(
             offset: const Offset(0, textOffset),
@@ -33,7 +40,8 @@ class Board extends StatelessWidget {
 
 class _TileGrid extends StatelessWidget {
   final BoardController controller;
-  const _TileGrid(this.controller);
+  final bool isInteractive;
+  const _TileGrid({required this.controller, required this.isInteractive});
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +60,11 @@ class _TileGrid extends StatelessWidget {
           final colIndex = index % 3;
           return Tile(
             boardController: controller,
-            getState: () =>
-                controller.getTileState(rowIndex: rowIndex, colIndex: colIndex),
+            state: controller.getTileState(
+              rowIndex: rowIndex,
+              colIndex: colIndex,
+            ),
+            isInteractive: isInteractive,
           );
         },
       ),
