@@ -34,16 +34,14 @@ class Tile extends StatelessWidget {
               final value = state.value;
               return AnimatedScale(
                 duration: const Duration(
-                  milliseconds: 1000,
+                  milliseconds: 1200,
                 ), // Um pouco menor que o await do controller
-                curve: Curves
-                    .easeInOutBack, // Efeito de "pulo" antes de sumir fica legal
+                curve: Curves.easeInOut,
                 scale: state.isDestroying ? 0.0 : 1.0,
                 child: value == null
                     ? const SizedBox.shrink()
                     : _getIconForValue(
                         val: value,
-                        // Se destruindo fica VERMELHO (Error color), senão usa lógica normal
                         color: state.isDestroying
                             ? diceColors.redDice!
                             : _getColor(cs: cs, status: state.status),

@@ -69,17 +69,15 @@ class BoardController extends ChangeNotifier {
 
     if (targets.isEmpty) return false;
 
-    // Fase 1: Animação
     for (var tile in targets) {
       tile.isDestroying = true;
       state.filledTiles -= 1;
     }
     notifyListeners();
 
-    await Future.delayed(const Duration(milliseconds: 1100));
+    await Future.delayed(const Duration(milliseconds: 1300));
     if (_isDisposed) return false;
 
-    // Fase 2: Limpeza
     for (var tile in targets) {
       tile.value = null;
       tile.isDestroying = false;
