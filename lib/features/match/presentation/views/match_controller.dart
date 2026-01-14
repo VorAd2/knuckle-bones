@@ -78,7 +78,9 @@ class MatchController extends ChangeNotifier {
     required int row,
     required int col,
   }) async {
-    if (!isMyTurn || state.isRolling || state.isEndGame) return;
+    if (!isMyTurn || state.isRolling || state.isDestroying || state.isEndGame) {
+      return;
+    }
 
     final diceValue = state.currentOracleValue;
     final result = localPlayer.boardController.placeDice(
@@ -86,15 +88,21 @@ class MatchController extends ChangeNotifier {
       colIndex: col,
       diceValue: diceValue,
     );
-    if (result == MoveResult.placed) {
-      await remotePlayer.boardController.destroyDieWithValue(
-        colIndex: col,
-        valueToDestroy: diceValue,
-      );
-      if (_isDisposed) return;
-      _nextTurn();
-    } else if (result == MoveResult.matchEnded) {
-      _triggerEndGame();
+    switch (result) {
+      case .occupied:
+        return;
+      case .placed:
+        state.isDestroying = true;
+        await remotePlayer.boardController.destroyDieWithValue(
+          colIndex: col,
+          valueToDestroy: diceValue,
+        );
+        if (_isDisposed) return;
+        state.isDestroying = false;
+        _nextTurn();
+        break;
+      case .matchEnded:
+        _triggerEndGame();
     }
   }
 
