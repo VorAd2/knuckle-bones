@@ -13,25 +13,25 @@ class MatchView extends StatefulWidget {
 }
 
 class _MatchViewState extends State<MatchView> {
-  late final MatchController _controller = MatchController();
+  late final MatchController _matchController = MatchController();
 
   @override
   void initState() {
     super.initState();
-    _controller.addListener(_onStateChanged);
+    _matchController.addListener(_onStateChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _controller.startMatch();
+      _matchController.startMatch();
     });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _matchController.dispose();
     super.dispose();
   }
 
   void _onStateChanged() {
-    if (_controller.state.isEndGame) {
+    if (_matchController.state.isEndGame) {
       if (!mounted) return;
       MyDialog.alert(
         context: context,
@@ -47,7 +47,7 @@ class _MatchViewState extends State<MatchView> {
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
-        if (context.mounted && _controller.state.isEndGame) {
+        if (context.mounted && _matchController.state.isEndGame) {
           Navigator.of(context).pop();
           return;
         }
@@ -70,8 +70,8 @@ class _MatchViewState extends State<MatchView> {
                   alignment: Alignment.bottomCenter,
                   child: _PlayerSection(
                     forTop: true,
-                    matchController: _controller,
-                    player: _controller.remotePlayer,
+                    matchController: _matchController,
+                    player: _matchController.remotePlayer,
                   ),
                 ),
               ),
@@ -83,8 +83,8 @@ class _MatchViewState extends State<MatchView> {
                   alignment: Alignment.topCenter,
                   child: _PlayerSection(
                     forTop: false,
-                    matchController: _controller,
-                    player: _controller.localPlayer,
+                    matchController: _matchController,
+                    player: _matchController.localPlayer,
                   ),
                 ),
               ),

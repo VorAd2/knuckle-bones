@@ -40,7 +40,7 @@ class Oracle extends StatelessWidget {
                     child: FastSpinner(color: cs.primary),
                   )
                 : AppIcons.dice(
-                    face: matchController.state.currentOracleValue,
+                    face: player.oracleValue,
                     size: 42,
                     color: cs.onSurfaceVariant,
                   ),

@@ -14,12 +14,13 @@ class MatchController extends ChangeNotifier {
   Timer? _rollingTimer;
   bool _isDisposed = false;
 
-  bool get isMyTurn => state.currentTurnPlayerId == localPlayer.id;
-
   MatchController() {
     state = MatchUiState();
     _initializePlayers();
   }
+
+  bool get isMyTurn => state.currentTurnPlayerId == localPlayer.id;
+  MatchPlayer get currentPlayer => isMyTurn ? localPlayer : remotePlayer;
 
   @override
   void dispose() {
@@ -57,21 +58,27 @@ class MatchController extends ChangeNotifier {
 
   void _nextTurn({bool isFirstTurn = false}) {
     if (!isFirstTurn) _toggleTurnPlayer();
-
     state.isRolling = true;
     notifyListeners();
+    _roll();
+  }
 
+  void _roll() {
+    final nextDice = Random().nextInt(6) + 1;
     _rollingTimer?.cancel();
     _rollingTimer = Timer(const Duration(milliseconds: 2000), () {
-      final nextDice = Random().nextInt(6) + 1;
       state.isRolling = false;
-      state.currentOracleValue = nextDice;
+      _setPlayerOracleValue(nextDice);
       notifyListeners();
 
       if (!isMyTurn) {
         _simulateRemoteInteraction();
       }
     });
+  }
+
+  void _setPlayerOracleValue(int value) {
+    currentPlayer.oracleValue = value;
   }
 
   Future<void> _handleLocalInteraction({
@@ -82,7 +89,7 @@ class MatchController extends ChangeNotifier {
       return;
     }
 
-    final diceValue = state.currentOracleValue;
+    final diceValue = currentPlayer.oracleValue;
     final result = localPlayer.boardController.placeDice(
       rowIndex: row,
       colIndex: col,
@@ -109,7 +116,7 @@ class MatchController extends ChangeNotifier {
   Future<void> _simulateRemoteInteraction() async {
     await Future.delayed(const Duration(seconds: 1));
     if (_isDisposed) return;
-    final diceValue = state.currentOracleValue;
+    final diceValue = currentPlayer.oracleValue;
     int col = Random().nextInt(3);
     int row = Random().nextInt(3);
     final result = remotePlayer.boardController.placeDice(
