@@ -164,7 +164,12 @@ class _Shrine extends StatelessWidget {
           if (forTop) ...[
             const PlayerAvatar(),
             const SizedBox(height: 4),
-            Text(player.name, style: TextStyle(fontSize: 9)),
+            Text(
+              player.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 9),
+            ),
             const SizedBox(height: 36),
             Oracle(
               forTop: forTop,
@@ -180,7 +185,12 @@ class _Shrine extends StatelessWidget {
             const SizedBox(height: 36),
             const PlayerAvatar(),
             const SizedBox(height: 4),
-            Text(player.name, style: TextStyle(fontSize: 9)),
+            Text(
+              player.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 9),
+            ),
           ],
         ],
       ),
