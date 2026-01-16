@@ -2,9 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:knuckle_bones/features/match/domain/match_player.dart'; // Importe a nova entidade
+import 'package:knuckle_bones/features/match/domain/match_player.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/board/board_controller.dart';
-import 'package:knuckle_bones/features/match/types/match_types.dart';
 import 'match_ui_state.dart';
 
 class MatchController extends ChangeNotifier {
@@ -95,6 +94,7 @@ class MatchController extends ChangeNotifier {
       colIndex: col,
       diceValue: diceValue,
     );
+
     switch (result) {
       case .occupied:
         return;
@@ -116,6 +116,7 @@ class MatchController extends ChangeNotifier {
   Future<void> _simulateRemoteInteraction() async {
     await Future.delayed(const Duration(seconds: 1));
     if (_isDisposed) return;
+
     final diceValue = currentPlayer.oracleValue;
     int col = Random().nextInt(3);
     int row = Random().nextInt(3);
@@ -124,18 +125,20 @@ class MatchController extends ChangeNotifier {
       colIndex: col,
       diceValue: diceValue,
     );
-    if (result == MoveResult.placed) {
-      await localPlayer.boardController.destroyDieWithValue(
-        colIndex: col,
-        valueToDestroy: diceValue,
-      );
-      if (_isDisposed) return;
-      _nextTurn();
-    } else if (result == MoveResult.matchEnded) {
-      _triggerEndGame();
-    } else {
-      // Maquina erra, tenta denovo
-      _simulateRemoteInteraction();
+
+    switch (result) {
+      case .placed:
+        await localPlayer.boardController.destroyDieWithValue(
+          colIndex: col,
+          valueToDestroy: diceValue,
+        );
+        if (_isDisposed) return;
+        _nextTurn();
+      case .matchEnded:
+        _triggerEndGame();
+      case .occupied:
+        //maquina erra, tenta denovo
+        _simulateRemoteInteraction();
     }
   }
 

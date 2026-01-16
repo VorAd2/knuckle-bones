@@ -50,9 +50,35 @@ class BoardController extends ChangeNotifier {
     _evaluateColumn(colIndex);
 
     notifyListeners();
-    if (state.filledTiles == 9) return MoveResult.matchEnded;
 
+    if (state.filledTiles == 9) return MoveResult.matchEnded;
     return MoveResult.placed;
+  }
+
+  void _evaluateColumn(int colIndex) {
+    final tiles = state.tileStates;
+    final Map<int, List<TileUiState>> families = {};
+    int newColScore = 0;
+
+    for (int row = 0; row < 3; row++) {
+      final tile = tiles[row][colIndex];
+      final value = tile.value;
+      if (value != null) {
+        if (families[value] == null) families[value] = [];
+        families[value]!.add(tile);
+      }
+    }
+
+    families.forEach((value, members) {
+      final length = members.length;
+      final status = length > 1 ? TileStatus.stacked : TileStatus.single;
+      for (var tile in members) {
+        tile.status = status;
+      }
+      newColScore += (length * value) * length;
+    });
+
+    state.scores[colIndex] = newColScore;
   }
 
   Future<bool> destroyDieWithValue({
@@ -66,13 +92,12 @@ class BoardController extends ChangeNotifier {
       final tile = tiles[r][colIndex];
       if (tile.value == valueToDestroy) targets.add(tile);
     }
-
     if (targets.isEmpty) return false;
-
     for (var tile in targets) {
       tile.isDestroying = true;
       state.filledTiles -= 1;
     }
+
     notifyListeners();
 
     await Future.delayed(const Duration(milliseconds: 1300));
@@ -84,32 +109,8 @@ class BoardController extends ChangeNotifier {
       tile.status = TileStatus.single;
     }
     _evaluateColumn(colIndex);
+
     notifyListeners();
     return true;
-  }
-
-  void _evaluateColumn(int colIndex) {
-    final tiles = state.tileStates;
-    final Map<int, List<TileUiState>> valueGroups = {};
-    int newColScore = 0;
-
-    for (int row = 0; row < 3; row++) {
-      final tile = tiles[row][colIndex];
-      final val = tile.value;
-      if (val != null) {
-        newColScore += val;
-        if (valueGroups[val] == null) valueGroups[val] = [];
-        valueGroups[val]!.add(tile);
-      }
-    }
-
-    valueGroups.forEach((val, list) {
-      final status = list.length > 1 ? TileStatus.stacked : TileStatus.single;
-      for (var tile in list) {
-        tile.status = status;
-      }
-    });
-
-    state.scores[colIndex] = newColScore;
   }
 }
