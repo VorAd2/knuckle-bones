@@ -33,7 +33,7 @@ class MatchController extends ChangeNotifier {
   void _initializePlayers() {
     localPlayer = MatchPlayer(
       id: 'p_local',
-      name: 'Ada LovelaceeeeAAAAA',
+      name: 'Ada LovelaceeeeBBBBWWWWWWWWWWW',
       boardController: BoardController(
         onTileSelected: ({required rowIndex, required colIndex}) =>
             _handleLocalInteraction(row: rowIndex, col: colIndex),

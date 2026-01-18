@@ -8,6 +8,8 @@ class BoardController extends ChangeNotifier {
   late final BoardUiState state;
   bool _isDisposed = false;
 
+  int get boardFullScore => state.boardFullScore;
+
   @override
   void dispose() {
     _isDisposed = true;

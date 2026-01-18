@@ -3,6 +3,7 @@ import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
 import 'package:knuckle_bones/features/match/domain/match_player.dart';
 import 'package:knuckle_bones/features/match/presentation/views/match_controller.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/board/board.dart';
+import 'package:knuckle_bones/features/match/presentation/widgets/end_dialog/end_dialog.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/oracle/oracle.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/player_avatar/player_avatar.dart';
 
@@ -14,6 +15,7 @@ class MatchView extends StatefulWidget {
 
 class _MatchViewState extends State<MatchView> {
   late final MatchController _matchController = MatchController();
+  bool _isQuitting = false;
 
   @override
   void initState() {
@@ -33,12 +35,38 @@ class _MatchViewState extends State<MatchView> {
   void _onStateChanged() {
     if (_matchController.state.isEndGame) {
       if (!mounted) return;
-      MyDialog.alert(
-        context: context,
-        titleString: 'End Game',
-        contentString: 'We have a winner',
-      );
+      _showEndDialog();
     }
+  }
+
+  void _showEndDialog() {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: 'Result',
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (dialogContext, _, _) => Center(
+        child: EndGameDialog(
+          localPlayer: _matchController.localPlayer,
+          remotePlayer: _matchController.remotePlayer,
+          onBackHome: () {
+            _isQuitting = true;
+            Navigator.pop(dialogContext);
+            Navigator.pop(context);
+          },
+          onClose: () {
+            Navigator.pop(dialogContext);
+          },
+        ),
+      ),
+      transitionBuilder: (context, anim, secondaryAnim, child) {
+        if (_isQuitting) return SizedBox.shrink();
+        return Transform.scale(
+          scale: Curves.elasticOut.transform(anim.value),
+          child: Opacity(opacity: anim.value, child: child),
+        );
+      },
+    );
   }
 
   @override
@@ -72,6 +100,7 @@ class _MatchViewState extends State<MatchView> {
                     forTop: true,
                     matchController: _matchController,
                     player: _matchController.remotePlayer,
+                    showEndDialog: _showEndDialog,
                   ),
                 ),
               ),
@@ -85,6 +114,7 @@ class _MatchViewState extends State<MatchView> {
                     forTop: false,
                     matchController: _matchController,
                     player: _matchController.localPlayer,
+                    showEndDialog: _showEndDialog,
                   ),
                 ),
               ),
@@ -101,10 +131,13 @@ class _PlayerSection extends StatelessWidget {
   final MatchController matchController;
   final MatchPlayer player;
 
+  final VoidCallback showEndDialog;
+
   const _PlayerSection({
     required this.forTop,
     required this.matchController,
     required this.player,
+    required this.showEndDialog,
   });
 
   @override
@@ -120,6 +153,7 @@ class _PlayerSection extends StatelessWidget {
               forTop: forTop,
               matchController: matchController,
               player: player,
+              showEndDialog: showEndDialog,
             ),
             Expanded(
               child: Board(
@@ -148,10 +182,13 @@ class _Shrine extends StatelessWidget {
   final MatchController matchController;
   final MatchPlayer player;
 
+  final VoidCallback showEndDialog;
+
   const _Shrine({
     required this.forTop,
     required this.matchController,
     required this.player,
+    required this.showEndDialog,
   });
 
   @override
