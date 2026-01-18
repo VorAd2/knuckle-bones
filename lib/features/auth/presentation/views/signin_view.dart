@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:knuckle_bones/features/auth/presentation/signup_view.dart';
+import 'package:knuckle_bones/features/auth/presentation/views/signup_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_auth_row.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/confirm_button.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/my_app_bar.dart';
+import 'package:knuckle_bones/features/auth/presentation/widgets/auth_confirm_button.dart';
+import 'package:knuckle_bones/core/presentation/widgets/my_app_bar.dart';
 import 'package:knuckle_bones/features/home/home_view.dart';
 
 class SigninView extends StatefulWidget {
@@ -42,11 +42,32 @@ class _SigninViewState extends State<SigninView> {
 
   void _onGithubAuth() {}
 
+  List<AuthFieldConfig> _getConfigs() {
+    return [
+      AuthFieldConfig(
+        controller: _emailFormController,
+        label: 'Email',
+        icon: const Icon(Icons.mail_lock_rounded),
+        validator: (v) => !v!.contains('@') ? 'Invalid email' : null,
+        isPassword: false,
+        keyboardType: TextInputType.emailAddress,
+      ),
+      AuthFieldConfig(
+        controller: _passwordFormController,
+        label: 'Password',
+        icon: const Icon(Icons.key_rounded),
+        validator: (v) => v!.length < 6 ? 'Min 6 chars' : null,
+        isPassword: true,
+        keyboardType: TextInputType.visiblePassword,
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: MyAppBar(title: 'Sign up'),
+      appBar: const MyAppBar(title: 'Sign up'),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) => SingleChildScrollView(
@@ -58,20 +79,35 @@ class _SigninViewState extends State<SigninView> {
               child: IntrinsicHeight(
                 child: Column(
                   children: [
-                    _buildGenericAvatar(cs),
+                    CircleAvatar(
+                      radius: 70,
+                      backgroundColor: cs.primaryContainer,
+                      child: Icon(
+                        Icons.person,
+                        size: 70,
+                        color: cs.onPrimaryContainer.withAlpha(127),
+                      ),
+                    ),
                     const SizedBox(height: 48),
                     AuthForm(formKey: _formKey, configs: _getConfigs()),
                     const SizedBox(height: 32),
-                    ConfirmButton(onSubmit: _onSubmit),
+                    AuthConfirmButton(onSubmit: _onSubmit),
                     const SizedBox(height: 32),
-                    Text('Or signin with', textAlign: TextAlign.center),
+                    const Text('Or signin with', textAlign: TextAlign.center),
                     const SizedBox(height: 14),
                     AlternativeAuthRow(
                       onGoogleAuth: _onGoogleAuth,
                       onGithubAuth: _onGithubAuth,
                     ),
                     const Spacer(),
-                    _buildSignupNavigate(),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (_) => SignupView()),
+                        );
+                      },
+                      child: const Text("Don't have an account yet?"),
+                    ),
                     const SizedBox(height: 20),
                   ],
                 ),
@@ -80,46 +116,6 @@ class _SigninViewState extends State<SigninView> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildGenericAvatar(ColorScheme cs) {
-    return CircleAvatar(
-      radius: 60,
-      backgroundColor: cs.primaryContainer,
-      child: Icon(Icons.person, size: 64, color: cs.onPrimaryContainer),
-    );
-  }
-
-  List<AuthFieldConfig> _getConfigs() {
-    return [
-      AuthFieldConfig(
-        controller: _emailFormController,
-        label: 'Email',
-        icon: Icons.mail_lock_rounded,
-        validator: (v) => !v!.contains('@') ? 'Invalid email' : null,
-        isPassword: false,
-        keyboardType: TextInputType.emailAddress,
-      ),
-      AuthFieldConfig(
-        controller: _passwordFormController,
-        label: 'Password',
-        icon: Icons.key_rounded,
-        validator: (v) => v!.length < 6 ? 'Min 6 chars' : null,
-        isPassword: true,
-        keyboardType: TextInputType.visiblePassword,
-      ),
-    ];
-  }
-
-  Widget _buildSignupNavigate() {
-    return TextButton(
-      onPressed: () {
-        Navigator.of(
-          context,
-        ).pushReplacement(MaterialPageRoute(builder: (_) => SignupView()));
-      },
-      child: Text("Don't have an account yet?"),
     );
   }
 }

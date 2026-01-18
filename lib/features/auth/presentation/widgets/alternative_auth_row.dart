@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
 
 class AlternativeAuthRow extends StatelessWidget {
   final VoidCallback onGoogleAuth;
@@ -18,34 +18,34 @@ class AlternativeAuthRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       spacing: 16,
       children: [
-        _socialButton(
-          icon: SvgPicture.asset(
-            'assets/icons/google.svg',
-            width: 24,
-            height: 24,
-          ),
+        _SocialButton(
+          icon: AppIcons.google(size: 24),
           label: 'Google',
           callback: onGoogleAuth,
         ),
-        _socialButton(
-          icon: SvgPicture.asset(
-            'assets/icons/github.svg',
-            width: 32,
-            height: 32,
-            colorFilter: ColorFilter.mode(cs.onSurface, BlendMode.srcIn),
-          ),
+        _SocialButton(
+          icon: AppIcons.github(size: 32, color: cs.onSurface),
           label: 'GitHub',
           callback: onGithubAuth,
         ),
       ],
     );
   }
+}
 
-  Widget _socialButton({
-    required Widget icon,
-    required String label,
-    required VoidCallback callback,
-  }) {
+class _SocialButton extends StatelessWidget {
+  final Widget icon;
+  final String label;
+  final VoidCallback callback;
+
+  const _SocialButton({
+    required this.icon,
+    required this.label,
+    required this.callback,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return OutlinedButton.icon(
       onPressed: callback,
       icon: icon,

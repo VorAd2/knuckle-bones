@@ -10,22 +10,36 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  int _currentIndex = 0;
-  final List<Widget> _views = const [LobbyView(), ProfileView()];
+  final _tabIndexNotifier = ValueNotifier<int>(0);
+  static const _profileTabIndex = 1;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _views),
+      body: ValueListenableBuilder(
+        valueListenable: _tabIndexNotifier,
+        builder: (context, currentIndex, _) {
+          return IndexedStack(
+            index: currentIndex,
+            children: [
+              const LobbyView(),
+              ProfileView(
+                tabIndexNotifier: _tabIndexNotifier,
+                profileTabIndex: _profileTabIndex,
+              ),
+            ],
+          );
+        },
+      ),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
+        selectedIndex: _tabIndexNotifier.value,
         onDestinationSelected: (index) {
           setState(() {
-            _currentIndex = index;
+            _tabIndexNotifier.value = index;
           });
         },
         destinations: [
-          NavigationDestination(icon: _getIcon(0), label: 'Play'),
+          NavigationDestination(icon: _getIcon(0), label: 'Lobby'),
           NavigationDestination(icon: _getIcon(1), label: 'Profile'),
         ],
       ),
@@ -35,14 +49,12 @@ class _HomeViewState extends State<HomeView> {
   Icon _getIcon(int destinationIndex) {
     return switch (destinationIndex) {
       0 => Icon(
-        destinationIndex == _currentIndex
+        0 == _tabIndexNotifier.value
             ? Icons.videogame_asset
             : Icons.videogame_asset_outlined,
       ),
       1 => Icon(
-        destinationIndex == _currentIndex
-            ? Icons.person_2
-            : Icons.person_2_outlined,
+        1 == _tabIndexNotifier.value ? Icons.person_2 : Icons.person_2_outlined,
       ),
       _ => Icon(Icons.error),
     };
