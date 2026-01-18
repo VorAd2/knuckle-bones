@@ -3,7 +3,7 @@ import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
 import 'package:knuckle_bones/features/match/domain/match_player.dart';
 import 'package:knuckle_bones/features/match/presentation/views/match_controller.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/board/board.dart';
-import 'package:knuckle_bones/features/match/presentation/widgets/end_dialog/end_dialog.dart';
+import 'package:knuckle_bones/features/match/presentation/widgets/end_game_dialog/end_game_dialog.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/oracle/oracle.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/player_avatar/player_avatar.dart';
 
