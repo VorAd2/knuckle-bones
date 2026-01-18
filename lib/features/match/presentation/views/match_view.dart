@@ -100,7 +100,6 @@ class _MatchViewState extends State<MatchView> {
                     forTop: true,
                     matchController: _matchController,
                     player: _matchController.remotePlayer,
-                    showEndDialog: _showEndDialog,
                   ),
                 ),
               ),
@@ -114,7 +113,6 @@ class _MatchViewState extends State<MatchView> {
                     forTop: false,
                     matchController: _matchController,
                     player: _matchController.localPlayer,
-                    showEndDialog: _showEndDialog,
                   ),
                 ),
               ),
@@ -131,13 +129,10 @@ class _PlayerSection extends StatelessWidget {
   final MatchController matchController;
   final MatchPlayer player;
 
-  final VoidCallback showEndDialog;
-
   const _PlayerSection({
     required this.forTop,
     required this.matchController,
     required this.player,
-    required this.showEndDialog,
   });
 
   @override
@@ -153,7 +148,6 @@ class _PlayerSection extends StatelessWidget {
               forTop: forTop,
               matchController: matchController,
               player: player,
-              showEndDialog: showEndDialog,
             ),
             Expanded(
               child: Board(
@@ -182,13 +176,10 @@ class _Shrine extends StatelessWidget {
   final MatchController matchController;
   final MatchPlayer player;
 
-  final VoidCallback showEndDialog;
-
   const _Shrine({
     required this.forTop,
     required this.matchController,
     required this.player,
-    required this.showEndDialog,
   });
 
   @override
