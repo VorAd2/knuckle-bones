@@ -99,18 +99,26 @@ class MatchController extends ChangeNotifier {
       case .occupied:
         return;
       case .placed:
-        state.isDestroying = true;
-        await remotePlayer.boardController.destroyDieWithValue(
-          colIndex: col,
-          valueToDestroy: diceValue,
-        );
-        if (_isDisposed) return;
-        state.isDestroying = false;
+        await _triggerRedDie(col: col, diceValue: diceValue);
         _nextTurn();
         break;
       case .matchEnded:
+        await _triggerRedDie(col: col, diceValue: diceValue);
         _triggerEndGame();
     }
+  }
+
+  Future<void> _triggerRedDie({
+    required int col,
+    required int diceValue,
+  }) async {
+    state.isDestroying = true;
+    await remotePlayer.boardController.destroyDieWithValue(
+      colIndex: col,
+      valueToDestroy: diceValue,
+    );
+    if (_isDisposed) return;
+    state.isDestroying = false;
   }
 
   Future<void> _simulateRemoteInteraction() async {
@@ -135,6 +143,11 @@ class MatchController extends ChangeNotifier {
         if (_isDisposed) return;
         _nextTurn();
       case .matchEnded:
+        await localPlayer.boardController.destroyDieWithValue(
+          colIndex: col,
+          valueToDestroy: diceValue,
+        );
+        if (_isDisposed) return;
         _triggerEndGame();
       case .occupied:
         //maquina erra, tenta denovo
