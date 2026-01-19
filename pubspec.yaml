@@ -17,6 +17,7 @@ dependencies:
   url_launcher: ^6.3.2
   get_it: ^9.2.0
   image_picker: ^1.2.1
+  firebase_core: ^4.3.0
 
 dev_dependencies:
   flutter_test:
