@@ -3,11 +3,10 @@ import 'package:knuckle_bones/features/auth/domain/i_auth_repository.dart';
 
 class AuthController extends ChangeNotifier {
   final IAuthRepository _repository;
-
-  AuthController(this._repository);
-
   bool _isLoading = false;
   String? _errorMessage;
+
+  AuthController(this._repository);
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -34,8 +33,6 @@ class AuthController extends ChangeNotifier {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
-
-    await Future.delayed(Duration(seconds: 2));
 
     try {
       await action();

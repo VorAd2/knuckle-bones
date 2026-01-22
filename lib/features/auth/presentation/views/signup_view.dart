@@ -43,6 +43,7 @@ class _SignupViewState extends State<SignupView> {
       password: _passwordFormController.text.trim(),
       name: _usernameFormController.text.trim(),
     );
+
     if (!mounted) return;
 
     if (success) {
