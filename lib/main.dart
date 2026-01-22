@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:knuckle_bones/features/auth/data/firebase_auth_repository.dart';
 import 'package:knuckle_bones/features/auth/domain/i_auth_repository.dart';
-import 'package:knuckle_bones/features/auth/presentation/views/auth_controller.dart';
+import 'package:knuckle_bones/core/presentation/controllers/auth_controller.dart';
 import 'package:knuckle_bones/firebase_options.dart';
 import 'package:knuckle_bones/my_app.dart';
 

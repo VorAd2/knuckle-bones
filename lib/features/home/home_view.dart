@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/features/lobby/lobby_view.dart';
-import 'package:knuckle_bones/features/profile/profile_view.dart';
+import 'package:knuckle_bones/features/profile/views/profile_view.dart';
 
 class HomeView extends StatefulWidget {
   final UserEntity user;

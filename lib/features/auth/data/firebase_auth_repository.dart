@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:knuckle_bones/core/domain/user_entity.dart';
@@ -17,8 +19,8 @@ class FirebaseAuthRepository implements IAuthRepository {
   }
 
   @override
-  Stream<UserEntity?> get authStateChanges {
-    return _auth.authStateChanges().map(_mapUser);
+  Stream<UserEntity?> get userChanges {
+    return _auth.userChanges().map(_mapUser);
   }
 
   @override
@@ -30,20 +32,32 @@ class FirebaseAuthRepository implements IAuthRepository {
     }
   }
 
+  Future<void> _checkIfNameIsTaken(String name) async {
+    final querySnapshot = await _firestore
+        .collection('users')
+        .where('name', isEqualTo: name)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      throw Exception('O nome "$name" já está em uso. Escolha outro.');
+    }
+  }
+
   @override
   Future<void> signUp({
     required String email,
     required String password,
     required String name,
   }) async {
+    await _checkIfNameIsTaken(name);
+
     try {
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      final uid = credential.user!.uid;
-      await credential.user!.updateDisplayName(name);
 
+      final uid = credential.user!.uid;
       await _firestore.collection('users').doc(uid).set({
         'id': uid,
         'email': email,
@@ -53,14 +67,47 @@ class FirebaseAuthRepository implements IAuthRepository {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
+      await credential.user!.updateDisplayName(name);
       await credential.user!.reload();
     } catch (e) {
-      throw Exception('Erro ao cadastrar: $e');
+      throw Exception('Erro no cadastro: $e');
     }
   }
 
   @override
   Future<void> signOut() async {
     await _auth.signOut();
+  }
+
+  @override
+  Future<void> updateUser({
+    required String newName,
+    required File? avatar,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Nenhum usuário logado para atualizar.');
+    }
+
+    final querySnapshot = await _firestore
+        .collection('users')
+        .where('name', isEqualTo: newName)
+        .get();
+    if (querySnapshot.docs.isNotEmpty) {
+      final docId = querySnapshot.docs.first.id;
+      if (docId != user.uid) {
+        throw Exception('O nome "$newName" já está em uso.');
+      }
+    }
+
+    try {
+      await user.updateDisplayName(newName);
+      await _firestore.collection('users').doc(user.uid).update({
+        'name': newName,
+      });
+      await user.reload();
+    } catch (e) {
+      throw Exception('Erro ao atualizar dados: $e');
+    }
   }
 }

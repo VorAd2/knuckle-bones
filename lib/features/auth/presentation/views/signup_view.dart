@@ -5,7 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:knuckle_bones/core/presentation/widgets/image_picker_sheet.dart';
 import 'package:knuckle_bones/core/utils/media_helper.dart';
-import 'package:knuckle_bones/features/auth/presentation/views/auth_controller.dart';
+import 'package:knuckle_bones/core/presentation/controllers/auth_controller.dart';
 import 'package:knuckle_bones/features/auth/presentation/views/signin_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_auth_row.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';

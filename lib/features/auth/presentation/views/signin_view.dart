@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:knuckle_bones/features/auth/presentation/views/auth_controller.dart';
+import 'package:knuckle_bones/core/presentation/controllers/auth_controller.dart';
 import 'package:knuckle_bones/features/auth/presentation/views/signup_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_auth_row.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
