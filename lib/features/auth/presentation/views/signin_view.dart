@@ -30,6 +30,7 @@ class _SigninViewState extends State<SigninView> {
 
   void _onSubmit() async {
     if (!_formKey.currentState!.validate()) return;
+    FocusScope.of(context).unfocus();
     final email = _emailFormController.text.trim();
     final password = _passwordFormController.text.trim();
     final success = await _controller.signIn(email, password);
@@ -80,13 +81,16 @@ class _SigninViewState extends State<SigninView> {
       },
       child: Stack(
         children: [
-          AuthScaffold(
-            componentsColumn: _ComponentsColumn(
-              formKey: _formKey,
-              getConfigs: _getConfigs,
-              onSubmit: _onSubmit,
-              onGoogleAuth: _onGoogleAuth,
-              onGithubAuth: _onGithubAuth,
+          GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: AuthScaffold(
+              componentsColumn: _ComponentsColumn(
+                formKey: _formKey,
+                getConfigs: _getConfigs,
+                onSubmit: _onSubmit,
+                onGoogleAuth: _onGoogleAuth,
+                onGithubAuth: _onGithubAuth,
+              ),
             ),
           ),
           LoadingVeil(),
