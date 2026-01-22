@@ -3,19 +3,21 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:knuckle_bones/core/data/user_model.dart';
+import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/presentation/widgets/image_picker_sheet.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
 import 'package:knuckle_bones/core/utils/media_helper.dart';
-import 'package:knuckle_bones/features/auth/presentation/views/auth_gate_view.dart';
+import 'package:knuckle_bones/features/auth/presentation/views/auth_controller.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_app_bar.dart';
 
 class ProfileView extends StatefulWidget {
+  final UserEntity user;
   final ValueNotifier<int> tabIndexNotifier;
   final int profileTabIndex;
   const ProfileView({
     super.key,
+    required this.user,
     required this.tabIndexNotifier,
     required this.profileTabIndex,
   });
@@ -25,10 +27,10 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
+  final _authController = GetIt.I<AuthController>();
   final _usernameFormController = TextEditingController();
   File? _avatarFile;
   bool _isEditing = false;
-  final _user = GetIt.I<UserModel>();
 
   @override
   void initState() {
@@ -52,7 +54,7 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   void _resetProfileData() {
-    _usernameFormController.text = _user.name;
+    _usernameFormController.text = widget.user.name;
   }
 
   void _onEdit() {
@@ -72,7 +74,7 @@ class _ProfileViewState extends State<ProfileView> {
     setState(() {
       _isEditing = false;
     });
-    _user.name = _usernameFormController.text.trim();
+    //widget.user.name = _usernameFormController.text.trim();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Name updated successfully')),
@@ -107,17 +109,14 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  Future<void> _onLogout() async {
+  Future<void> _onSignOut() async {
     final shouldLogout = await MyDialog.show(
       context: context,
       titleString: 'Log out',
       contentString: 'Are you sure you want to log out of your account?',
     );
     if (mounted && shouldLogout) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const AuthGateView()),
-      );
+      _authController.signOut();
     }
   }
 
@@ -162,7 +161,7 @@ class _ProfileViewState extends State<ProfileView> {
                 Colors.black,
                 0.3,
               ),
-              onClick: () => _onLogout(),
+              onClick: () => _onSignOut(),
             ),
           ],
         ),

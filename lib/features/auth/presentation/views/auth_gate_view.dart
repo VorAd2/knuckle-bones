@@ -1,12 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
+import 'package:knuckle_bones/features/auth/domain/i_auth_repository.dart';
 import 'package:knuckle_bones/features/auth/presentation/views/signin_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/views/signup_view.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_app_bar.dart';
+import 'package:knuckle_bones/features/home/home_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AuthGateView extends StatelessWidget {
   const AuthGateView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final authRepository = GetIt.I<IAuthRepository>();
+    return StreamBuilder<UserEntity?>(
+      stream: authRepository.authStateChanges,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (snapshot.hasData) {
+          return HomeView(user: snapshot.data!);
+        }
+        return const _WelcomeView();
+      },
+    );
+  }
+}
+
+class _WelcomeView extends StatelessWidget {
+  const _WelcomeView();
 
   Future<void> _openGithub(BuildContext context) async {
     final githubUrl = 'https://github.com/VorAd2';
@@ -24,6 +51,28 @@ class AuthGateView extends StatelessWidget {
       if (!context.mounted) return;
       _showPopup(context, 'Unknown error: $e');
     }
+  }
+
+  void _showPopup(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Ops!'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _navigateTo(BuildContext context, Widget destination) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => destination));
   }
 
   @override
@@ -52,9 +101,9 @@ class AuthGateView extends StatelessWidget {
                             const SizedBox(height: 64),
                             _GateButtonsRow(
                               onSignin: () =>
-                                  _navigateTo(context, SigninView()),
+                                  _navigateTo(context, const SigninView()),
                               onSignup: () =>
-                                  _navigateTo(context, SignupView()),
+                                  _navigateTo(context, const SignupView()),
                             ),
                           ],
                         ),
@@ -83,12 +132,6 @@ class AuthGateView extends StatelessWidget {
     );
   }
 
-  void _navigateTo(BuildContext context, Widget destination) {
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => destination));
-  }
-
   List<Widget> _buildBrandWidgets(TextTheme textTheme, ColorScheme cs) {
     return [
       Container(
@@ -111,24 +154,6 @@ class AuthGateView extends StatelessWidget {
         textAlign: TextAlign.center,
       ),
     ];
-  }
-
-  void _showPopup(BuildContext context, String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Ops!'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
   }
 }
 

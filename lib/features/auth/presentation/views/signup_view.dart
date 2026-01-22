@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:knuckle_bones/core/presentation/widgets/image_picker_sheet.dart';
 import 'package:knuckle_bones/core/utils/media_helper.dart';
+import 'package:knuckle_bones/features/auth/presentation/views/auth_controller.dart';
 import 'package:knuckle_bones/features/auth/presentation/views/signin_view.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_auth_row.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
@@ -18,6 +20,7 @@ class SignupView extends StatefulWidget {
 }
 
 class _SignupViewState extends State<SignupView> {
+  final _controller = GetIt.I<AuthController>();
   final _formKey = GlobalKey<FormState>();
   final _emailFormController = TextEditingController();
   final _passwordFormController = TextEditingController();
@@ -32,9 +35,25 @@ class _SignupViewState extends State<SignupView> {
     super.dispose();
   }
 
-  void _onSubmit() {
-    if (_formKey.currentState!.validate()) {
-      debugPrint('Validado');
+  Future<void> _onSubmit() async {
+    if (!_formKey.currentState!.validate()) return;
+    final success = await _controller.signUp(
+      email: _emailFormController.text.trim(),
+      password: _passwordFormController.text.trim(),
+      name: _usernameFormController.text.trim(),
+    );
+    if (!mounted) return;
+
+    if (success) {
+      //TODO enviar avatar para cloudinary
+      Navigator.of(context).pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_controller.errorMessage ?? 'Error signing up'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
     }
   }
 
@@ -63,49 +82,55 @@ class _SignupViewState extends State<SignupView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const MyAppBar(title: 'Sign up'),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) => SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: constraints.maxHeight - 48,
-              ),
-              child: IntrinsicHeight(
-                child: Column(
-                  children: [
-                    AvatarSelector(
-                      avatarFile: _userAvatarFile,
-                      onPick: _pickImage,
-                      onRemove: _userAvatarFile == null
-                          ? null
-                          : () => setState(() => _userAvatarFile = null),
-                    ),
-                    const SizedBox(height: 48),
-                    AuthForm(formKey: _formKey, configs: _getConfigs()),
-                    const SizedBox(height: 32),
-                    AuthConfirmButton(onSubmit: _onSubmit),
-                    const SizedBox(height: 32),
-                    const Text('Or sign up with', textAlign: TextAlign.center),
-                    const SizedBox(height: 14),
-                    AlternativeAuthRow(
-                      onGoogleAuth: _onGoogleAuth,
-                      onGithubAuth: _onGithubAuth,
-                    ),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (_) => SigninView()),
-                        );
-                      },
-                      child: Text('Already have an account?'),
-                    ),
-                    const SizedBox(height: 4),
-                  ],
-                ),
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, child) {
+        return Scaffold(
+          appBar: const MyAppBar(title: 'Sign up'),
+          body: SafeArea(
+            child: IgnorePointer(ignoring: _controller.isLoading, child: child),
+          ),
+        );
+      },
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight - 48),
+            child: IntrinsicHeight(
+              child: Column(
+                children: [
+                  AvatarSelector(
+                    avatarFile: _userAvatarFile,
+                    onPick: _pickImage,
+                    onRemove: _userAvatarFile == null
+                        ? null
+                        : () => setState(() => _userAvatarFile = null),
+                  ),
+                  const SizedBox(height: 48),
+                  AuthForm(formKey: _formKey, configs: _getConfigs()),
+                  const SizedBox(height: 32),
+                  _controller.isLoading
+                      ? const CircularProgressIndicator()
+                      : AuthConfirmButton(onSubmit: _onSubmit),
+                  const SizedBox(height: 32),
+                  const Text('Or sign up with', textAlign: TextAlign.center),
+                  const SizedBox(height: 14),
+                  AlternativeAuthRow(
+                    onGoogleAuth: _onGoogleAuth,
+                    onGithubAuth: _onGithubAuth,
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (_) => SigninView()),
+                      );
+                    },
+                    child: Text('Already have an account?'),
+                  ),
+                  const SizedBox(height: 4),
+                ],
               ),
             ),
           ),

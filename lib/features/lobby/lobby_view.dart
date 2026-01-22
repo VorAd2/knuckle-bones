@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
@@ -6,7 +7,8 @@ import 'package:knuckle_bones/core/presentation/widgets/my_app_bar.dart';
 import 'package:knuckle_bones/features/match/presentation/views/match_view.dart';
 
 class LobbyView extends StatefulWidget {
-  const LobbyView({super.key});
+  final UserEntity user;
+  const LobbyView({super.key, required this.user});
   @override
   State<StatefulWidget> createState() => _LobbyViewState();
 }

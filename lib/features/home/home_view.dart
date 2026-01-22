@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/features/lobby/lobby_view.dart';
 import 'package:knuckle_bones/features/profile/profile_view.dart';
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+  final UserEntity user;
+  const HomeView({super.key, required this.user});
 
   @override
   State<StatefulWidget> createState() => _HomeViewState();
@@ -22,8 +24,9 @@ class _HomeViewState extends State<HomeView> {
           return IndexedStack(
             index: currentIndex,
             children: [
-              const LobbyView(),
+              LobbyView(user: widget.user),
               ProfileView(
+                user: widget.user,
                 tabIndexNotifier: _tabIndexNotifier,
                 profileTabIndex: _profileTabIndex,
               ),
