@@ -35,6 +35,8 @@ class AuthController extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
+    await Future.delayed(Duration(seconds: 2));
+
     try {
       await action();
       return true;

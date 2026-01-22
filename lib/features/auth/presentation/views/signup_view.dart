@@ -10,7 +10,8 @@ import 'package:knuckle_bones/features/auth/presentation/views/signin_view.dart'
 import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_auth_row.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
 import 'package:knuckle_bones/features/auth/presentation/widgets/auth_confirm_button.dart';
-import 'package:knuckle_bones/core/presentation/widgets/my_app_bar.dart';
+import 'package:knuckle_bones/features/auth/presentation/widgets/auth_scaffold.dart';
+import 'package:knuckle_bones/features/auth/presentation/widgets/loading_veil.dart';
 
 class SignupView extends StatefulWidget {
   const SignupView({super.key});
@@ -80,65 +81,6 @@ class _SignupViewState extends State<SignupView> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: _controller,
-      builder: (context, child) {
-        return Scaffold(
-          appBar: const MyAppBar(title: 'Sign up'),
-          body: SafeArea(
-            child: IgnorePointer(ignoring: _controller.isLoading, child: child),
-          ),
-        );
-      },
-      child: LayoutBuilder(
-        builder: (context, constraints) => SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight - 48),
-            child: IntrinsicHeight(
-              child: Column(
-                children: [
-                  AvatarSelector(
-                    avatarFile: _userAvatarFile,
-                    onPick: _pickImage,
-                    onRemove: _userAvatarFile == null
-                        ? null
-                        : () => setState(() => _userAvatarFile = null),
-                  ),
-                  const SizedBox(height: 48),
-                  AuthForm(formKey: _formKey, configs: _getConfigs()),
-                  const SizedBox(height: 32),
-                  _controller.isLoading
-                      ? const CircularProgressIndicator()
-                      : AuthConfirmButton(onSubmit: _onSubmit),
-                  const SizedBox(height: 32),
-                  const Text('Or sign up with', textAlign: TextAlign.center),
-                  const SizedBox(height: 14),
-                  AlternativeAuthRow(
-                    onGoogleAuth: _onGoogleAuth,
-                    onGithubAuth: _onGithubAuth,
-                  ),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (_) => SigninView()),
-                      );
-                    },
-                    child: Text('Already have an account?'),
-                  ),
-                  const SizedBox(height: 4),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   List<AuthFieldConfig> _getConfigs() {
     return [
       AuthFieldConfig(
@@ -167,15 +109,46 @@ class _SignupViewState extends State<SignupView> {
       ),
     ];
   }
+
+  @override
+  Widget build(BuildContext context) {
+    final avatarSelector = _AvatarSelector(
+      avatarFile: _userAvatarFile,
+      onPick: _pickImage,
+      onRemove: _userAvatarFile == null
+          ? null
+          : () => setState(() => _userAvatarFile = null),
+    );
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (_, child) {
+        return PopScope(canPop: !_controller.isLoading, child: child!);
+      },
+      child: Stack(
+        children: [
+          AuthScaffold(
+            componentsColumn: _ComponentsColumn(
+              avatarSelector: avatarSelector,
+              formKey: _formKey,
+              getConfigs: _getConfigs,
+              onSubmit: _onSubmit,
+              onGoogleAuth: _onGoogleAuth,
+              onGithubAuth: _onGithubAuth,
+            ),
+          ),
+          LoadingVeil(),
+        ],
+      ),
+    );
+  }
 }
 
-class AvatarSelector extends StatelessWidget {
+class _AvatarSelector extends StatelessWidget {
   final File? avatarFile;
   final Function(ImageSource) onPick;
   final VoidCallback? onRemove;
 
-  const AvatarSelector({
-    super.key,
+  const _AvatarSelector({
     required this.avatarFile,
     required this.onPick,
     required this.onRemove,
@@ -229,6 +202,52 @@ class AvatarSelector extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ComponentsColumn extends StatelessWidget {
+  final _AvatarSelector avatarSelector;
+  final GlobalKey<FormState> formKey;
+  final List<AuthFieldConfig> Function() getConfigs;
+  final VoidCallback onSubmit;
+  final VoidCallback onGoogleAuth;
+  final VoidCallback onGithubAuth;
+  const _ComponentsColumn({
+    required this.avatarSelector,
+    required this.formKey,
+    required this.getConfigs,
+    required this.onSubmit,
+    required this.onGoogleAuth,
+    required this.onGithubAuth,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        avatarSelector,
+        const SizedBox(height: 48),
+        AuthForm(formKey: formKey, configs: getConfigs()),
+        const SizedBox(height: 32),
+        AuthConfirmButton(onSubmit: onSubmit),
+        const SizedBox(height: 32),
+        const Text('Or sign up with', textAlign: TextAlign.center),
+        const SizedBox(height: 14),
+        AlternativeAuthRow(
+          onGoogleAuth: onGoogleAuth,
+          onGithubAuth: onGithubAuth,
+        ),
+        const Spacer(),
+        TextButton(
+          onPressed: () {
+            Navigator.of(
+              context,
+            ).pushReplacement(MaterialPageRoute(builder: (_) => SigninView()));
+          },
+          child: Text('Already have an account?'),
+        ),
+        const SizedBox(height: 4),
+      ],
     );
   }
 }
