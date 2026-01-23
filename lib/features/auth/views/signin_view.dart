@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:knuckle_bones/core/presentation/controllers/auth_controller.dart';
-import 'package:knuckle_bones/features/auth/presentation/views/signup_view.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_auth_row.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/auth_confirm_button.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/auth_scaffold.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/loading_veil.dart';
+import 'package:knuckle_bones/features/auth/views/signup_view.dart';
+import 'package:knuckle_bones/features/auth/widgets/alternative_auth_row.dart';
+import 'package:knuckle_bones/features/auth/widgets/auth_form.dart';
+import 'package:knuckle_bones/features/auth/widgets/auth_confirm_button.dart';
+import 'package:knuckle_bones/features/auth/widgets/auth_scaffold.dart';
+import 'package:knuckle_bones/features/auth/widgets/loading_veil.dart';
 
 class SigninView extends StatefulWidget {
   const SigninView({super.key});

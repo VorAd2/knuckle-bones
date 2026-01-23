@@ -152,6 +152,7 @@ class _ProfileViewState extends State<ProfileView> {
           GestureDetector(
             onTap: () => FocusScope.of(context).unfocus(),
             child: ProfileScaffold(
+              user: widget.user,
               isEditingNotifier: _controller.isEditingNotifier,
               buildAppBarActions: _buildAppBarActions,
               formKey: _formKey,

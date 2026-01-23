@@ -1,8 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:knuckle_bones/core/domain/user_entity.dart';
-import 'package:knuckle_bones/features/auth/domain/i_auth_repository.dart';
+import 'package:knuckle_bones/core/domain/i_auth_repository.dart';
 
 class AuthController extends ChangeNotifier {
   final IAuthRepository _repository;
@@ -43,18 +41,6 @@ class AuthController extends ChangeNotifier {
     } catch (e) {
       _errorMessage = e.toString().replaceAll('Exception:', '').trim();
       return false;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> updateProfile({required String name, File? avatar}) async {
-    try {
-      await _repository.updateUser(newName: name, avatar: avatar);
-    } catch (e) {
-      _errorMessage = e.toString();
-      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();

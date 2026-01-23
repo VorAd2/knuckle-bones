@@ -2,10 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:knuckle_bones/core/data/user_repository.dart';
 import 'package:knuckle_bones/core/presentation/controllers/auth_controller.dart';
 
 class ProfileController {
   final _authController = GetIt.I<AuthController>();
+  final _userRepository = GetIt.I<UserRepository>();
   final isLoadingNotifier = ValueNotifier(false);
   final isEditingNotifier = ValueNotifier(false);
   final avatarFileNotifier = ValueNotifier<File?>(null);
@@ -26,7 +28,7 @@ class ProfileController {
   }
 
   Future<void> updateProfile({required String newName, File? newAvatar}) async {
-    await _authController.updateProfile(name: newName, avatar: newAvatar);
+    await _userRepository.updateUser(newName: newName, avatar: newAvatar);
   }
 
   void signOut() {

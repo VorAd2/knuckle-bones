@@ -2,8 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
-import 'package:knuckle_bones/features/auth/data/firebase_auth_repository.dart';
-import 'package:knuckle_bones/features/auth/domain/i_auth_repository.dart';
+import 'package:knuckle_bones/core/data/firebase_auth_repository.dart';
+import 'package:knuckle_bones/core/data/user_repository.dart';
+import 'package:knuckle_bones/core/domain/i_auth_repository.dart';
 import 'package:knuckle_bones/core/presentation/controllers/auth_controller.dart';
 import 'package:knuckle_bones/firebase_options.dart';
 import 'package:knuckle_bones/my_app.dart';
@@ -16,6 +17,7 @@ void _setupDependencies() {
   getIt.registerSingleton<AuthController>(
     AuthController(getIt<IAuthRepository>()),
   );
+  getIt.registerSingleton<UserRepository>(UserRepository());
 }
 
 void main() async {

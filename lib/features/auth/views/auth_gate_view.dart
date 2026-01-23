@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:knuckle_bones/core/data/user_repository.dart';
 import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
-import 'package:knuckle_bones/features/auth/domain/i_auth_repository.dart';
-import 'package:knuckle_bones/features/auth/presentation/views/signin_view.dart';
-import 'package:knuckle_bones/features/auth/presentation/views/signup_view.dart';
+import 'package:knuckle_bones/core/domain/i_auth_repository.dart';
+import 'package:knuckle_bones/features/auth/views/signin_view.dart';
+import 'package:knuckle_bones/features/auth/views/signup_view.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_app_bar.dart';
 import 'package:knuckle_bones/features/home/home_view.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,18 +16,41 @@ class AuthGateView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authRepository = GetIt.I<IAuthRepository>();
+    final userRepository = GetIt.I<UserRepository>();
     return StreamBuilder<UserEntity?>(
-      stream: authRepository.userChanges,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+      stream: authRepository.authChanges,
+      builder: (context, authSnapshot) {
+        if (authSnapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
-        if (snapshot.hasData) {
-          return HomeView(user: snapshot.data!);
+        if (!authSnapshot.hasData) {
+          return const _WelcomeView();
         }
-        return const _WelcomeView();
+
+        final basicUser = authSnapshot.data!;
+
+        return FutureBuilder<UserEntity>(
+          future: userRepository.getUserDetails(basicUser),
+          builder: (context, dataSnapshot) {
+            if (dataSnapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text("Loading user data..."),
+                    ],
+                  ),
+                ),
+              );
+            }
+            return HomeView(user: dataSnapshot.data ?? basicUser);
+          },
+        );
       },
     );
   }

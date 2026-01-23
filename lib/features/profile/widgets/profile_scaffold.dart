@@ -2,12 +2,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_app_bar.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
 import 'package:knuckle_bones/features/profile/widgets/profile_avatar.dart';
 import 'package:knuckle_bones/features/profile/widgets/profile_name_field.dart';
 
 class ProfileScaffold extends StatelessWidget {
+  final UserEntity user;
   final ValueNotifier<bool> isEditingNotifier;
   final List<Widget> Function(bool, ColorScheme) buildAppBarActions;
   final GlobalKey<FormState> formKey;
@@ -21,6 +23,7 @@ class ProfileScaffold extends StatelessWidget {
 
   const ProfileScaffold({
     super.key,
+    required this.user,
     required this.isEditingNotifier,
     required this.buildAppBarActions,
     required this.formKey,
@@ -62,6 +65,41 @@ class ProfileScaffold extends StatelessWidget {
                     controller: usernameFormController,
                     errorTextNotifier: errorTextNotifier,
                   ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(width: 60),
+                    Column(
+                      spacing: 8,
+                      children: [
+                        Text(
+                          'Games Played',
+                          style: TextStyle(color: cs.onSurface.withAlpha(220)),
+                        ),
+                        Text(
+                          (user.gamesPlayed).toString(),
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Column(
+                      spacing: 8,
+                      children: [
+                        Text(
+                          'Wins',
+                          style: TextStyle(color: cs.onSurface.withAlpha(220)),
+                        ),
+                        Text(
+                          (user.wins).toString(),
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 60),
+                  ],
                 ),
                 const SizedBox(height: 48),
                 ThreeDButton.wide(

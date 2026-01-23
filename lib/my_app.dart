@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:knuckle_bones/core/presentation/theme/app_theme.dart';
-import 'package:knuckle_bones/features/auth/presentation/views/auth_gate_view.dart';
+import 'package:knuckle_bones/features/auth/views/auth_gate_view.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

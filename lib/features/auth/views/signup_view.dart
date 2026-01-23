@@ -6,12 +6,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:knuckle_bones/core/presentation/widgets/image_picker_sheet.dart';
 import 'package:knuckle_bones/core/utils/media_helper.dart';
 import 'package:knuckle_bones/core/presentation/controllers/auth_controller.dart';
-import 'package:knuckle_bones/features/auth/presentation/views/signin_view.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/alternative_auth_row.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/auth_form.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/auth_confirm_button.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/auth_scaffold.dart';
-import 'package:knuckle_bones/features/auth/presentation/widgets/loading_veil.dart';
+import 'package:knuckle_bones/features/auth/views/signin_view.dart';
+import 'package:knuckle_bones/features/auth/widgets/alternative_auth_row.dart';
+import 'package:knuckle_bones/features/auth/widgets/auth_form.dart';
+import 'package:knuckle_bones/features/auth/widgets/auth_confirm_button.dart';
+import 'package:knuckle_bones/features/auth/widgets/auth_scaffold.dart';
+import 'package:knuckle_bones/features/auth/widgets/loading_veil.dart';
 
 class SignupView extends StatefulWidget {
   const SignupView({super.key});

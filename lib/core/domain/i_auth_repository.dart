@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:knuckle_bones/core/domain/user_entity.dart';
 
 abstract class IAuthRepository {
-  Stream<UserEntity?> get userChanges;
+  Stream<UserEntity?> get authChanges;
 
   Future<void> signIn({required String email, required String password});
 
@@ -14,6 +12,4 @@ abstract class IAuthRepository {
   });
 
   Future<void> signOut();
-
-  Future<void> updateUser({required String newName, required File? avatar});
 }
