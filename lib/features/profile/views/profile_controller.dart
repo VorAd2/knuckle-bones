@@ -6,12 +6,14 @@ import 'package:knuckle_bones/core/data/user_repository.dart';
 import 'package:knuckle_bones/core/presentation/controllers/auth_controller.dart';
 
 class ProfileController {
+  final ValueNotifier<bool> isLoadingNotifier;
   final _authController = GetIt.I<AuthController>();
   final _userRepository = GetIt.I<UserRepository>();
-  final isLoadingNotifier = ValueNotifier(false);
   final isEditingNotifier = ValueNotifier(false);
   final avatarFileNotifier = ValueNotifier<File?>(null);
   final errorTextNotifier = ValueNotifier<String?>(null);
+
+  ProfileController({required this.isLoadingNotifier});
 
   bool get isEditing => isEditingNotifier.value;
   File? get avatarFile => avatarFileNotifier.value;

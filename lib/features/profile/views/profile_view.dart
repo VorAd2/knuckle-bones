@@ -9,11 +9,13 @@ import 'package:knuckle_bones/features/profile/widgets/profile_scaffold.dart';
 
 class ProfileView extends StatefulWidget {
   final UserEntity user;
+  final ValueNotifier<bool> globalLoadingNotifier;
   final ValueNotifier<int> tabIndexNotifier;
   final int profileTabIndex;
   const ProfileView({
     super.key,
     required this.user,
+    required this.globalLoadingNotifier,
     required this.tabIndexNotifier,
     required this.profileTabIndex,
   });
@@ -23,13 +25,16 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  final _controller = ProfileController();
+  late ProfileController _controller;
   final _formKey = GlobalKey<FormState>();
   final _usernameFormController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    _controller = ProfileController(
+      isLoadingNotifier: widget.globalLoadingNotifier,
+    );
     _resetProfileData();
     widget.tabIndexNotifier.addListener(_handleTabChange);
   }
