@@ -12,12 +12,20 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  final _tabIndexNotifier = ValueNotifier<int>(0);
   static const _profileTabIndex = 1;
+  late final ValueNotifier<UserEntity> _userNotifier;
+  final _tabIndexNotifier = ValueNotifier<int>(0);
   final _globalLoadingNotifier = ValueNotifier(false);
 
   @override
+  void initState() {
+    super.initState();
+    _userNotifier = ValueNotifier(widget.user);
+  }
+
+  @override
   void dispose() {
+    _userNotifier.dispose();
     _globalLoadingNotifier.dispose();
     _tabIndexNotifier.dispose();
     super.dispose();
@@ -37,9 +45,9 @@ class _HomeViewState extends State<HomeView> {
                 return IndexedStack(
                   index: currentIndex,
                   children: [
-                    LobbyView(user: widget.user),
+                    LobbyView(userNotifier: _userNotifier),
                     ProfileView(
-                      user: widget.user,
+                      userNotifier: _userNotifier,
                       globalLoadingNotifier: _globalLoadingNotifier,
                       tabIndexNotifier: _tabIndexNotifier,
                       profileTabIndex: _profileTabIndex,

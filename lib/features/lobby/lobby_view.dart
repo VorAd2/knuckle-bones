@@ -7,8 +7,8 @@ import 'package:knuckle_bones/core/presentation/widgets/my_app_bar.dart';
 import 'package:knuckle_bones/features/match/presentation/views/match_view.dart';
 
 class LobbyView extends StatefulWidget {
-  final UserEntity user;
-  const LobbyView({super.key, required this.user});
+  final ValueNotifier<UserEntity> userNotifier;
+  const LobbyView({super.key, required this.userNotifier});
   @override
   State<StatefulWidget> createState() => _LobbyViewState();
 }

@@ -13,6 +13,7 @@ class FirebaseAuthRepository implements IAuthRepository {
       id: firebaseUser.uid,
       email: firebaseUser.email ?? '',
       name: firebaseUser.displayName ?? 'Player',
+      avatarFile: null,
     );
   }
 

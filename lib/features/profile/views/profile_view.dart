@@ -8,13 +8,13 @@ import 'package:knuckle_bones/features/profile/widgets/loading_veil.dart';
 import 'package:knuckle_bones/features/profile/widgets/profile_scaffold.dart';
 
 class ProfileView extends StatefulWidget {
-  final UserEntity user;
+  final ValueNotifier<UserEntity> userNotifier;
   final ValueNotifier<bool> globalLoadingNotifier;
   final ValueNotifier<int> tabIndexNotifier;
   final int profileTabIndex;
   const ProfileView({
     super.key,
-    required this.user,
+    required this.userNotifier,
     required this.globalLoadingNotifier,
     required this.tabIndexNotifier,
     required this.profileTabIndex,
@@ -28,6 +28,8 @@ class _ProfileViewState extends State<ProfileView> {
   late ProfileController _controller;
   final _formKey = GlobalKey<FormState>();
   final _usernameFormController = TextEditingController();
+
+  UserEntity get user => widget.userNotifier.value;
 
   @override
   void initState() {
@@ -56,7 +58,7 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   void _resetProfileData() {
-    _usernameFormController.text = widget.user.name;
+    _usernameFormController.text = user.name;
   }
 
   void _onEditIntention() {
@@ -73,7 +75,7 @@ class _ProfileViewState extends State<ProfileView> {
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
     final newName = _usernameFormController.text.trim();
-    if (newName == widget.user.name) {
+    if (newName == user.name) {
       _controller.isEditing = false;
       return;
     }
@@ -81,11 +83,11 @@ class _ProfileViewState extends State<ProfileView> {
     _controller.errorText = null;
 
     try {
-      await _controller.updateProfile(
+      await _controller.updateUser(
         newName: newName,
         newAvatar: _controller.avatarFile,
+        userNotifier: widget.userNotifier,
       );
-
       if (mounted) {
         _controller.isLoading = false;
         _controller.isEditing = false;
@@ -140,7 +142,8 @@ class _ProfileViewState extends State<ProfileView> {
   @override
   void didUpdateWidget(ProfileView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.user != oldWidget.user && !_controller.isEditing) {
+    if (widget.userNotifier.value != oldWidget.userNotifier.value &&
+        !_controller.isEditing) {
       _resetProfileData();
     }
   }
@@ -157,7 +160,7 @@ class _ProfileViewState extends State<ProfileView> {
           GestureDetector(
             onTap: () => FocusScope.of(context).unfocus(),
             child: ProfileScaffold(
-              user: widget.user,
+              userNotifier: widget.userNotifier,
               isEditingNotifier: _controller.isEditingNotifier,
               buildAppBarActions: _buildAppBarActions,
               formKey: _formKey,

@@ -19,6 +19,7 @@ class UserRepository {
         id: authUser.id,
         email: authUser.email,
         name: data?['name'] ?? authUser.name,
+        avatarFile: null,
         gamesPlayed: data?['gamesPlayed'] ?? 0,
         wins: data?['wins'] ?? 0,
       );

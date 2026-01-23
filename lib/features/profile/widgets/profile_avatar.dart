@@ -1,18 +1,17 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/presentation/widgets/image_picker_sheet.dart';
 
 class ProfileAvatar extends StatelessWidget {
-  final ValueNotifier<File?> imageFileNotifier;
+  final ValueNotifier<UserEntity> userNotifier;
   final bool isEditing;
   final Function(ImageSource) onPickImage;
   final VoidCallback onRemoveImage;
 
   const ProfileAvatar({
     super.key,
-    required this.imageFileNotifier,
+    required this.userNotifier,
     required this.isEditing,
     required this.onPickImage,
     required this.onRemoveImage,
@@ -22,9 +21,10 @@ class ProfileAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return ValueListenableBuilder(
-      valueListenable: imageFileNotifier,
-      builder: (_, file, _) {
-        final imageProvider = file != null ? FileImage(file) : null;
+      valueListenable: userNotifier,
+      builder: (_, user, _) {
+        final avatarFile = user.avatarFile;
+        final imageProvider = avatarFile != null ? FileImage(avatarFile) : null;
         return CircleAvatar(
           radius: 70,
           backgroundImage: imageProvider,
@@ -32,7 +32,7 @@ class ProfileAvatar extends StatelessWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              if (file == null)
+              if (avatarFile == null)
                 Icon(
                   Icons.person,
                   size: 70,
@@ -61,7 +61,7 @@ class ProfileAvatar extends StatelessWidget {
                           ImagePickerSheet.show(
                             context: context,
                             onPick: onPickImage,
-                            onRemove: file == null ? null : onRemoveImage,
+                            onRemove: avatarFile == null ? null : onRemoveImage,
                           );
                         }
                       : null,

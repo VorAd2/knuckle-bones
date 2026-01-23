@@ -9,7 +9,7 @@ import 'package:knuckle_bones/features/profile/widgets/profile_avatar.dart';
 import 'package:knuckle_bones/features/profile/widgets/profile_name_field.dart';
 
 class ProfileScaffold extends StatelessWidget {
-  final UserEntity user;
+  final ValueNotifier<UserEntity> userNotifier;
   final ValueNotifier<bool> isEditingNotifier;
   final List<Widget> Function(bool, ColorScheme) buildAppBarActions;
   final GlobalKey<FormState> formKey;
@@ -23,7 +23,7 @@ class ProfileScaffold extends StatelessWidget {
 
   const ProfileScaffold({
     super.key,
-    required this.user,
+    required this.userNotifier,
     required this.isEditingNotifier,
     required this.buildAppBarActions,
     required this.formKey,
@@ -35,6 +35,8 @@ class ProfileScaffold extends StatelessWidget {
     required this.showHistory,
     required this.onSignOut,
   });
+
+  UserEntity get user => userNotifier.value;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +54,7 @@ class ProfileScaffold extends StatelessWidget {
             child: Column(
               children: [
                 ProfileAvatar(
-                  imageFileNotifier: avatarFileNotifier,
+                  userNotifier: userNotifier,
                   isEditing: isEditing,
                   onPickImage: pickImage,
                   onRemoveImage: removeImage,

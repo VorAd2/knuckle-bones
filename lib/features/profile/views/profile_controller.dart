@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:knuckle_bones/core/data/user_repository.dart';
+import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/presentation/controllers/auth_controller.dart';
 
 class ProfileController {
@@ -24,13 +25,18 @@ class ProfileController {
 
   void dispose() {
     isEditingNotifier.dispose();
-    isLoadingNotifier.dispose();
     avatarFileNotifier.dispose();
     errorTextNotifier.dispose();
   }
 
-  Future<void> updateProfile({required String newName, File? newAvatar}) async {
+  Future<void> updateUser({
+    required String newName,
+    required File? newAvatar,
+    required ValueNotifier<UserEntity> userNotifier,
+  }) async {
     await _userRepository.updateUser(newName: newName, avatar: newAvatar);
+    final oldLocalUser = userNotifier.value;
+    userNotifier.value = oldLocalUser.copyWith(name: newName);
   }
 
   void signOut() {
