@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:knuckle_bones/core/presentation/widgets/image_picker_sheet.dart';
+import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
 import 'package:knuckle_bones/core/utils/media_helper.dart';
 import 'package:knuckle_bones/core/presentation/controllers/auth_controller.dart';
 import 'package:knuckle_bones/features/auth/views/signin_view.dart';
@@ -60,23 +61,42 @@ class _SignupViewState extends State<SignupView> {
     }
   }
 
-  void _onGoogleAuth() {}
+  void _onGoogleAuth() {
+    MyDialog.alert(
+      context: context,
+      titleString: 'Oops',
+      contentString: 'This feature has not yet been implemented',
+    );
+  }
 
-  void _onGithubAuth() {}
+  void _onGithubAuth() {
+    MyDialog.alert(
+      context: context,
+      titleString: 'Oops',
+      contentString: 'This feature has not yet been implemented',
+    );
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     try {
       final file = await MediaHelper.pickImage(source);
-      if (file != null) {
-        setState(() {
-          _userAvatarFile = file;
-        });
-      }
+      if (!mounted || file == null) return;
+      setState(() {
+        _userAvatarFile = file;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Attention. This feature has not been fully implemented. The image will not be saved to the cloud.",
+          ),
+        ),
+      );
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('An error has occurred. Please, try again.'),
+            duration: Duration(seconds: 6),
           ),
         );
       }
