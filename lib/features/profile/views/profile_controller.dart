@@ -3,11 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:knuckle_bones/core/data/user_repository.dart';
-import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/presentation/controllers/auth_controller.dart';
+import 'package:knuckle_bones/core/store/user_store.dart';
 
 class ProfileController {
   final ValueNotifier<bool> isLoadingNotifier;
+  final _userStore = GetIt.I<UserStore>();
   final _authController = GetIt.I<AuthController>();
   final _userRepository = GetIt.I<UserRepository>();
   final isEditingNotifier = ValueNotifier(false);
@@ -32,11 +33,10 @@ class ProfileController {
   Future<void> updateUser({
     required String newName,
     required File? newAvatar,
-    required ValueNotifier<UserEntity> userNotifier,
   }) async {
     await _userRepository.updateUser(newName: newName, avatar: newAvatar);
-    final oldLocalUser = userNotifier.value;
-    userNotifier.value = oldLocalUser.copyWith(name: newName);
+    final oldLocalUser = _userStore.value!;
+    _userStore.setUser(oldLocalUser.copyWith(name: newName));
   }
 
   void signOut() {

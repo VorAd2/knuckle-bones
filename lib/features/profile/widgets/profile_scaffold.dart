@@ -1,15 +1,17 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_app_bar.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
+import 'package:knuckle_bones/core/store/user_store.dart';
 import 'package:knuckle_bones/features/profile/widgets/profile_avatar.dart';
 import 'package:knuckle_bones/features/profile/widgets/profile_name_field.dart';
 
 class ProfileScaffold extends StatelessWidget {
-  final ValueNotifier<UserEntity> userNotifier;
+  final _userStore = GetIt.I<UserStore>();
   final ValueNotifier<bool> isEditingNotifier;
   final List<Widget> Function(bool, ColorScheme) buildAppBarActions;
   final GlobalKey<FormState> formKey;
@@ -21,9 +23,8 @@ class ProfileScaffold extends StatelessWidget {
   final VoidCallback showHistory;
   final VoidCallback onSignOut;
 
-  const ProfileScaffold({
+  ProfileScaffold({
     super.key,
-    required this.userNotifier,
     required this.isEditingNotifier,
     required this.buildAppBarActions,
     required this.formKey,
@@ -36,7 +37,7 @@ class ProfileScaffold extends StatelessWidget {
     required this.onSignOut,
   });
 
-  UserEntity get user => userNotifier.value;
+  UserEntity get user => _userStore.value!;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +55,6 @@ class ProfileScaffold extends StatelessWidget {
             child: Column(
               children: [
                 ProfileAvatar(
-                  userNotifier: userNotifier,
                   isEditing: isEditing,
                   onPickImage: pickImage,
                   onRemoveImage: removeImage,

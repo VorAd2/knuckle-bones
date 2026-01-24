@@ -6,6 +6,7 @@ import 'package:knuckle_bones/core/data/firebase_auth_repository.dart';
 import 'package:knuckle_bones/core/data/user_repository.dart';
 import 'package:knuckle_bones/core/domain/i_auth_repository.dart';
 import 'package:knuckle_bones/core/presentation/controllers/auth_controller.dart';
+import 'package:knuckle_bones/core/store/user_store.dart';
 import 'package:knuckle_bones/firebase_options.dart';
 import 'package:knuckle_bones/my_app.dart';
 
@@ -13,11 +14,12 @@ import 'package:knuckle_bones/my_app.dart';
 
 void _setupDependencies() {
   final getIt = GetIt.I;
-  getIt.registerLazySingleton<IAuthRepository>(() => FirebaseAuthRepository());
+  getIt.registerSingleton<IAuthRepository>(FirebaseAuthRepository());
   getIt.registerSingleton<AuthController>(
     AuthController(getIt<IAuthRepository>()),
   );
   getIt.registerSingleton<UserRepository>(UserRepository());
+  getIt.registerSingleton<UserStore>(UserStore());
 }
 
 void main() async {

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/features/lobby/lobby_view.dart';
 import 'package:knuckle_bones/features/profile/views/profile_view.dart';
 
 class HomeView extends StatefulWidget {
-  final UserEntity user;
-  const HomeView({super.key, required this.user});
+  const HomeView({super.key});
 
   @override
   State<StatefulWidget> createState() => _HomeViewState();
@@ -13,19 +11,16 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   static const _profileTabIndex = 1;
-  late final ValueNotifier<UserEntity> _userNotifier;
   final _tabIndexNotifier = ValueNotifier<int>(0);
   final _globalLoadingNotifier = ValueNotifier(false);
 
   @override
   void initState() {
     super.initState();
-    _userNotifier = ValueNotifier(widget.user);
   }
 
   @override
   void dispose() {
-    _userNotifier.dispose();
     _globalLoadingNotifier.dispose();
     _tabIndexNotifier.dispose();
     super.dispose();
@@ -45,9 +40,8 @@ class _HomeViewState extends State<HomeView> {
                 return IndexedStack(
                   index: currentIndex,
                   children: [
-                    LobbyView(userNotifier: _userNotifier),
+                    LobbyView(),
                     ProfileView(
-                      userNotifier: _userNotifier,
                       globalLoadingNotifier: _globalLoadingNotifier,
                       tabIndexNotifier: _tabIndexNotifier,
                       profileTabIndex: _profileTabIndex,

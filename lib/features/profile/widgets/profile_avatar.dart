@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/presentation/widgets/image_picker_sheet.dart';
+import 'package:knuckle_bones/core/store/user_store.dart';
 
 class ProfileAvatar extends StatelessWidget {
-  final ValueNotifier<UserEntity> userNotifier;
+  final _userStore = GetIt.I<UserStore>();
   final bool isEditing;
   final Function(ImageSource) onPickImage;
   final VoidCallback onRemoveImage;
 
-  const ProfileAvatar({
+  ProfileAvatar({
     super.key,
-    required this.userNotifier,
     required this.isEditing,
     required this.onPickImage,
     required this.onRemoveImage,
@@ -21,9 +21,9 @@ class ProfileAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return ValueListenableBuilder(
-      valueListenable: userNotifier,
+      valueListenable: _userStore,
       builder: (_, user, _) {
-        final avatarFile = user.avatarFile;
+        final avatarFile = user!.avatarFile;
         final imageProvider = avatarFile != null ? FileImage(avatarFile) : null;
         return CircleAvatar(
           radius: 70,

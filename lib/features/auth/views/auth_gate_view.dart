@@ -4,6 +4,7 @@ import 'package:knuckle_bones/core/data/user_repository.dart';
 import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
 import 'package:knuckle_bones/core/domain/i_auth_repository.dart';
+import 'package:knuckle_bones/core/store/user_store.dart';
 import 'package:knuckle_bones/features/auth/views/signin_view.dart';
 import 'package:knuckle_bones/features/auth/views/signup_view.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_app_bar.dart';
@@ -17,6 +18,7 @@ class AuthGateView extends StatelessWidget {
   Widget build(BuildContext context) {
     final authRepository = GetIt.I<IAuthRepository>();
     final userRepository = GetIt.I<UserRepository>();
+    final userStore = GetIt.I<UserStore>();
     return StreamBuilder<UserEntity?>(
       stream: authRepository.authChanges,
       builder: (context, authSnapshot) {
@@ -26,6 +28,7 @@ class AuthGateView extends StatelessWidget {
           );
         }
         if (!authSnapshot.hasData) {
+          if (userStore.hasUser) userStore.clearUser();
           return const _WelcomeView();
         }
 
@@ -35,20 +38,10 @@ class AuthGateView extends StatelessWidget {
           future: userRepository.getUserDetails(basicUser),
           builder: (context, dataSnapshot) {
             if (dataSnapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text("Loading user data..."),
-                    ],
-                  ),
-                ),
-              );
+              const _LoadingView();
             }
-            return HomeView(user: dataSnapshot.data ?? basicUser);
+            userStore.setUser(dataSnapshot.data ?? basicUser);
+            return HomeView();
           },
         );
       },
@@ -209,6 +202,25 @@ class _GateButtonsRow extends StatelessWidget {
           child: const Text('Sign up'),
         ),
       ],
+    );
+  }
+}
+
+class _LoadingView extends StatelessWidget {
+  const _LoadingView();
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text("Loading user data..."),
+          ],
+        ),
+      ),
     );
   }
 }

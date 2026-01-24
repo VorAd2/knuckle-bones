@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
+import 'package:knuckle_bones/core/store/user_store.dart';
 import 'package:knuckle_bones/core/utils/media_helper.dart';
 import 'package:knuckle_bones/features/profile/views/profile_controller.dart';
 import 'package:knuckle_bones/features/profile/widgets/loading_veil.dart';
 import 'package:knuckle_bones/features/profile/widgets/profile_scaffold.dart';
 
 class ProfileView extends StatefulWidget {
-  final ValueNotifier<UserEntity> userNotifier;
   final ValueNotifier<bool> globalLoadingNotifier;
   final ValueNotifier<int> tabIndexNotifier;
   final int profileTabIndex;
   const ProfileView({
     super.key,
-    required this.userNotifier,
     required this.globalLoadingNotifier,
     required this.tabIndexNotifier,
     required this.profileTabIndex,
@@ -25,11 +25,12 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
+  final _userStore = GetIt.I<UserStore>();
   late ProfileController _controller;
   final _formKey = GlobalKey<FormState>();
   final _usernameFormController = TextEditingController();
 
-  UserEntity get user => widget.userNotifier.value;
+  UserEntity get user => _userStore.value!;
 
   @override
   void initState() {
@@ -53,7 +54,7 @@ class _ProfileViewState extends State<ProfileView> {
     final newTabIndex = widget.tabIndexNotifier.value;
     final isEditing = _controller.isEditing;
     if (newTabIndex != widget.profileTabIndex && isEditing) {
-      _onCancel();
+      _onCancelIntention();
     }
   }
 
@@ -65,7 +66,7 @@ class _ProfileViewState extends State<ProfileView> {
     _controller.isEditing = true;
   }
 
-  void _onCancel() {
+  void _onCancelIntention() {
     _controller.isEditing = false;
     _formKey.currentState?.reset();
     _resetProfileData();
@@ -86,7 +87,6 @@ class _ProfileViewState extends State<ProfileView> {
       await _controller.updateUser(
         newName: newName,
         newAvatar: _controller.avatarFile,
-        userNotifier: widget.userNotifier,
       );
       if (mounted) {
         _controller.isLoading = false;
@@ -140,15 +140,6 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   @override
-  void didUpdateWidget(ProfileView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.userNotifier.value != oldWidget.userNotifier.value &&
-        !_controller.isEditing) {
-      _resetProfileData();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: _controller.isLoadingNotifier,
@@ -160,7 +151,6 @@ class _ProfileViewState extends State<ProfileView> {
           GestureDetector(
             onTap: () => FocusScope.of(context).unfocus(),
             child: ProfileScaffold(
-              userNotifier: widget.userNotifier,
               isEditingNotifier: _controller.isEditingNotifier,
               buildAppBarActions: _buildAppBarActions,
               formKey: _formKey,
@@ -183,7 +173,7 @@ class _ProfileViewState extends State<ProfileView> {
     if (isEditing) {
       return [
         IconButton(
-          onPressed: _onCancel,
+          onPressed: _onCancelIntention,
           icon: Icon(Icons.close, color: cs.secondary),
           tooltip: 'Cancel',
         ),

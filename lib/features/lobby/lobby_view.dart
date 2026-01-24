@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:knuckle_bones/core/domain/user_entity.dart';
+import 'package:get_it/get_it.dart';
 import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_app_bar.dart';
+import 'package:knuckle_bones/core/store/user_store.dart';
 import 'package:knuckle_bones/features/match/presentation/views/match_view.dart';
 
 class LobbyView extends StatefulWidget {
-  final ValueNotifier<UserEntity> userNotifier;
-  const LobbyView({super.key, required this.userNotifier});
+  const LobbyView({super.key});
   @override
   State<StatefulWidget> createState() => _LobbyViewState();
 }
@@ -18,6 +18,7 @@ enum _OpponentType { human, bot }
 enum _BotDifficulty { lovelace, turing }
 
 class _LobbyViewState extends State<LobbyView> {
+  final _userStore = GetIt.I<UserStore>();
   final _codeFormKey = GlobalKey<FormState>();
   final _codeFieldController = TextEditingController();
   _OpponentType _opponentTypeView = _OpponentType.human;
