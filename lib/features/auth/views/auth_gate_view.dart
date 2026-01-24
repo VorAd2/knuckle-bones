@@ -38,7 +38,7 @@ class AuthGateView extends StatelessWidget {
           future: userRepository.getUserDetails(basicUser),
           builder: (context, dataSnapshot) {
             if (dataSnapshot.connectionState == ConnectionState.waiting) {
-              const _LoadingView();
+              return const _LoadingView();
             }
             userStore.setUser(dataSnapshot.data ?? basicUser);
             return HomeView();
