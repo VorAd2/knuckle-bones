@@ -7,6 +7,8 @@ import 'package:knuckle_bones/core/domain/player_role.dart';
 import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/store/user_store.dart';
 import 'package:knuckle_bones/features/match/data/match_repository.dart';
+import 'package:knuckle_bones/features/match/domain/connection_handlers.dart';
+import 'package:knuckle_bones/features/match/domain/i_connection_handler.dart';
 import 'package:knuckle_bones/features/match/domain/room_entity.dart';
 import 'package:knuckle_bones/features/match/domain/match_player.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/board/board_controller.dart';
@@ -14,19 +16,23 @@ import 'match_ui_state.dart';
 
 class MatchController extends ChangeNotifier {
   final _userStore = GetIt.I<UserStore>();
-  final _repository = MatchRepository();
+  final _repository = GetIt.I<MatchRepository>();
   final MatchUiState state = MatchUiState();
   final isAwaitingNotifier = ValueNotifier(true);
   final String roomCode;
 
+  late final IConnectionHandler _connectionHandler;
   late final MatchPlayer localPlayer;
   MatchPlayer? remotePlayer;
-  PlayerRole localPlayerRole;
+  final PlayerRole localPlayerRole;
   late final RoomEntity room;
   Timer? _rollingTimer;
   bool _isDisposed = false;
 
   MatchController({required this.localPlayerRole, required this.roomCode}) {
+    _connectionHandler = localPlayerRole == .host
+        ? HostConnectionHandler()
+        : GuestConnectionHandler();
     localPlayer = MatchPlayer(
       id: user.id,
       name: user.name,
@@ -39,10 +45,10 @@ class MatchController extends ChangeNotifier {
 
   Future<void> init() async {
     try {
-      if (localPlayerRole == .host) {
-        await createRoom();
-      } else {
-        await joinRoom();
+      room = await _connectionHandler.connect(user: user, roomCode: roomCode);
+      if (localPlayerRole == .guest) {
+        _setLoading(false);
+        notifyListeners();
       }
     } catch (e) {
       debugPrint("Erro ao iniciar partida: $e");
@@ -57,42 +63,6 @@ class MatchController extends ChangeNotifier {
 
   void _setLoading(bool value) {
     isAwaitingNotifier.value = value;
-  }
-
-  Future<void> createRoom() async {
-    try {
-      final myId = localPlayer.id;
-      await _insertRoomCode();
-      final roomId = await _repository.createRoom(
-        hostId: myId,
-        roomCode: roomCode,
-      );
-
-      room = RoomEntity(id: roomId, roomCode: roomCode);
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-
-  Future<void> _insertRoomCode() async {
-    await _repository.insertCode(roomCode);
-  }
-
-  Future<void> joinRoom() async {
-    try {
-      final myId = user.id;
-      final roomId = await _repository.joinRoom(
-        roomCode: roomCode,
-        guestId: myId,
-      );
-
-      room = RoomEntity(id: roomId, roomCode: roomCode, status: .playing);
-    } catch (e) {
-      throw Exception(e);
-    } finally {
-      _setLoading(false);
-      notifyListeners();
-    }
   }
 
   // void startMatch() {

@@ -7,6 +7,7 @@ import 'package:knuckle_bones/core/data/user_repository.dart';
 import 'package:knuckle_bones/core/domain/i_auth_repository.dart';
 import 'package:knuckle_bones/core/presentation/controllers/auth_controller.dart';
 import 'package:knuckle_bones/core/store/user_store.dart';
+import 'package:knuckle_bones/features/match/data/match_repository.dart';
 import 'package:knuckle_bones/firebase_options.dart';
 import 'package:knuckle_bones/my_app.dart';
 
@@ -20,6 +21,7 @@ void _setupDependencies() {
   );
   getIt.registerSingleton<UserRepository>(UserRepository());
   getIt.registerSingleton<UserStore>(UserStore());
+  getIt.registerSingleton<MatchRepository>(MatchRepository());
 }
 
 void main() async {
