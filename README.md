@@ -1,3 +1,6 @@
+![Flutter](https://img.shields.io/badge/Flutter-3.38.5-grey?style=flat&labelColor=02569B)
+
+
 <h1>KnuckleBones</h1>
 A Flutter app that features a 1v1 multiplayer dice game based on the mechanics of the Knuckle Bones minigame found in Cult of the Lamb. 
 
@@ -30,8 +33,11 @@ A Flutter app that features a 1v1 multiplayer dice game based on the mechanics o
 
 ## Prerequisites
 - Firebase project
-- Flutter (3.38.5 or other compatible version)
-- FVM (optional, but recommended)
+- Android SDK or physical Android device
+- **FVM installed** (used to manage the Flutter SDK version)
+
+> This project uses FVM to ensure the correct Flutter SDK version.  
+> All Flutter commands should be executed via FVM.
 
 ## 1. Clone the repository
 
