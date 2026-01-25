@@ -13,7 +13,7 @@ A Flutter app that features a 1v1 multiplayer dice game based on the mechanics o
 ## Home and Match
 <p align="center">
   <img src="docs/lobby.png" width="300"/>
-  <img src="docs/profile.jpg" width="300"/>
+  <img src="docs/profile.png" width="300"/>
   <img src="docs/match.png" width="300"/>
 </p>
 
