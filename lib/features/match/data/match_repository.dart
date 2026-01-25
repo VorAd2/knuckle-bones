@@ -41,10 +41,14 @@ class MatchRepository {
     }
   }
 
-  Future<String> insertCode(String roomCode) async {
+  Future<String> insertCode({
+    required String roomCode,
+    required String roomId,
+  }) async {
     await _firestore.collection('codes').doc(roomCode).set({
       'code': roomCode,
       'status': CodeStatus.virgin.name,
+      'room': roomId,
       'createdAt': FieldValue.serverTimestamp(),
     });
     return roomCode;

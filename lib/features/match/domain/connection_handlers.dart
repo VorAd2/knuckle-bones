@@ -12,11 +12,11 @@ class HostConnectionHandler implements IConnectionHandler {
     required UserEntity user,
     required String roomCode,
   }) async {
-    await _repository.insertCode(roomCode);
     final roomId = await _repository.createRoom(
       hostId: user.id,
       roomCode: roomCode,
     );
+    await _repository.insertCode(roomCode: roomCode, roomId: roomId);
     return RoomEntity(id: roomId, roomCode: roomCode);
   }
 }
