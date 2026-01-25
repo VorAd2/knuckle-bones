@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:knuckle_bones/core/domain/player_role.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
-import 'package:knuckle_bones/core/store/user_store.dart';
 import 'package:knuckle_bones/features/match/domain/match_player.dart';
 import 'package:knuckle_bones/features/match/presentation/views/match_controller.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/board/board.dart';
@@ -24,7 +22,6 @@ class MatchView extends StatefulWidget {
 
 class _MatchViewState extends State<MatchView> {
   late final MatchController _matchController;
-  final _userStore = GetIt.I<UserStore>();
   bool _isQuitting = false;
 
   @override

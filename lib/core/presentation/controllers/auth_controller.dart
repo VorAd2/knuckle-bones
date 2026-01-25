@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/domain/i_auth_repository.dart';
 
 class AuthController extends ChangeNotifier {
