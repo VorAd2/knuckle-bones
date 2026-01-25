@@ -1,10 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_app_bar.dart';
-import 'package:knuckle_bones/core/store/user_store.dart';
 import 'package:knuckle_bones/features/match/presentation/views/match_view.dart';
 
 class LobbyView extends StatefulWidget {
@@ -18,16 +18,26 @@ enum _OpponentType { human, bot }
 enum _BotDifficulty { lovelace, turing }
 
 class _LobbyViewState extends State<LobbyView> {
-  final _userStore = GetIt.I<UserStore>();
   final _codeFormKey = GlobalKey<FormState>();
   final _codeFieldController = TextEditingController();
   _OpponentType _opponentTypeView = _OpponentType.human;
   _BotDifficulty _botDiff = _BotDifficulty.lovelace;
 
+  String _generateRoomCode() {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    final rnd = Random();
+    return String.fromCharCodes(
+      Iterable.generate(6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))),
+    );
+  }
+
   void _onCreate(BuildContext context) {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const MatchView()));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            MatchView(localPlayerRole: .host, roomCode: _generateRoomCode()),
+      ),
+    );
   }
 
   void _onJoin(BuildContext context) {
@@ -58,12 +68,16 @@ class _LobbyViewState extends State<LobbyView> {
             ),
             TextButton(
               onPressed: () {
-                final code = _codeFieldController.text.trim();
                 if (_validateMatchCode()) {
                   _closeAndClear(dialogContext);
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(code)));
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => MatchView(
+                        localPlayerRole: .guest,
+                        roomCode: _codeFieldController.text,
+                      ),
+                    ),
+                  );
                 }
               },
               child: const Text('Confirm'),

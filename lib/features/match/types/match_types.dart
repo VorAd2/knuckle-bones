@@ -4,3 +4,7 @@ typedef TileSelectionCallback =
 enum TileStatus { single, stacked }
 
 enum MoveResult { occupied, placed, matchEnded }
+
+enum MatchStatus { waiting, playing, finished }
+
+enum CodeStatus { virgin, used }

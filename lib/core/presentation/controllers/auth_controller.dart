@@ -6,7 +6,6 @@ class AuthController extends ChangeNotifier {
   final IAuthRepository _repository;
   bool _isLoading = false;
   String? _errorMessage;
-  UserEntity? currentUser;
 
   AuthController(this._repository);
 

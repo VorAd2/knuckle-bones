@@ -100,3 +100,61 @@ class _ScoreRow extends StatelessWidget {
     );
   }
 }
+
+class BoardMock extends StatelessWidget {
+  const BoardMock({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    const double textOffset = 24.0;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _TileGridMock(),
+        Transform.translate(
+          offset: const Offset(0, textOffset),
+          child: _ScoreRowMock(),
+        ),
+      ],
+    );
+  }
+}
+
+class _TileGridMock extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 1,
+      child: GridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 9,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+        ),
+        itemBuilder: (_, _) {
+          return TileMock();
+        },
+      ),
+    );
+  }
+}
+
+class _ScoreRowMock extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: List.generate(3, (index) {
+        return Expanded(
+          child: Center(
+            child: Text(
+              '0',
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}

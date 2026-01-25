@@ -71,3 +71,17 @@ class Tile extends StatelessWidget {
     return AppIcons.dice(face: val, color: color);
   }
 }
+
+class TileMock extends StatelessWidget {
+  const TileMock({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Material(
+      color: cs.surfaceBright,
+      borderRadius: BorderRadius.circular(12),
+      elevation: 2.5,
+      child: InkWell(borderRadius: BorderRadius.circular(12), onTap: null),
+    );
+  }
+}

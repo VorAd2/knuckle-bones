@@ -50,3 +50,24 @@ class Oracle extends StatelessWidget {
     );
   }
 }
+
+class OracleMock extends StatelessWidget {
+  const OracleMock({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final borderColor = cs.outlineVariant;
+    return Container(
+      width: 55,
+      height: 55,
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest,
+        border: Border.all(color: borderColor, width: 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Center(
+        child: AppIcons.dice(face: 1, size: 42, color: cs.onSurfaceVariant),
+      ),
+    );
+  }
+}

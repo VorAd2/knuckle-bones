@@ -1,0 +1,1 @@
+enum PlayerRole { host, guest }

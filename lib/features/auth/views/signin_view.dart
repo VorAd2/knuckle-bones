@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:knuckle_bones/core/presentation/controllers/auth_controller.dart';
+import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
 import 'package:knuckle_bones/features/auth/views/signup_view.dart';
 import 'package:knuckle_bones/features/auth/widgets/alternative_auth_row.dart';
 import 'package:knuckle_bones/features/auth/widgets/auth_form.dart';
@@ -47,9 +48,21 @@ class _SigninViewState extends State<SigninView> {
     }
   }
 
-  void _onGoogleAuth() {}
+  void _onGoogleAuth() {
+    MyDialog.alert(
+      context: context,
+      titleString: 'Oops',
+      contentString: 'This feature has not yet been implemented',
+    );
+  }
 
-  void _onGithubAuth() {}
+  void _onGithubAuth() {
+    MyDialog.alert(
+      context: context,
+      titleString: 'Oops',
+      contentString: 'This feature has not yet been implemented',
+    );
+  }
 
   List<AuthFieldConfig> _getConfigs() {
     return [

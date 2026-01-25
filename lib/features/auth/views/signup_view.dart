@@ -49,7 +49,6 @@ class _SignupViewState extends State<SignupView> {
     if (!mounted) return;
 
     if (success) {
-      //TODO enviar avatar para cloudinary
       Navigator.of(context).pop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
