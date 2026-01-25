@@ -95,12 +95,13 @@ class _LobbyViewState extends State<LobbyView> {
                               _codeFieldController.text,
                             );
                             if (dialogContext.mounted) {
+                              final code = _codeFieldController.text;
                               _closeAndClear(dialogContext);
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (_) => MatchView(
                                     localPlayerRole: .guest,
-                                    roomCode: _codeFieldController.text,
+                                    roomCode: code,
                                   ),
                                 ),
                               );
