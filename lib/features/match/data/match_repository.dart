@@ -1,8 +1,49 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:knuckle_bones/features/match/types/match_types.dart';
 
+class RoomNotFoundException implements Exception {
+  final String message;
+  RoomNotFoundException(this.message);
+  @override
+  String toString() => message;
+}
+
+class RoomUsedException implements Exception {
+  final String message;
+  RoomUsedException(this.message);
+  @override
+  String toString() => message;
+}
+
 class MatchRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> checkCodeAvailability(String code) async {
+    try {
+      final query = await _firestore
+          .collection('codes')
+          .where('code', isEqualTo: code)
+          .limit(1)
+          .get();
+
+      if (query.docs.isEmpty) {
+        throw RoomNotFoundException('Room not found');
+      }
+
+      final data = query.docs.first.data();
+      final status = data['status'];
+
+      if (status != CodeStatus.virgin) {
+        throw RoomUsedException('This code is already in use or is invalid');
+      }
+    } on RoomNotFoundException {
+      rethrow;
+    } on RoomUsedException {
+      rethrow;
+    } catch (e) {
+      throw Exception("Unknown error. Please, contact the developer.");
+    }
+  }
 
   Future<String> insertCode(String roomCode) async {
     await _firestore.collection('codes').add({

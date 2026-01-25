@@ -5,6 +5,7 @@ import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
 import 'package:knuckle_bones/core/presentation/widgets/three_d_button.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_app_bar.dart';
+import 'package:knuckle_bones/features/match/data/match_repository.dart';
 import 'package:knuckle_bones/features/match/presentation/views/match_view.dart';
 
 class LobbyView extends StatefulWidget {
@@ -41,48 +42,88 @@ class _LobbyViewState extends State<LobbyView> {
   }
 
   void _onJoin(BuildContext context) {
+    final repository = MatchRepository();
+    String? errorMessage;
+    bool isValidating = false;
     showDialog(
       barrierDismissible: false,
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Type the match code'),
-          content: Form(
-            key: _codeFormKey,
-            child: TextFormField(
-              controller: _codeFieldController,
-              validator: (value) {
-                if (value == null || value.isEmpty) return 'Required';
-                if (value.length < 6) return 'The code has 6 chars';
-                return null;
-              },
-              decoration: const InputDecoration(hintText: 'Example: X79UK2'),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                _closeAndClear(dialogContext);
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (_validateMatchCode()) {
-                  _closeAndClear(dialogContext);
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => MatchView(
-                        localPlayerRole: .guest,
-                        roomCode: _codeFieldController.text,
-                      ),
-                    ),
-                  );
-                }
-              },
-              child: const Text('Confirm'),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setChildState) {
+            return AlertDialog(
+              title: const Text('Type the match code'),
+              content: Form(
+                key: _codeFormKey,
+                child: TextFormField(
+                  controller: _codeFieldController,
+                  enabled: !isValidating,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Required';
+                    if (value.length != 6) return 'The code has 6 chars';
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Example: X79UK2',
+                    errorText: errorMessage,
+                  ),
+                  onChanged: (_) {
+                    if (errorMessage != null) {
+                      setChildState(() => errorMessage = null);
+                    }
+                  },
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isValidating
+                      ? null
+                      : () => _closeAndClear(dialogContext),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: isValidating
+                      ? null
+                      : () async {
+                          if (!_validateMatchCode()) return;
+                          setChildState(() {
+                            isValidating = true;
+                            errorMessage = null;
+                          });
+                          try {
+                            await repository.checkCodeAvailability(
+                              _codeFieldController.text,
+                            );
+                            if (dialogContext.mounted) {
+                              _closeAndClear(dialogContext);
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => MatchView(
+                                    localPlayerRole: .guest,
+                                    roomCode: _codeFieldController.text,
+                                  ),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            setChildState(() => errorMessage = e.toString());
+                          } finally {
+                            if (dialogContext.mounted) {
+                              setChildState(() => isValidating = false);
+                            }
+                          }
+                        },
+                  child: isValidating
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Confirm'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
