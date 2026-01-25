@@ -26,7 +26,7 @@ class MatchController extends ChangeNotifier {
   Timer? _rollingTimer;
   bool _isDisposed = false;
 
-  MatchController(this.localPlayerRole, this.roomCode) {
+  MatchController({required this.localPlayerRole, required this.roomCode}) {
     localPlayer = MatchPlayer(
       id: user.id,
       name: user.name,
@@ -63,7 +63,10 @@ class MatchController extends ChangeNotifier {
     try {
       final myId = localPlayer.id;
       await _insertRoomCode();
-      final roomId = await _repository.createRoom(myId, roomCode);
+      final roomId = await _repository.createRoom(
+        hostId: myId,
+        roomCode: roomCode,
+      );
 
       room = RoomEntity(id: roomId, roomCode: roomCode);
     } catch (e) {
@@ -78,7 +81,10 @@ class MatchController extends ChangeNotifier {
   Future<void> joinRoom() async {
     try {
       final myId = user.id;
-      final roomId = await _repository.joinRoom(roomCode, myId);
+      final roomId = await _repository.joinRoom(
+        roomCode: roomCode,
+        guestId: myId,
+      );
 
       room = RoomEntity(id: roomId, roomCode: roomCode, status: .playing);
     } catch (e) {

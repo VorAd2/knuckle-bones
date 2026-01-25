@@ -27,14 +27,17 @@ class _MatchViewState extends State<MatchView> {
   @override
   void initState() {
     super.initState();
-    _matchController = MatchController(widget.localPlayerRole, widget.roomCode);
+    _matchController = MatchController(
+      localPlayerRole: widget.localPlayerRole,
+      roomCode: widget.roomCode,
+    );
     _matchController.addListener(_onStateChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
         await _matchController.init();
       } catch (e) {
         if (!mounted) return;
-        await MyDialog.show(
+        await MyDialog.alert(
           context: context,
           titleString: "Erro",
           contentString: "Não foi possível entrar na sala.",
