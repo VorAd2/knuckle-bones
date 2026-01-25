@@ -2,7 +2,7 @@
 
 
 <h1>KnuckleBones</h1>
-A Flutter app that features a 1v1 multiplayer dice game based on the mechanics of the Knuckle Bones minigame found in Cult of the Lamb. 
+A Flutter app that features a 1v1 multiplayer dice game based on the mechanics of the Knuckle Bones minigame found in Cult of the Lamb. This project uses Firebase's free resources to offer, in a simplified approach, authentication, real-time interaction and data storage features.
 
 # 🧩 Previews and Features
 
