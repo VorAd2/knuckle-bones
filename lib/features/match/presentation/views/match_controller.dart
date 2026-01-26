@@ -7,9 +7,9 @@ import 'package:knuckle_bones/core/domain/player_role.dart';
 import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/store/user_store.dart';
 import 'package:knuckle_bones/features/match/data/match_repository.dart';
-import 'package:knuckle_bones/features/match/domain/connection_handlers.dart';
-import 'package:knuckle_bones/features/match/domain/i_connection_handler.dart';
-import 'package:knuckle_bones/features/match/domain/room_entity.dart';
+import 'package:knuckle_bones/features/match/domain/connection/connection_handlers.dart';
+import 'package:knuckle_bones/features/match/domain/connection/i_connection_handler.dart';
+import 'package:knuckle_bones/features/match/domain/entity/room_entity.dart';
 import 'package:knuckle_bones/features/match/domain/match_player.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/board/board_controller.dart';
 import 'match_ui_state.dart';
@@ -18,14 +18,15 @@ class MatchController extends ChangeNotifier {
   final _userStore = GetIt.I<UserStore>();
   final _repository = GetIt.I<MatchRepository>();
   final MatchUiState state = MatchUiState();
-  final isAwaitingNotifier = ValueNotifier(true);
+  final isWaitingNotifier = ValueNotifier(true);
   final String roomCode;
 
+  StreamSubscription? _matchSubscription;
   late final IConnectionHandler _connectionHandler;
   late final MatchPlayer localPlayer;
   MatchPlayer? remotePlayer;
   final PlayerRole localPlayerRole;
-  late final RoomEntity room;
+  late RoomEntity room;
   Timer? _rollingTimer;
   bool _isDisposed = false;
 
@@ -43,46 +44,58 @@ class MatchController extends ChangeNotifier {
     );
   }
 
+  UserEntity get user => _userStore.value!;
+  String? get turnPlayerId => state.currentTurnPlayerId;
+  bool get isMyTurn => turnPlayerId == localPlayer.id;
+  MatchPlayer get turnPlayer => isMyTurn ? localPlayer : remotePlayer!;
+
   Future<void> init() async {
     try {
       room = await _connectionHandler.connect(user: user, roomCode: roomCode);
       if (localPlayerRole == .guest) {
-        _setLoading(false);
-        notifyListeners();
+        _setWaiting(false);
       }
+      _listeningToMatch(room.id);
     } catch (e) {
       debugPrint("Erro ao iniciar partida: $e");
       rethrow;
     }
   }
 
-  UserEntity get user => _userStore.value!;
-  String? get turnPlayerId => state.currentTurnPlayerId;
-  bool get isMyTurn => turnPlayerId == localPlayer.id;
-  MatchPlayer get turnPlayer => isMyTurn ? localPlayer : remotePlayer!;
+  void _listeningToMatch(String roomId) {
+    _matchSubscription = _repository
+        .streamMatch(roomId)
+        .listen(
+          (updatedRoom) {
+            _updateRoom(updatedRoom);
+            if (updatedRoom.status == .waiting ||
+                updatedRoom.lastMove?.playerId == user.id) {
+              return;
+            }
+            if (localPlayerRole == .host && isWaitingNotifier.value) {
+              _setWaiting(false);
 
-  void _setLoading(bool value) {
-    isAwaitingNotifier.value = value;
+              _toggleTurnPlayer();
+              notifyListeners();
+
+              // remotePlayer = MatchPlayer(
+              //   id: updatedRoom.guestBoard!.playerId,
+              //   name: updatedRoom.guestBoard!.playerName,
+              //   boardController: BoardController(
+              //     onTileSelected: ({required rowIndex, required colIndex}) {},
+              //   ),
+              // );
+              //start match
+            }
+          },
+          onError: (e) {
+            print('XOXO Erro stream: $e');
+          },
+        );
   }
 
-  // void startMatch() {
-  //   final newMatch = MatchEntity(
-  //     id: 'match_123',
-  //     hostId: localPlayer.id,
-  //     guestId: remotePlayer.id,
-  //     currentTurnPlayerId: localPlayer.id,
-  //     status: MatchStatus.playing,
-  //   );
-  //   state.match = newMatch;
-  //   state.isLoading = false;
-  //   _nextTurn(isFirstTurn: true);
-  // }
   ///////////////////////////////////////////////////////
   //////////////////////////////////////////////////////
-
-  void _toggleTurnPlayer() {
-    state.currentTurnPlayerId = isMyTurn ? remotePlayer!.id : localPlayer.id;
-  }
 
   void _nextTurn({bool isFirstTurn = false}) {
     if (!isFirstTurn) _toggleTurnPlayer();
@@ -103,10 +116,6 @@ class MatchController extends ChangeNotifier {
         _simulateRemoteInteraction();
       }
     });
-  }
-
-  void _setPlayerOracleValue(int value) {
-    turnPlayer.oracleValue = value;
   }
 
   Future<void> _handleLocalInteraction({
@@ -184,6 +193,22 @@ class MatchController extends ChangeNotifier {
     }
   }
 
+  void _setWaiting(bool value) {
+    isWaitingNotifier.value = value;
+  }
+
+  void _updateRoom(RoomEntity updatedRoom) {
+    room = updatedRoom;
+  }
+
+  void _toggleTurnPlayer() {
+    state.currentTurnPlayerId = isMyTurn ? remotePlayer!.id : localPlayer.id;
+  }
+
+  void _setPlayerOracleValue(int value) {
+    turnPlayer.oracleValue = value;
+  }
+
   void _triggerEndGame() {
     state.isEndGame = true;
     notifyListeners();
@@ -191,7 +216,8 @@ class MatchController extends ChangeNotifier {
 
   @override
   void dispose() {
-    isAwaitingNotifier.dispose();
+    _matchSubscription?.cancel();
+    isWaitingNotifier.dispose();
     _isDisposed = true;
     _rollingTimer?.cancel();
     localPlayer.dispose();

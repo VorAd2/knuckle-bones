@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:knuckle_bones/features/match/domain/entity/board_entity.dart';
+import 'package:knuckle_bones/features/match/domain/entity/room_entity.dart';
 import 'package:knuckle_bones/features/match/types/match_types.dart';
 
 class RoomNotFoundException implements Exception {
@@ -30,7 +32,7 @@ class MatchRepository {
       final status = data?['status'];
 
       if (status != CodeStatus.virgin.name) {
-        throw RoomUsedException('This code is already in use or is invalid');
+        throw RoomUsedException('This code is invalid');
       }
     } on RoomNotFoundException {
       rethrow;
@@ -55,22 +57,25 @@ class MatchRepository {
   }
 
   Future<String> createRoom({
-    required String hostId,
     required String roomCode,
+    required String hostId,
+    required String hostName,
   }) async {
     final docRef = await _firestore.collection('rooms').add({
       'code': roomCode,
-      'hostId': hostId,
-      'guestId': null,
+      'hostBoard': BoardEntity.toMap(hostId, hostName, null, null),
+      'guestBoard': null,
       'status': MatchStatus.waiting.name,
+      'turnPlayerId': null,
       'createdAt': FieldValue.serverTimestamp(),
     });
     return docRef.id;
   }
 
-  Future<String> joinRoom({
+  Future<Map<String, dynamic>> joinRoom({
     required String roomCode,
     required String guestId,
+    required String guestName,
   }) async {
     final roomQueryFuture = _firestore
         .collection('rooms')
@@ -107,12 +112,23 @@ class MatchRepository {
       }
 
       transaction.update(roomRef, {
-        'guestId': guestId,
         'status': MatchStatus.playing.name,
+        'guestBoard': BoardEntity.toMap(guestId, guestName, null, null),
+        'turnPlayerId': freshRoom.data()?['hostBoard']['playerId'],
       });
       transaction.update(codeRef, {'status': CodeStatus.used.name});
     });
 
-    return roomRef.id;
+    final oldRoomData = roomQuerySnapshot.docs.first.data();
+    return {'id': roomRef.id, 'hostBoard': oldRoomData['hostBoard']};
+  }
+
+  Stream<RoomEntity> streamMatch(String roomId) {
+    return _firestore.collection('rooms').doc(roomId).snapshots().map((
+      snapshot,
+    ) {
+      if (!snapshot.exists) throw Exception('The game was finished');
+      return RoomEntity.fromMap(snapshot.id, snapshot.data()!);
+    });
   }
 }

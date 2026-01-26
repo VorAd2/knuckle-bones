@@ -94,7 +94,7 @@ class _MatchViewState extends State<MatchView> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: _matchController.isAwaitingNotifier,
+      valueListenable: _matchController.isWaitingNotifier,
       builder: (_, isAwaiting, child) {
         return Stack(
           children: [
