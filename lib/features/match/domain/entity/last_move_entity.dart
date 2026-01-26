@@ -10,13 +10,4 @@ class LastMoveEntity {
     required this.dice,
     required this.playerId,
   });
-
-  factory LastMoveEntity.fromMap(Map<String, dynamic> data) {
-    return LastMoveEntity(
-      row: data['row'],
-      col: data['col'],
-      dice: data['dice'],
-      playerId: data['playerId'],
-    );
-  }
 }

@@ -20,25 +20,4 @@ class RoomEntity {
     required this.lastMove,
     required this.turnPlayerId,
   });
-
-  factory RoomEntity.fromMap(String roomId, Map<String, dynamic> data) {
-    final hostBoard = BoardEntity.fromMap(
-      Map<String, dynamic>.from(data['hostBoard']),
-    );
-    final guestBoard = data['guestBoard'] != null
-        ? BoardEntity.fromMap(Map<String, dynamic>.from(data['guestBoard']))
-        : null;
-    final lastMove = data['lastMove'] != null
-        ? LastMoveEntity.fromMap(Map<String, dynamic>.from(data['lastMove']))
-        : null;
-    return RoomEntity(
-      id: roomId,
-      status: MatchStatus.fromName(data['status']),
-      code: data['code'] ?? '',
-      hostBoard: hostBoard,
-      guestBoard: guestBoard,
-      lastMove: lastMove,
-      turnPlayerId: data['turnPlayerId'],
-    );
-  }
 }

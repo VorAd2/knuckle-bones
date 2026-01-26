@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:knuckle_bones/core/domain/user_entity.dart';
+import 'package:knuckle_bones/features/match/data/mappers.dart';
 import 'package:knuckle_bones/features/match/data/match_repository.dart';
 import 'package:knuckle_bones/features/match/domain/entity/board_entity.dart';
 import 'package:knuckle_bones/features/match/domain/connection/i_connection_handler.dart';
@@ -47,9 +48,8 @@ class GuestConnectionHandler implements IConnectionHandler {
       guestId: user.id,
       guestName: user.name,
     );
-    final hostBoard = BoardEntity.fromMap(
-      Map<String, dynamic>.from(oldRoomData['hostBoard']),
-    );
+    final hostBoard = (oldRoomData['hostBoard'] as Map<String, dynamic>)
+        .toBoardEntity();
     return RoomEntity(
       status: .playing,
       id: oldRoomData['id'],

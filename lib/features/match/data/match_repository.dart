@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:knuckle_bones/features/match/data/mappers.dart';
 import 'package:knuckle_bones/features/match/domain/entity/board_entity.dart';
 import 'package:knuckle_bones/features/match/domain/entity/room_entity.dart';
 import 'package:knuckle_bones/features/match/types/match_types.dart';
@@ -63,7 +64,12 @@ class MatchRepository {
   }) async {
     final docRef = await _firestore.collection('rooms').add({
       'code': roomCode,
-      'hostBoard': BoardEntity.toMap(hostId, hostName, null, null),
+      'hostBoard': BoardEntity(
+        playerId: hostId,
+        playerName: hostName,
+        oracle: null,
+        score: null,
+      ).toMap(),
       'guestBoard': null,
       'status': MatchStatus.waiting.name,
       'turnPlayerId': null,
@@ -113,7 +119,12 @@ class MatchRepository {
 
       transaction.update(roomRef, {
         'status': MatchStatus.playing.name,
-        'guestBoard': BoardEntity.toMap(guestId, guestName, null, null),
+        'guestBoard': BoardEntity(
+          playerId: guestId,
+          playerName: guestName,
+          oracle: null,
+          score: null,
+        ).toMap(),
         'turnPlayerId': freshRoom.data()?['hostBoard']['playerId'],
       });
       transaction.update(codeRef, {'status': CodeStatus.used.name});
@@ -128,7 +139,7 @@ class MatchRepository {
       snapshot,
     ) {
       if (!snapshot.exists) throw Exception('The game was finished');
-      return RoomEntity.fromMap(snapshot.id, snapshot.data()!);
+      return snapshot.data()!.toRoomEntity(roomId);
     });
   }
 }
