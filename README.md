@@ -1,7 +1,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Flutter SDK](https://img.shields.io/badge/Flutter_SDK-3.38.5-grey?style=flat&labelColor=02569B)
 
-<h1>KnuckleBones</h1>
+# KnuckleBones
 KnuckleBones is a multiplayer dice game developed with Flutter, based on the mechanics of the minigame of the same name featured in Cult of the Lamb, with real-time online matches,
 using Firebase Authentication and Cloud Firestore.
 
@@ -9,16 +9,16 @@ using Firebase Authentication and Cloud Firestore.
 
 ## Welcome and Authentication
 <p align="center">
-  <img src="docs/welcome.png" width="300"/>
-  <img src="docs/signin.png" width="300"/>
-  <img src="docs/signup.png" width="300"/>
+  <img src="docs/welcome.png" width="300" alt="Welcome screen"/>
+  <img src="docs/signin.png" width="300" alt="Sign in screen"/>
+  <img src="docs/signup.png" width="300" alt="Sign up screen"/>
 </p>
 
 ## Home and Match
 <p align="center">
-  <img src="docs/lobby.png" width="300"/>
-  <img src="docs/profile.png" width="300"/>
-  <img src="docs/match.png" width="300"/>
+  <img src="docs/lobby.png" width="300" alt="Lobby screen"/>
+  <img src="docs/profile.png" width="300" alt="Profile screen"/>
+  <img src="docs/match.png" width="300" alt="Match screen"/>
 </p>
 
 # 🧰 Toolbox
