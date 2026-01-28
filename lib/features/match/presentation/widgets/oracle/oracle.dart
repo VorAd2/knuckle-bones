@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:knuckle_bones/core/presentation/icons/app_icons.dart';
-import 'package:knuckle_bones/features/match/domain/match_player.dart';
+import 'package:knuckle_bones/features/match/domain/match_player/match_player.dart';
 import 'package:knuckle_bones/features/match/presentation/views/match_controller.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/oracle/fast_spinner.dart';
 
@@ -22,8 +22,10 @@ class Oracle extends StatelessWidget {
     return ListenableBuilder(
       listenable: matchController,
       builder: (context, _) {
-        final isTurn = matchController.state.currentTurnPlayerId == player.id;
-        final borderColor = isTurn ? cs.tertiary : cs.outlineVariant;
+        final isTurn = matchController.turnPlayerId == player.id;
+        final borderColor = isTurn && matchController.hasStarted
+            ? cs.tertiary
+            : cs.outlineVariant;
         return Container(
           width: 55,
           height: 55,
@@ -33,7 +35,7 @@ class Oracle extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Center(
-            child: matchController.state.isRolling && isTurn
+            child: matchController.isRolling && isTurn
                 ? SizedBox(
                     width: 24,
                     height: 24,

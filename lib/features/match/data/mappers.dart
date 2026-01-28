@@ -14,6 +14,12 @@ extension BoardSerialization on BoardEntity {
   }
 }
 
+extension LastMoveSerialization on LastMoveEntity {
+  Map<String, dynamic> toMap() {
+    return {'row': row, 'col': col, 'dice': dice, 'playerId': playerId};
+  }
+}
+
 extension RoomDeserialization on Map<String, dynamic> {
   RoomEntity toRoomEntity(String roomId) {
     final hostBoard = (this['hostBoard'] as Map<String, dynamic>)
@@ -31,6 +37,7 @@ extension RoomDeserialization on Map<String, dynamic> {
       hostBoard: hostBoard,
       guestBoard: guestBoard,
       lastMove: lastMove,
+      isOmen: this['isOmen'],
       turnPlayerId: this['turnPlayerId'],
     );
   }

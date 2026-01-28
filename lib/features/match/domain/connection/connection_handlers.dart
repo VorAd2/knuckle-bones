@@ -31,8 +31,9 @@ class HostConnectionHandler implements IConnectionHandler {
         score: null,
       ),
       guestBoard: null,
+      isOmen: false,
       lastMove: null,
-      turnPlayerId: null,
+      turnPlayerId: user.id,
     );
   }
 }
@@ -61,6 +62,7 @@ class GuestConnectionHandler implements IConnectionHandler {
         oracle: null,
         score: null,
       ),
+      isOmen: false,
       lastMove: null,
       turnPlayerId: hostBoard.playerId,
     );

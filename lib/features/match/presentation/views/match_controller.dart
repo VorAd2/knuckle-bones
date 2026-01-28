@@ -9,28 +9,36 @@ import 'package:knuckle_bones/core/store/user_store.dart';
 import 'package:knuckle_bones/features/match/data/match_repository.dart';
 import 'package:knuckle_bones/features/match/domain/connection/connection_handlers.dart';
 import 'package:knuckle_bones/features/match/domain/connection/i_connection_handler.dart';
+import 'package:knuckle_bones/features/match/domain/entity/last_move_entity.dart';
 import 'package:knuckle_bones/features/match/domain/entity/room_entity.dart';
-import 'package:knuckle_bones/features/match/domain/match_player.dart';
+import 'package:knuckle_bones/features/match/domain/match_player/match_player.dart';
+import 'package:knuckle_bones/features/match/presentation/views/echo_controller.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/board/board_controller.dart';
 import 'match_ui_state.dart';
 
 class MatchController extends ChangeNotifier {
+  late final MatchUiState state;
   final _userStore = GetIt.I<UserStore>();
   final _repository = GetIt.I<MatchRepository>();
-  final MatchUiState state = MatchUiState();
-  final isWaitingNotifier = ValueNotifier(true);
-  final String roomCode;
 
-  StreamSubscription? _matchSubscription;
-  late final IConnectionHandler _connectionHandler;
-  late final MatchPlayer localPlayer;
-  MatchPlayer? remotePlayer;
-  final PlayerRole localPlayerRole;
   late RoomEntity room;
+  final String roomCode;
+  late final MatchPlayer localPlayer;
+  final PlayerRole localPlayerRole;
+  MatchPlayer? remotePlayer;
+
+  late final IConnectionHandler _connectionHandler;
+  StreamSubscription? _matchSubscription;
+
   Timer? _rollingTimer;
   bool _isDisposed = false;
 
+  final isWaitingNotifier = ValueNotifier(true);
+
   MatchController({required this.localPlayerRole, required this.roomCode}) {
+    state = MatchUiState(
+      currentTurnPlayerId: localPlayerRole == .host ? user.id : null,
+    );
     _connectionHandler = localPlayerRole == .host
         ? HostConnectionHandler()
         : GuestConnectionHandler();
@@ -44,22 +52,58 @@ class MatchController extends ChangeNotifier {
     );
   }
 
-  UserEntity get user => _userStore.value!;
+  bool hasStarted = false;
+  bool get isWaiting => isWaitingNotifier.value;
+  bool get isEndGame => state.isEndGame;
+  bool get isRolling => state.isRolling;
   String? get turnPlayerId => state.currentTurnPlayerId;
   bool get isMyTurn => turnPlayerId == localPlayer.id;
-  MatchPlayer get turnPlayer => isMyTurn ? localPlayer : remotePlayer!;
+  UserEntity get user => _userStore.value!;
 
-  Future<void> init() async {
+  Future<void> asyncInit() async {
     try {
-      room = await _connectionHandler.connect(user: user, roomCode: roomCode);
-      if (localPlayerRole == .guest) {
-        _setWaiting(false);
+      switch (localPlayerRole) {
+        case .host:
+          await _hostInit();
+          break;
+        case .guest:
+          await _guestInit();
       }
-      _listeningToMatch(room.id);
     } catch (e) {
       debugPrint("Erro ao iniciar partida: $e");
       rethrow;
     }
+  }
+
+  void _notifyWaiting(bool value) {
+    isWaitingNotifier.value = value;
+  }
+
+  void _updateRoom(RoomEntity updatedRoom) {
+    room = updatedRoom;
+  }
+
+  Future<void> _hostInit() async {
+    room = await _connectionHandler.connect(user: user, roomCode: roomCode);
+    _listeningToMatch(room.id);
+  }
+
+  Future<void> _guestInit() async {
+    room = await _connectionHandler.connect(user: user, roomCode: roomCode);
+
+    remotePlayer = MatchPlayer(
+      id: room.hostBoard.playerId,
+      name: room.hostBoard.playerName,
+      boardController: BoardController(
+        onTileSelected: ({required rowIndex, required colIndex}) {},
+      ),
+    );
+
+    hasStarted = true;
+    _notifyWaiting(false);
+    _nextTurn(room);
+
+    _listeningToMatch(room.id);
   }
 
   void _listeningToMatch(String roomId) {
@@ -67,25 +111,33 @@ class MatchController extends ChangeNotifier {
         .streamMatch(roomId)
         .listen(
           (updatedRoom) {
-            _updateRoom(updatedRoom);
-            if (updatedRoom.status == .waiting ||
-                updatedRoom.lastMove?.playerId == user.id) {
-              return;
+            if (updatedRoom.status == .waiting) return;
+
+            if (updatedRoom.isOmen) {
+              if (updatedRoom.turnPlayerId == localPlayer.id) return;
+            } else {
+              if (updatedRoom.lastMove?.playerId == localPlayer.id) return;
             }
-            if (localPlayerRole == .host && isWaitingNotifier.value) {
-              _setWaiting(false);
 
-              _toggleTurnPlayer();
-              notifyListeners();
+            _updateRoom(updatedRoom);
 
-              // remotePlayer = MatchPlayer(
-              //   id: updatedRoom.guestBoard!.playerId,
-              //   name: updatedRoom.guestBoard!.playerName,
-              //   boardController: BoardController(
-              //     onTileSelected: ({required rowIndex, required colIndex}) {},
-              //   ),
-              // );
-              //start match
+            if (localPlayerRole == .host && isWaiting) {
+              remotePlayer = MatchPlayer(
+                id: updatedRoom.guestBoard!.playerId,
+                name: updatedRoom.guestBoard!.playerName,
+                boardController: BoardController(
+                  onTileSelected: ({required rowIndex, required colIndex}) {},
+                ),
+              );
+              hasStarted = true;
+              _notifyWaiting(false);
+            }
+
+            if (updatedRoom.isOmen) {
+              _handleOmen(updatedRoom);
+              return;
+            } else {
+              _nextTurn(updatedRoom);
             }
           },
           onError: (e) {
@@ -97,53 +149,111 @@ class MatchController extends ChangeNotifier {
   ///////////////////////////////////////////////////////
   //////////////////////////////////////////////////////
 
-  void _nextTurn({bool isFirstTurn = false}) {
-    if (!isFirstTurn) _toggleTurnPlayer();
-    state.isRolling = true;
-    notifyListeners();
-    _roll();
+  void _nextTurn(RoomEntity updatedRoom) {
+    state.currentTurnPlayerId = updatedRoom.turnPlayerId;
+    if (localPlayer.id == turnPlayerId) {
+      _rollForLocal();
+    } else {
+      _rollForRemote();
+    }
   }
 
-  void _roll() {
-    final nextDice = Random().nextInt(6) + 1;
+  void _rollForLocal() {
+    void startMatchVariable() => hasStarted = true;
+
+    state.isRolling = true;
+    notifyListeners();
+
+    final oracle = Random().nextInt(6) + 1;
     _rollingTimer?.cancel();
-    _rollingTimer = Timer(const Duration(milliseconds: 2000), () {
+    _rollingTimer = Timer(const Duration(milliseconds: 2000), () async {
+      if (!hasStarted) startMatchVariable();
+
       state.isRolling = false;
-      _setPlayerOracleValue(nextDice);
+      localPlayer.oracleValue = oracle;
       notifyListeners();
 
-      if (!isMyTurn) {
-        _simulateRemoteInteraction();
-      }
+      await EchoController.echoOracle(
+        room: room,
+        role: localPlayerRole,
+        oracle: oracle,
+      );
     });
+  }
+
+  void _rollForRemote() {
+    state.isRolling = true;
+    notifyListeners();
+  }
+
+  void _handleOmen(RoomEntity updatedRoom) {
+    final targetBoard =
+        updatedRoom.turnPlayerId == updatedRoom.hostBoard.playerId
+        ? updatedRoom.hostBoard
+        : updatedRoom.guestBoard!;
+    final oracle = targetBoard.oracle!;
+    state.isRolling = false;
+    remotePlayer!.oracleValue = oracle;
+    notifyListeners();
   }
 
   Future<void> _handleLocalInteraction({
     required int row,
     required int col,
   }) async {
-    if (!isMyTurn || state.isRolling || state.isDestroying || state.isEndGame) {
+    if (!hasStarted ||
+        !isMyTurn ||
+        state.isRolling ||
+        state.isDestroying ||
+        state.isEndGame) {
       return;
     }
+    final diceValue = localPlayer.oracleValue;
+    //placeDice, triggerRedDie
 
-    final diceValue = turnPlayer.oracleValue;
-    final result = localPlayer.boardController.placeDice(
-      rowIndex: row,
-      colIndex: col,
-      diceValue: diceValue,
+    room = room.copyWith(
+      isOmen: false,
+      lastMove: LastMoveEntity(
+        col: col,
+        row: row,
+        dice: diceValue,
+        playerId: localPlayer.id,
+      ),
+      turnPlayerId: remotePlayer!.id,
     );
+    _nextTurn(room);
 
-    switch (result) {
-      case .occupied:
-        return;
-      case .placed:
-        await _triggerRedDie(col: col, diceValue: diceValue);
-        _nextTurn();
-        break;
-      case .matchEnded:
-        await _triggerRedDie(col: col, diceValue: diceValue);
-        _triggerEndGame();
+    try {
+      await EchoController.echoMove(
+        room: room,
+        row: row,
+        col: col,
+        dice: diceValue,
+        triggerPlayerId: localPlayer.id,
+        opponnentPlayerId: remotePlayer!.id,
+      );
+    } catch (e) {
+      // _revertTurn();
+      print("Erro ao sincronizar: $e");
     }
+    // final diceValue = turnPlayer.oracleValue;
+    // final result = localPlayer.boardController.placeDice(
+    //   rowIndex: row,
+    //   colIndex: col,
+    //   diceValue: diceValue,
+    // );
+    // switch (result) {
+    //   case .occupied:
+    //     return;
+    //   case .placed:
+    //     await _triggerRedDie(col: col, diceValue: diceValue);
+    //     await echoMove();
+    //     _nextTurn();
+    //     break;
+    //   case .matchEnded:
+    //     await _triggerRedDie(col: col, diceValue: diceValue);
+    //     _triggerEndGame();
+    // }
   }
 
   Future<void> _triggerRedDie({
@@ -157,56 +267,6 @@ class MatchController extends ChangeNotifier {
     );
     if (_isDisposed) return;
     state.isDestroying = false;
-  }
-
-  Future<void> _simulateRemoteInteraction() async {
-    await Future.delayed(const Duration(seconds: 1));
-    if (_isDisposed) return;
-
-    final diceValue = turnPlayer.oracleValue;
-    int col = Random().nextInt(3);
-    int row = Random().nextInt(3);
-    final result = remotePlayer!.boardController.placeDice(
-      rowIndex: row,
-      colIndex: col,
-      diceValue: diceValue,
-    );
-
-    switch (result) {
-      case .placed:
-        await localPlayer.boardController.destroyDieWithValue(
-          colIndex: col,
-          valueToDestroy: diceValue,
-        );
-        if (_isDisposed) return;
-        _nextTurn();
-      case .matchEnded:
-        await localPlayer.boardController.destroyDieWithValue(
-          colIndex: col,
-          valueToDestroy: diceValue,
-        );
-        if (_isDisposed) return;
-        _triggerEndGame();
-      case .occupied:
-        //maquina erra, tenta denovo
-        _simulateRemoteInteraction();
-    }
-  }
-
-  void _setWaiting(bool value) {
-    isWaitingNotifier.value = value;
-  }
-
-  void _updateRoom(RoomEntity updatedRoom) {
-    room = updatedRoom;
-  }
-
-  void _toggleTurnPlayer() {
-    state.currentTurnPlayerId = isMyTurn ? remotePlayer!.id : localPlayer.id;
-  }
-
-  void _setPlayerOracleValue(int value) {
-    turnPlayer.oracleValue = value;
   }
 
   void _triggerEndGame() {

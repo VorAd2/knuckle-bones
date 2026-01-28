@@ -12,6 +12,18 @@ class MatchPlayer {
     required this.boardController,
   });
 
+  @override
+  String toString() {
+    return '''
+MatchPlayer(
+  id: $id,
+  name: $name,
+  oracleValue: $oracleValue,
+  boardController: ${boardController.runtimeType},
+)
+''';
+  }
+
   void dispose() {
     boardController.dispose();
   }

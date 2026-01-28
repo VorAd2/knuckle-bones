@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:knuckle_bones/core/domain/player_role.dart';
 import 'package:knuckle_bones/features/match/data/mappers.dart';
 import 'package:knuckle_bones/features/match/domain/entity/board_entity.dart';
+import 'package:knuckle_bones/features/match/domain/entity/last_move_entity.dart';
 import 'package:knuckle_bones/features/match/domain/entity/room_entity.dart';
 import 'package:knuckle_bones/features/match/types/match_types.dart';
 
@@ -72,7 +74,9 @@ class MatchRepository {
       ).toMap(),
       'guestBoard': null,
       'status': MatchStatus.waiting.name,
-      'turnPlayerId': null,
+      'turnPlayerId': hostId,
+      'isOmen': false,
+      'lastMove': null,
       'createdAt': FieldValue.serverTimestamp(),
     });
     return docRef.id;
@@ -135,11 +139,54 @@ class MatchRepository {
   }
 
   Stream<RoomEntity> streamMatch(String roomId) {
-    return _firestore.collection('rooms').doc(roomId).snapshots().map((
-      snapshot,
-    ) {
-      if (!snapshot.exists) throw Exception('The game was finished');
-      return snapshot.data()!.toRoomEntity(roomId);
+    return _firestore
+        .collection('rooms')
+        .doc(roomId)
+        .snapshots(includeMetadataChanges: true)
+        .where((snapshot) => !snapshot.metadata.hasPendingWrites)
+        .map((snapshot) {
+          if (!snapshot.exists) throw Exception('The game was finished');
+          return snapshot.data()!.toRoomEntity(roomId);
+        });
+  }
+
+  Future<void> echoOracle({
+    required RoomEntity room,
+    required PlayerRole role,
+    required int oracle,
+  }) async {
+    final boardName = role == .host ? 'hostBoard' : 'guestBoard';
+    final boardEntity = boardName == 'hostBoard'
+        ? room.hostBoard
+        : room.guestBoard;
+    await _firestore.collection('rooms').doc(room.id).update({
+      'isOmen': true,
+      boardName: BoardEntity(
+        playerId: boardEntity!.playerId,
+        playerName: boardEntity.playerName,
+        oracle: oracle,
+        score: boardEntity.score,
+      ).toMap(),
+    });
+  }
+
+  Future<void> echoMove({
+    required RoomEntity room,
+    required int row,
+    required int col,
+    required int dice,
+    required String triggerPlayerId,
+    required String opponnentPlayerId,
+  }) async {
+    await _firestore.collection('rooms').doc(room.id).update({
+      'isOmen': false,
+      'lastMove': LastMoveEntity(
+        col: col,
+        row: row,
+        dice: dice,
+        playerId: triggerPlayerId,
+      ).toMap(),
+      'turnPlayerId': opponnentPlayerId,
     });
   }
 }

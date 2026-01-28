@@ -5,6 +5,7 @@ class MatchUiState {
   bool isEndGame;
 
   MatchUiState({
+    this.currentTurnPlayerId,
     this.isRolling = false,
     this.isDestroying = false,
     this.isEndGame = false,

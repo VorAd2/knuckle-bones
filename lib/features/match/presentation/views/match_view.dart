@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:knuckle_bones/core/domain/player_role.dart';
 import 'package:knuckle_bones/core/presentation/widgets/my_dialog.dart';
-import 'package:knuckle_bones/features/match/domain/match_player.dart';
 import 'package:knuckle_bones/features/match/presentation/views/match_controller.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/board/board.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/end_game_dialog/end_game_dialog.dart';
@@ -34,7 +33,7 @@ class _MatchViewState extends State<MatchView> {
     _matchController.addListener(_onStateChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
-        await _matchController.init();
+        await _matchController.asyncInit();
       } catch (e) {
         if (!mounted) return;
         await MyDialog.alert(
@@ -117,7 +116,7 @@ class _MatchScaffold extends StatelessWidget {
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
-        if (context.mounted && matchController.state.isEndGame) {
+        if (context.mounted && matchController.isEndGame) {
           Navigator.of(context).pop();
           return;
         }
@@ -141,7 +140,6 @@ class _MatchScaffold extends StatelessWidget {
                   child: _PlayerSection(
                     forTop: true,
                     matchController: matchController,
-                    player: matchController.remotePlayer,
                   ),
                 ),
               ),
@@ -154,7 +152,6 @@ class _MatchScaffold extends StatelessWidget {
                   child: _PlayerSection(
                     forTop: false,
                     matchController: matchController,
-                    player: matchController.localPlayer,
                   ),
                 ),
               ),
@@ -169,49 +166,55 @@ class _MatchScaffold extends StatelessWidget {
 class _PlayerSection extends StatelessWidget {
   final bool forTop;
   final MatchController matchController;
-  final MatchPlayer? player;
 
-  const _PlayerSection({
-    required this.forTop,
-    required this.matchController,
-    required this.player,
-  });
+  const _PlayerSection({required this.forTop, required this.matchController});
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: matchController,
       builder: (context, child) {
-        final isTurn = matchController.state.currentTurnPlayerId == player?.id;
+        final player = forTop
+            ? matchController.remotePlayer
+            : matchController.localPlayer;
+        final isPlayerTurn = matchController.turnPlayerId == player?.id;
         return AnimatedOpacity(
           duration: const Duration(milliseconds: 300),
-          opacity: isTurn ? 1.0 : 0.7,
+          opacity: !matchController.isWaiting && isPlayerTurn ? 1.0 : 0.7,
           child: child,
         );
       },
       child: Container(
         padding: const EdgeInsets.all(14),
-        child: Row(
-          spacing: 18,
-          children: [
-            if (player == null) ...[
-              ShrineMock(),
-              Expanded(child: BoardMock()),
-            ] else ...[
-              Shrine(
-                forTop: forTop,
-                matchController: matchController,
-                player: player!,
-              ),
-              Expanded(
-                child: Board(
-                  controller: player!.boardController,
-                  isInteractive: !forTop,
-                  forTop: forTop,
-                ),
-              ),
-            ],
-          ],
+        child: ListenableBuilder(
+          listenable: matchController.isWaitingNotifier,
+          builder: (_, _) {
+            final player = forTop
+                ? matchController.remotePlayer
+                : matchController.localPlayer;
+            return Row(
+              spacing: 18,
+              children: [
+                if (player == null) ...[
+                  ShrineMock(),
+                  Expanded(child: BoardMock()),
+                ] else ...[
+                  Shrine(
+                    forTop: forTop,
+                    matchController: matchController,
+                    player: player,
+                  ),
+                  Expanded(
+                    child: Board(
+                      controller: player.boardController,
+                      isInteractive: !forTop,
+                      forTop: forTop,
+                    ),
+                  ),
+                ],
+              ],
+            );
+          },
         ),
       ),
     );
