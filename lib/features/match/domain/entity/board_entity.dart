@@ -11,12 +11,12 @@ class BoardEntity {
     required this.score,
   });
 
-  BoardEntity copyWith(int oracle, int score) {
+  BoardEntity copyWith({int? oracle, int? score}) {
     return BoardEntity(
       playerId: playerId,
       playerName: playerName,
-      oracle: oracle,
-      score: score,
+      oracle: oracle ?? this.oracle,
+      score: score ?? this.score,
     );
   }
 }

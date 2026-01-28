@@ -161,12 +161,7 @@ class MatchRepository {
         : room.guestBoard;
     await _firestore.collection('rooms').doc(room.id).update({
       'isOmen': true,
-      boardName: BoardEntity(
-        playerId: boardEntity!.playerId,
-        playerName: boardEntity.playerName,
-        oracle: oracle,
-        score: boardEntity.score,
-      ).toMap(),
+      boardName: boardEntity!.copyWith(oracle: oracle).toMap(),
     });
   }
 

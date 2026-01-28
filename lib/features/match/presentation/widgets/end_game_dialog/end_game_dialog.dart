@@ -16,8 +16,8 @@ class EndGameDialog extends StatelessWidget {
     required this.onBackHome,
     required this.onClose,
   }) {
-    localScore = localPlayer.boardController.boardFullScore;
-    remoteScore = remotePlayer.boardController.boardFullScore;
+    localScore = localPlayer.boardController.fullScore;
+    remoteScore = remotePlayer.boardController.fullScore;
   }
   @override
   Widget build(BuildContext context) {

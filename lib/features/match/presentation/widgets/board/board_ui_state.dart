@@ -7,5 +7,5 @@ class BoardUiState {
 
   BoardUiState({required this.tileStates, required this.scores});
 
-  int get boardFullScore => scores.reduce((value, element) => value + element);
+  int get fullScore => scores.reduce((value, element) => value + element);
 }
