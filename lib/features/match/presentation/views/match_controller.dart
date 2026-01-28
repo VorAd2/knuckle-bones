@@ -26,26 +26,45 @@ class MatchController extends ChangeNotifier {
   final String roomCode;
   late final MatchPlayer localPlayer;
   MatchPlayer? remotePlayer;
-  final PlayerRole localPlayerRole;
+  Timer? _rollingTimer;
+  bool _isDisposed = false;
+
+  bool hasStarted = false;
+  final isWaitingNotifier = ValueNotifier(true);
 
   late final IConnectionHandler _connectionHandler;
   StreamSubscription? _matchSubscription;
 
-  Timer? _rollingTimer;
-  bool _isDisposed = false;
+  bool get isWaiting => isWaitingNotifier.value;
+  String? get turnPlayerId => state.currentTurnPlayerId;
+  bool get isMyTurn => turnPlayerId == localPlayer.id;
+  bool get isRolling => state.isRolling;
+  bool get isDestroying => state.isDestroying;
+  bool get isEndGame => state.isEndGame;
 
-  final isWaitingNotifier = ValueNotifier(true);
+  int get localFullScore => localPlayer.fullScore;
+  int get remoteFullScore => remotePlayer!.fullScore;
 
-  MatchController({required this.localPlayerRole, required this.roomCode}) {
+  set turnPlayerId(String id) => state.currentTurnPlayerId = id;
+  set isRolling(bool value) => state.isRolling = value;
+  set isDestroying(bool value) => state.isDestroying = value;
+  set isEndGame(bool value) => state.isEndGame = value;
+
+  MatchController({
+    required PlayerRole localPlayerRole,
+    required this.roomCode,
+  }) {
+    UserEntity getUser() => _userStore.value!;
     state = MatchUiState(
-      currentTurnPlayerId: localPlayerRole == .host ? user.id : null,
+      currentTurnPlayerId: localPlayerRole == .host ? getUser().id : null,
     );
     _connectionHandler = localPlayerRole == .host
         ? HostConnectionHandler()
         : GuestConnectionHandler();
     localPlayer = MatchPlayer(
-      id: user.id,
-      name: user.name,
+      id: getUser().id,
+      name: getUser().name,
+      role: localPlayerRole,
       boardController: BoardController(
         onTileSelected: ({required rowIndex, required colIndex}) =>
             _handleLocalMove(row: rowIndex, col: colIndex),
@@ -53,20 +72,43 @@ class MatchController extends ChangeNotifier {
     );
   }
 
-  bool hasStarted = false;
-  bool get isWaiting => isWaitingNotifier.value;
-  bool get isEndGame => state.isEndGame;
-  bool get isRolling => state.isRolling;
-  String? get turnPlayerId => state.currentTurnPlayerId;
-  bool get isMyTurn => turnPlayerId == localPlayer.id;
-  UserEntity get user => _userStore.value!;
+  @override
+  void dispose() {
+    localPlayer.dispose();
+    remotePlayer?.dispose();
+    isWaitingNotifier.dispose();
+    _rollingTimer?.cancel();
+    _isDisposed = true;
+    _matchSubscription?.cancel();
+    super.dispose();
+  }
 
-  int get localFullScore => localPlayer.boardController.fullScore;
-  int get remoteFullScore => remotePlayer!.boardController.fullScore;
+  void _notifyWaiting(bool value) {
+    isWaitingNotifier.value = value;
+  }
+
+  void _updateRoom(RoomEntity updatedRoom) {
+    room = updatedRoom;
+  }
+
+  void _setRemotePlayer({
+    required String id,
+    required String name,
+    required PlayerRole role,
+  }) {
+    remotePlayer = MatchPlayer(
+      id: id,
+      name: name,
+      role: role,
+      boardController: BoardController(
+        onTileSelected: ({required rowIndex, required colIndex}) {},
+      ),
+    );
+  }
 
   Future<void> asyncInit() async {
     try {
-      switch (localPlayerRole) {
+      switch (localPlayer.role) {
         case .host:
           await _hostInit();
           break;
@@ -79,77 +121,88 @@ class MatchController extends ChangeNotifier {
     }
   }
 
-  void _notifyWaiting(bool value) {
-    isWaitingNotifier.value = value;
-  }
-
-  void _updateRoom(RoomEntity updatedRoom) {
-    room = updatedRoom;
+  Future<void> _connectAndSetRoom() async {
+    room = await _connectionHandler.connect(
+      player: localPlayer,
+      roomCode: roomCode,
+    );
   }
 
   Future<void> _hostInit() async {
-    room = await _connectionHandler.connect(user: user, roomCode: roomCode);
+    await _connectAndSetRoom();
     _listeningToMatch(room.id);
   }
 
   Future<void> _guestInit() async {
-    room = await _connectionHandler.connect(user: user, roomCode: roomCode);
+    void startLocally() {
+      hasStarted = true;
+      _notifyWaiting(false);
+      _nextTurn(room);
+    }
 
-    remotePlayer = MatchPlayer(
-      id: room.hostBoard.playerId,
-      name: room.hostBoard.playerName,
-      boardController: BoardController(
-        onTileSelected: ({required rowIndex, required colIndex}) {},
-      ),
-    );
-
-    hasStarted = true;
-    _notifyWaiting(false);
-    _nextTurn(room);
-
+    await _connectAndSetRoom();
+    _setRemotePlayer(id: room.hostId, name: room.hostName, role: .host);
+    startLocally();
     _listeningToMatch(room.id);
   }
 
   void _listeningToMatch(String roomId) {
+    bool blockMyEcho(RoomEntity updatedRoom) {
+      if (updatedRoom.status == .waiting) return true;
+
+      if (updatedRoom.isOmen) {
+        if (updatedRoom.turnPlayerId == localPlayer.id) return true;
+      } else {
+        if (updatedRoom.lastMovePlayerId == localPlayer.id) return true;
+      }
+
+      return false;
+    }
+
+    bool triggerHostStarting(RoomEntity updatedRoom) {
+      void startGlobally() {
+        hasStarted = true;
+        _notifyWaiting(false);
+        _nextTurn(updatedRoom);
+      }
+
+      if (localPlayer.role == .host && isWaiting) {
+        _setRemotePlayer(
+          id: updatedRoom.guestId!,
+          name: updatedRoom.guestName!,
+          role: .guest,
+        );
+        startGlobally();
+        return true;
+      }
+
+      return false;
+    }
+
+    Future<void> reactToEcho(RoomEntity updatedRoom) async {
+      bool isTheFirstMove() {
+        return updatedRoom.lastMove == null &&
+            localPlayer.id != updatedRoom.turnPlayerId;
+      }
+
+      if (updatedRoom.isOmen) {
+        _handleOmen(updatedRoom);
+        return;
+      } else {
+        if (isTheFirstMove()) return;
+        await _handleRemoteMove(updatedRoom);
+        _nextTurn(updatedRoom);
+      }
+    }
+
     _matchSubscription = _repository
         .streamMatch(roomId)
         .listen(
           (updatedRoom) async {
-            if (updatedRoom.status == .waiting) return;
-
-            if (updatedRoom.isOmen) {
-              if (updatedRoom.turnPlayerId == localPlayer.id) return;
-            } else {
-              if (updatedRoom.lastMove?.playerId == localPlayer.id) return;
-            }
-
+            if (blockMyEcho(updatedRoom)) return;
             _updateRoom(updatedRoom);
-
-            if (localPlayerRole == .host && isWaiting) {
-              remotePlayer = MatchPlayer(
-                id: updatedRoom.guestBoard!.playerId,
-                name: updatedRoom.guestBoard!.playerName,
-                boardController: BoardController(
-                  onTileSelected: ({required rowIndex, required colIndex}) {},
-                ),
-              );
-              hasStarted = true;
-              _notifyWaiting(false);
-              _nextTurn(updatedRoom);
-              return;
-            }
-
-            if (updatedRoom.isOmen) {
-              _handleOmen(updatedRoom);
-              return;
-            } else {
-              if (updatedRoom.lastMove == null &&
-                  localPlayer.id != updatedRoom.turnPlayerId) {
-                return;
-              }
-              await _handleRemoteMove(updatedRoom);
-              _nextTurn(updatedRoom);
-            }
+            if (triggerHostStarting(updatedRoom)) return;
+            await reactToEcho(updatedRoom);
           },
           onError: (e) {
             print('XOXO Erro stream: $e');
@@ -157,11 +210,8 @@ class MatchController extends ChangeNotifier {
         );
   }
 
-  ///////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////
-
   void _nextTurn(RoomEntity updatedRoom) {
-    state.currentTurnPlayerId = updatedRoom.turnPlayerId;
+    turnPlayerId = updatedRoom.turnPlayerId!;
     if (localPlayer.id == turnPlayerId) {
       _rollForLocal();
     } else {
@@ -172,7 +222,7 @@ class MatchController extends ChangeNotifier {
   void _rollForLocal() {
     void startMatchVariable() => hasStarted = true;
 
-    state.isRolling = true;
+    isRolling = true;
     notifyListeners();
 
     final oracle = Random().nextInt(6) + 1;
@@ -180,40 +230,35 @@ class MatchController extends ChangeNotifier {
     _rollingTimer = Timer(const Duration(milliseconds: 2000), () async {
       if (!hasStarted) startMatchVariable();
 
-      state.isRolling = false;
+      isRolling = false;
       localPlayer.oracleValue = oracle;
       notifyListeners();
 
       await EchoController.echoOracle(
         room: room,
-        role: localPlayerRole,
+        role: localPlayer.role,
         oracle: oracle,
       );
     });
   }
 
   void _rollForRemote() {
-    state.isRolling = true;
+    isRolling = true;
     notifyListeners();
   }
 
   void _handleOmen(RoomEntity updatedRoom) {
-    final targetBoard =
-        updatedRoom.turnPlayerId == updatedRoom.hostBoard.playerId
+    final targetBoard = updatedRoom.turnPlayerId == updatedRoom.hostId
         ? updatedRoom.hostBoard
         : updatedRoom.guestBoard!;
     final oracle = targetBoard.oracle!;
-    state.isRolling = false;
+    isRolling = false;
     remotePlayer!.oracleValue = oracle;
     notifyListeners();
   }
 
   Future<void> _handleLocalMove({required int row, required int col}) async {
-    if (!hasStarted ||
-        !isMyTurn ||
-        state.isRolling ||
-        state.isDestroying ||
-        state.isEndGame) {
+    if (!hasStarted || !isMyTurn || isRolling || isDestroying || isEndGame) {
       return;
     }
     final diceValue = localPlayer.oracleValue;
@@ -297,20 +342,20 @@ class MatchController extends ChangeNotifier {
     required int diceValue,
     required BoardController boardController,
   }) async {
-    state.isDestroying = true;
+    isDestroying = true;
     await boardController.destroyDieWithValue(
       colIndex: col,
       valueToDestroy: diceValue,
     );
     if (_isDisposed) return;
-    state.isDestroying = false;
+    isDestroying = false;
   }
 
   Map<String, BoardEntity> _getNewBoards() {
     final oldBoards = {'host': room.hostBoard, 'guest': room.guestBoard};
     final newScores = {
-      'host': localPlayerRole == .host ? localFullScore : remoteFullScore,
-      'guest': localPlayerRole == .guest ? localFullScore : remoteFullScore,
+      'host': localPlayer.role == .host ? localFullScore : remoteFullScore,
+      'guest': localPlayer.role == .guest ? localFullScore : remoteFullScore,
     };
 
     final newHostBoard = oldBoards['host']!.copyWith(score: newScores['host']);
@@ -324,16 +369,5 @@ class MatchController extends ChangeNotifier {
   void _triggerEndGame() {
     state.isEndGame = true;
     notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    _matchSubscription?.cancel();
-    isWaitingNotifier.dispose();
-    _isDisposed = true;
-    _rollingTimer?.cancel();
-    localPlayer.dispose();
-    remotePlayer?.dispose();
-    super.dispose();
   }
 }

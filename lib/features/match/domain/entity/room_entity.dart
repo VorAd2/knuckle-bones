@@ -23,6 +23,12 @@ class RoomEntity {
     required this.turnPlayerId,
   });
 
+  String get hostId => hostBoard.playerId;
+  String get hostName => hostBoard.playerName;
+  String? get guestId => guestBoard?.playerId;
+  String? get guestName => guestBoard?.playerName;
+  String? get lastMovePlayerId => lastMove?.playerId;
+
   RoomEntity copyWith({
     String? id,
     String? code,

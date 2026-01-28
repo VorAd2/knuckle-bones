@@ -48,6 +48,7 @@ app.*.map.json
 .fvm/
 
 /tasks.txt
+/commits.txt
 
 firebase_options.dart
 /firebase.json
