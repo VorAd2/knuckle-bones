@@ -4,7 +4,7 @@ import 'package:knuckle_bones/features/match/presentation/widgets/board/board_co
 class MatchPlayer {
   final String id;
   final String name;
-  int oracleValue = 1;
+  int omen = 1;
   final PlayerRole role;
   final BoardController boardController;
 
@@ -23,7 +23,7 @@ class MatchPlayer {
 MatchPlayer(
   id: $id,
   name: $name,
-  oracleValue: $oracleValue,
+  omen: $omen,
   boardController: ${boardController.runtimeType},
 )
 ''';

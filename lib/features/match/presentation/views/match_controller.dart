@@ -8,7 +8,6 @@ import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/store/user_store.dart';
 import 'package:knuckle_bones/features/match/data/match_repository.dart';
 import 'package:knuckle_bones/features/match/domain/connection/connection_handlers.dart';
-import 'package:knuckle_bones/features/match/domain/connection/i_connection_handler.dart';
 import 'package:knuckle_bones/features/match/domain/entity/board_entity.dart';
 import 'package:knuckle_bones/features/match/domain/entity/last_move_entity.dart';
 import 'package:knuckle_bones/features/match/domain/entity/room_entity.dart';
@@ -225,19 +224,19 @@ class MatchController extends ChangeNotifier {
     isRolling = true;
     notifyListeners();
 
-    final oracle = Random().nextInt(6) + 1;
+    final omen = Random().nextInt(6) + 1;
     _rollingTimer?.cancel();
     _rollingTimer = Timer(const Duration(milliseconds: 2000), () async {
       if (!hasStarted) startMatchVariable();
 
       isRolling = false;
-      localPlayer.oracleValue = oracle;
+      localPlayer.omen = omen;
       notifyListeners();
 
-      await EchoController.echoOracle(
+      await EchoController.echoOmen(
         room: room,
         role: localPlayer.role,
-        oracle: oracle,
+        omen: omen,
       );
     });
   }
@@ -251,9 +250,9 @@ class MatchController extends ChangeNotifier {
     final targetBoard = updatedRoom.turnPlayerId == updatedRoom.hostId
         ? updatedRoom.hostBoard
         : updatedRoom.guestBoard!;
-    final oracle = targetBoard.oracle!;
+    final omen = targetBoard.omen!;
     isRolling = false;
-    remotePlayer!.oracleValue = oracle;
+    remotePlayer!.omen = omen;
     notifyListeners();
   }
 
@@ -261,7 +260,7 @@ class MatchController extends ChangeNotifier {
     if (!hasStarted || !isMyTurn || isRolling || isDestroying || isEndGame) {
       return;
     }
-    final diceValue = localPlayer.oracleValue;
+    final diceValue = localPlayer.omen;
     final result = localPlayer.boardController.placeDice(
       rowIndex: row,
       colIndex: col,

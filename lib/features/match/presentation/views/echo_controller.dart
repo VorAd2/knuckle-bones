@@ -6,12 +6,12 @@ import 'package:knuckle_bones/features/match/domain/entity/room_entity.dart';
 class EchoController {
   static final _repository = GetIt.I<MatchRepository>();
 
-  static Future<void> echoOracle({
+  static Future<void> echoOmen({
     required RoomEntity room,
     required PlayerRole role,
-    required int oracle,
+    required int omen,
   }) async {
-    await _repository.echoOracle(room: room, role: role, oracle: oracle);
+    await _repository.echoOmen(room: room, role: role, omen: omen);
   }
 
   static Future<void> echoMove({

@@ -2,9 +2,15 @@ import 'package:get_it/get_it.dart';
 import 'package:knuckle_bones/features/match/data/mappers.dart';
 import 'package:knuckle_bones/features/match/data/match_repository.dart';
 import 'package:knuckle_bones/features/match/domain/entity/board_entity.dart';
-import 'package:knuckle_bones/features/match/domain/connection/i_connection_handler.dart';
 import 'package:knuckle_bones/features/match/domain/entity/room_entity.dart';
 import 'package:knuckle_bones/features/match/domain/match_player/match_player.dart';
+
+abstract class IConnectionHandler {
+  Future<RoomEntity> connect({
+    required MatchPlayer player,
+    required String roomCode,
+  });
+}
 
 final _repository = GetIt.I<MatchRepository>();
 
@@ -27,7 +33,7 @@ class HostConnectionHandler implements IConnectionHandler {
       hostBoard: BoardEntity(
         playerId: player.id,
         playerName: player.name,
-        oracle: null,
+        omen: null,
         score: null,
       ),
       guestBoard: null,
@@ -59,7 +65,7 @@ class GuestConnectionHandler implements IConnectionHandler {
       guestBoard: BoardEntity(
         playerId: player.id,
         playerName: player.name,
-        oracle: null,
+        omen: null,
         score: null,
       ),
       isOmen: false,

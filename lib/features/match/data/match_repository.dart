@@ -69,7 +69,7 @@ class MatchRepository {
       'hostBoard': BoardEntity(
         playerId: hostId,
         playerName: hostName,
-        oracle: null,
+        omen: null,
         score: null,
       ).toMap(),
       'guestBoard': null,
@@ -126,7 +126,7 @@ class MatchRepository {
         'guestBoard': BoardEntity(
           playerId: guestId,
           playerName: guestName,
-          oracle: null,
+          omen: null,
           score: null,
         ).toMap(),
         'turnPlayerId': freshRoom.data()?['hostBoard']['playerId'],
@@ -150,10 +150,10 @@ class MatchRepository {
         });
   }
 
-  Future<void> echoOracle({
+  Future<void> echoOmen({
     required RoomEntity room,
     required PlayerRole role,
-    required int oracle,
+    required int omen,
   }) async {
     final boardName = role == .host ? 'hostBoard' : 'guestBoard';
     final boardEntity = boardName == 'hostBoard'
@@ -161,7 +161,7 @@ class MatchRepository {
         : room.guestBoard;
     await _firestore.collection('rooms').doc(room.id).update({
       'isOmen': true,
-      boardName: boardEntity!.copyWith(oracle: oracle).toMap(),
+      boardName: boardEntity!.copyWith(omen: omen).toMap(),
     });
   }
 

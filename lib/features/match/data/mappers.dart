@@ -8,7 +8,7 @@ extension BoardSerialization on BoardEntity {
     return {
       'playerId': playerId,
       'playerName': playerName,
-      'oracle': oracle,
+      'omen': omen,
       'score': score,
     };
   }
@@ -48,7 +48,7 @@ extension BoardDeserialization on Map<String, dynamic> {
     return BoardEntity(
       playerId: this['playerId'],
       playerName: this['playerName'],
-      oracle: this['oracle'],
+      omen: this['omen'],
       score: this['score'],
     );
   }
