@@ -58,8 +58,8 @@ class MatchController extends ChangeNotifier {
       currentTurnPlayerId: localPlayerRole == .host ? getUser().id : null,
     );
     _connectionHandler = localPlayerRole == .host
-        ? HostConnectionHandler()
-        : GuestConnectionHandler();
+        ? HostConnectionHandler(_repository)
+        : GuestConnectionHandler(_repository);
     localPlayer = MatchPlayer(
       id: getUser().id,
       name: getUser().name,

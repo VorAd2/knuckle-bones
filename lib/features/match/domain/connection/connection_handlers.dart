@@ -1,4 +1,3 @@
-import 'package:get_it/get_it.dart';
 import 'package:knuckle_bones/features/match/data/mappers.dart';
 import 'package:knuckle_bones/features/match/data/match_repository.dart';
 import 'package:knuckle_bones/features/match/domain/entity/board_entity.dart';
@@ -12,20 +11,22 @@ abstract class IConnectionHandler {
   });
 }
 
-final _repository = GetIt.I<MatchRepository>();
-
 class HostConnectionHandler implements IConnectionHandler {
+  final MatchRepository repository;
+
+  HostConnectionHandler(this.repository);
+
   @override
   Future<RoomEntity> connect({
     required MatchPlayer player,
     required String roomCode,
   }) async {
-    final roomId = await _repository.createRoom(
+    final roomId = await repository.createRoom(
       roomCode: roomCode,
       hostId: player.id,
       hostName: player.name,
     );
-    await _repository.insertCode(roomCode: roomCode, roomId: roomId);
+    await repository.insertCode(roomCode: roomCode, roomId: roomId);
     return RoomEntity(
       id: roomId,
       status: .waiting,
@@ -45,12 +46,15 @@ class HostConnectionHandler implements IConnectionHandler {
 }
 
 class GuestConnectionHandler implements IConnectionHandler {
+  final MatchRepository repository;
+
+  GuestConnectionHandler(this.repository);
   @override
   Future<RoomEntity> connect({
     required MatchPlayer player,
     required String roomCode,
   }) async {
-    final oldRoomData = await _repository.joinRoom(
+    final oldRoomData = await repository.joinRoom(
       roomCode: roomCode,
       guestId: player.id,
       guestName: player.name,

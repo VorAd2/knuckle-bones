@@ -21,7 +21,7 @@ void _setupDependencies() {
   );
   getIt.registerSingleton<UserRepository>(UserRepository());
   getIt.registerSingleton<UserStore>(UserStore());
-  getIt.registerSingleton<MatchRepository>(MatchRepository());
+  getIt.registerFactory<MatchRepository>(() => MatchRepository());
 }
 
 void main() async {
