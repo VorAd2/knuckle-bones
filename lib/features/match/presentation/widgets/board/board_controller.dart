@@ -5,19 +5,20 @@ import 'board_ui_state.dart';
 
 class BoardController extends ChangeNotifier {
   final TileSelectionCallback onTileSelected;
+  final VoidCallback onRedDieEnd;
   late final BoardUiState state;
   bool _isDisposed = false;
 
   int get fullScore => state.fullScore;
 
+  BoardController({required this.onTileSelected, required this.onRedDieEnd}) {
+    state = _createInitialState(onTileSelected);
+  }
+
   @override
   void dispose() {
     _isDisposed = true;
     super.dispose();
-  }
-
-  BoardController({required this.onTileSelected}) {
-    state = _createInitialState(onTileSelected);
   }
 
   BoardUiState _createInitialState(TileSelectionCallback onTileSelected) {
@@ -83,7 +84,7 @@ class BoardController extends ChangeNotifier {
     state.scores[colIndex] = newColScore;
   }
 
-  Future<bool> destroyDieWithValue({
+  Future<void> destroyDieWithValue({
     required int colIndex,
     required int valueToDestroy,
   }) async {
@@ -94,16 +95,20 @@ class BoardController extends ChangeNotifier {
       final tile = tiles[r][colIndex];
       if (tile.value == valueToDestroy) targets.add(tile);
     }
-    if (targets.isEmpty) return false;
+
+    if (targets.isEmpty) {
+      onRedDieEnd();
+      return;
+    }
+
     for (var tile in targets) {
       tile.isDestroying = true;
       state.filledTiles -= 1;
     }
-
     notifyListeners();
 
     await Future.delayed(const Duration(milliseconds: 1300));
-    if (_isDisposed) return false;
+    if (_isDisposed) return;
 
     for (var tile in targets) {
       tile.value = null;
@@ -111,8 +116,6 @@ class BoardController extends ChangeNotifier {
       tile.status = TileStatus.single;
     }
     _evaluateColumn(colIndex);
-
     notifyListeners();
-    return true;
   }
 }

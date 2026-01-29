@@ -34,9 +34,8 @@ class Tile extends StatelessWidget {
             builder: (context, _) {
               final value = state.value;
               return AnimatedScale(
-                duration: const Duration(
-                  milliseconds: 1200,
-                ), // Um pouco menor que o await do controller
+                onEnd: boardController.onRedDieEnd,
+                duration: const Duration(milliseconds: 1200),
                 curve: Curves.easeInOut,
                 scale: state.isDestroying ? 0.0 : 1.0,
                 child: value == null

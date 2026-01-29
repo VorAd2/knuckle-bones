@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:knuckle_bones/core/domain/player_role.dart';
 import 'package:knuckle_bones/features/match/data/mappers.dart';
 import 'package:knuckle_bones/features/match/domain/entity/board_entity.dart';
-import 'package:knuckle_bones/features/match/domain/entity/last_move_entity.dart';
 import 'package:knuckle_bones/features/match/domain/entity/room_entity.dart';
 import 'package:knuckle_bones/features/match/types/match_types.dart';
 
@@ -165,23 +164,7 @@ class MatchRepository {
     });
   }
 
-  Future<void> echoMove({
-    required RoomEntity room,
-    required int row,
-    required int col,
-    required int dice,
-    required String triggerPlayerId,
-    required String opponnentPlayerId,
-  }) async {
-    await _firestore.collection('rooms').doc(room.id).update({
-      'isOmen': false,
-      'lastMove': LastMoveEntity(
-        col: col,
-        row: row,
-        dice: dice,
-        playerId: triggerPlayerId,
-      ).toMap(),
-      'turnPlayerId': opponnentPlayerId,
-    });
+  Future<void> echoMove({required RoomEntity room}) async {
+    await _firestore.collection('rooms').doc(room.id).set(room.toMap());
   }
 }

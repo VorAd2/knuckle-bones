@@ -67,6 +67,7 @@ class MatchController extends ChangeNotifier {
       boardController: BoardController(
         onTileSelected: ({required rowIndex, required colIndex}) =>
             _handleLocalMove(row: rowIndex, col: colIndex),
+        onRedDieEnd: () => isDestroying = false,
       ),
     );
   }
@@ -101,6 +102,7 @@ class MatchController extends ChangeNotifier {
       role: role,
       boardController: BoardController(
         onTileSelected: ({required rowIndex, required colIndex}) {},
+        onRedDieEnd: () => isDestroying = false,
       ),
     );
   }
@@ -271,7 +273,7 @@ class MatchController extends ChangeNotifier {
       case .occupied:
         return;
       case .placed:
-        await _triggerRedDie(
+        _triggerRedDie(
           col: col,
           diceValue: diceValue,
           boardController: remotePlayer!.boardController,
@@ -294,18 +296,12 @@ class MatchController extends ChangeNotifier {
         _nextTurn(room);
 
         try {
-          await EchoController.echoMove(
-            room: room,
-            row: row,
-            col: col,
-            dice: diceValue,
-            triggerPlayerId: localPlayer.id,
-            opponnentPlayerId: remotePlayer!.id,
-          );
+          await EchoController.echoMove(room: room);
         } catch (e) {
           // _revertTurn();
           print("Erro ao sincronizar: $e");
         }
+
         break;
       case .matchEnded:
       //
@@ -329,6 +325,7 @@ class MatchController extends ChangeNotifier {
           diceValue: diceValue,
           boardController: localPlayer.boardController,
         );
+        if (_isDisposed) return;
         room = updatedRoom;
         _nextTurn(room);
         break;
@@ -347,8 +344,6 @@ class MatchController extends ChangeNotifier {
       colIndex: col,
       valueToDestroy: diceValue,
     );
-    if (_isDisposed) return;
-    isDestroying = false;
   }
 
   Map<String, BoardEntity> _getNewBoards() {
@@ -367,7 +362,7 @@ class MatchController extends ChangeNotifier {
   }
 
   void _triggerEndGame() {
-    state.isEndGame = true;
+    isEndGame = true;
     notifyListeners();
   }
 }

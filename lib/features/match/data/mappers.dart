@@ -3,6 +3,21 @@ import 'package:knuckle_bones/features/match/domain/entity/last_move_entity.dart
 import 'package:knuckle_bones/features/match/domain/entity/room_entity.dart';
 import 'package:knuckle_bones/features/match/types/match_types.dart';
 
+extension RoomSerialization on RoomEntity {
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'code': code,
+      'status': status.name,
+      'hostBoard': hostBoard.toMap(),
+      'guestBoard': guestBoard!.toMap(),
+      'isOmen': isOmen,
+      'lastMove': lastMove!.toMap(),
+      'turnPlayerId': turnPlayerId,
+    };
+  }
+}
+
 extension BoardSerialization on BoardEntity {
   Map<String, dynamic> toMap() {
     return {
