@@ -227,6 +227,7 @@ class MatchController extends ChangeNotifier {
     final omen = Random().nextInt(6) + 1;
     _rollingTimer?.cancel();
     _rollingTimer = Timer(const Duration(milliseconds: 2000), () async {
+      if (_isDisposed) return;
       if (!hasStarted) startMatchVariable();
 
       isRolling = false;
