@@ -67,7 +67,10 @@ class MatchController extends ChangeNotifier {
       boardController: BoardController(
         onTileSelected: ({required rowIndex, required colIndex}) =>
             _handleLocalMove(row: rowIndex, col: colIndex),
-        onRedDieEnd: () => isDestroying = false,
+        onRedDieEnd: () {
+          if (_isDisposed) return;
+          isDestroying = false;
+        },
       ),
     );
   }
@@ -131,6 +134,7 @@ class MatchController extends ChangeNotifier {
 
   Future<void> _hostInit() async {
     await _connectAndSetRoom();
+    if (_isDisposed) return;
     _listeningToMatch(room.id);
   }
 
@@ -142,6 +146,7 @@ class MatchController extends ChangeNotifier {
     }
 
     await _connectAndSetRoom();
+    if (_isDisposed) return;
     _setRemotePlayer(id: room.hostId, name: room.hostName, role: .host);
     startLocally();
     _listeningToMatch(room.id);
@@ -192,6 +197,7 @@ class MatchController extends ChangeNotifier {
       } else {
         if (isTheFirstMove()) return;
         await _handleRemoteMove(updatedRoom);
+        if (_isDisposed) return;
         _nextTurn(updatedRoom);
       }
     }
