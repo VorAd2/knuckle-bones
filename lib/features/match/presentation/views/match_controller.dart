@@ -242,6 +242,14 @@ class MatchController extends ChangeNotifier {
       localPlayer.omen = omen;
       notifyListeners();
 
+      if (localPlayer.role == .host) {
+        final oldHostBoard = room.hostBoard;
+        room = room.copyWith(hostBoard: oldHostBoard.copyWith(omen: omen));
+      } else {
+        final oldGuestBoard = room.guestBoard;
+        room = room.copyWith(guestBoard: oldGuestBoard!.copyWith(omen: omen));
+      }
+
       await EchoController.echoOmen(
         room: room,
         role: localPlayer.role,
@@ -359,8 +367,21 @@ class MatchController extends ChangeNotifier {
       'guest': localPlayer.role == .guest ? localFullScore : remoteFullScore,
     };
 
-    final newHostBoard = oldBoards['host']!.copyWith(score: newScores['host']);
-    final newGuestBoard = oldBoards['guest']!.copyWith(
+    final oldHostBoard = oldBoards['host']!;
+    final oldGuestBoard = oldBoards['guest']!;
+    BoardEntity newHostBoard;
+    BoardEntity newGuestBoard;
+
+    newHostBoard = BoardEntity(
+      playerId: oldHostBoard.playerId,
+      playerName: oldHostBoard.playerName,
+      omen: localPlayer.role == .host ? null : oldHostBoard.omen,
+      score: newScores['host'],
+    );
+    newGuestBoard = BoardEntity(
+      playerId: oldGuestBoard.playerId,
+      playerName: oldGuestBoard.playerName,
+      omen: localPlayer.role == .guest ? null : oldGuestBoard.omen,
       score: newScores['guest'],
     );
 

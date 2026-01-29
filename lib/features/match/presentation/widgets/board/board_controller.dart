@@ -107,6 +107,9 @@ class BoardController extends ChangeNotifier {
     }
     notifyListeners();
 
+    /////////////////////////
+    ////////////////////////
+
     await Future.delayed(const Duration(milliseconds: 1300));
     if (_isDisposed) return;
 
