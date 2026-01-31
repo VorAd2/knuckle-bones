@@ -3,7 +3,7 @@ typedef TileSelectionCallback =
 
 enum TileStatus { single, stacked }
 
-enum MoveResult { occupied, placed, matchEnded }
+enum MoveResult { occupied, ongoing, matchEnded }
 
 enum MatchStatus {
   waiting,

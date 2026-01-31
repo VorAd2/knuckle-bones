@@ -286,7 +286,7 @@ class MatchController extends ChangeNotifier {
     switch (result) {
       case .occupied:
         return;
-      case .placed:
+      case .ongoing:
         _triggerRedDie(
           col: col,
           diceValue: diceValue,
@@ -333,7 +333,7 @@ class MatchController extends ChangeNotifier {
     switch (result) {
       case .occupied:
         return;
-      case .placed:
+      case .ongoing:
         await _triggerRedDie(
           col: lastMove.col,
           diceValue: diceValue,

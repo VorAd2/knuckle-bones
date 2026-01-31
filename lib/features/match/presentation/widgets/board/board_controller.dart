@@ -55,7 +55,7 @@ class BoardController extends ChangeNotifier {
     notifyListeners();
 
     if (state.filledTiles == 9) return MoveResult.matchEnded;
-    return MoveResult.placed;
+    return MoveResult.ongoing;
   }
 
   void _evaluateColumn(int colIndex) {
@@ -106,9 +106,6 @@ class BoardController extends ChangeNotifier {
       state.filledTiles -= 1;
     }
     notifyListeners();
-
-    /////////////////////////
-    ////////////////////////
 
     await Future.delayed(const Duration(milliseconds: 1300));
     if (_isDisposed) return;
