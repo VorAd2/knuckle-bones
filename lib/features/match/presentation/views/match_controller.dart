@@ -12,7 +12,6 @@ import 'package:knuckle_bones/features/match/domain/entity/board_entity.dart';
 import 'package:knuckle_bones/features/match/domain/entity/last_move_entity.dart';
 import 'package:knuckle_bones/features/match/domain/entity/room_entity.dart';
 import 'package:knuckle_bones/features/match/domain/match_player/match_player.dart';
-import 'package:knuckle_bones/features/match/presentation/views/echo_controller.dart';
 import 'package:knuckle_bones/features/match/presentation/widgets/board/board_controller.dart';
 import 'match_ui_state.dart';
 
@@ -197,7 +196,7 @@ class MatchController extends ChangeNotifier {
       } else {
         if (isTheFirstMove()) return;
         await _handleRemoteMove(updatedRoom);
-        if (_isDisposed) return;
+        if (_isDisposed || updatedRoom.status == .finished) return;
         _nextTurn(updatedRoom);
       }
     }
@@ -250,7 +249,7 @@ class MatchController extends ChangeNotifier {
         room = room.copyWith(guestBoard: oldGuestBoard!.copyWith(omen: omen));
       }
 
-      await EchoController.echoOmen(
+      await _repository.echoOmen(
         room: room,
         role: localPlayer.role,
         omen: omen,
@@ -292,34 +291,61 @@ class MatchController extends ChangeNotifier {
           diceValue: diceValue,
           boardController: remotePlayer!.boardController,
         );
-
-        final newBoards = _getNewBoards();
-        room = room.copyWith(
-          isOmen: false,
-          hostBoard: newBoards['host'],
-          guestBoard: newBoards['guest'],
-          lastMove: LastMoveEntity(
+        try {
+          await _echoMove(
             col: col,
             row: row,
-            dice: diceValue,
-            playerId: localPlayer.id,
-          ),
-          turnPlayerId: remotePlayer!.id,
-        );
-
-        _nextTurn(room);
-
-        try {
-          await EchoController.echoMove(room: room);
+            diceValue: diceValue,
+            isOnGoing: true,
+          );
         } catch (e) {
           // _revertTurn();
           print("Erro ao sincronizar: $e");
         }
-
         break;
       case .matchEnded:
-      //
+        await _triggerRedDie(
+          col: col,
+          diceValue: diceValue,
+          boardController: remotePlayer!.boardController,
+        );
+        try {
+          await _echoMove(
+            col: col,
+            row: row,
+            diceValue: diceValue,
+            isOnGoing: false,
+          );
+        } catch (e) {
+          // _revertTurn();
+          print("Erro ao sincronizar: $e");
+        }
+        _triggerEndGame();
     }
+  }
+
+  Future<void> _echoMove({
+    required int col,
+    required int row,
+    required int diceValue,
+    required bool isOnGoing,
+  }) async {
+    final newBoards = _getNewBoards();
+    room = room.copyWith(
+      status: isOnGoing ? .playing : .finished,
+      isOmen: false,
+      hostBoard: newBoards['host'],
+      guestBoard: newBoards['guest'],
+      lastMove: LastMoveEntity(
+        col: col,
+        row: row,
+        dice: diceValue,
+        playerId: localPlayer.id,
+      ),
+      turnPlayerId: isOnGoing ? remotePlayer!.id : null,
+    );
+    if (isOnGoing) _nextTurn(room);
+    await _repository.echoMove(room: room);
   }
 
   Future<void> _handleRemoteMove(RoomEntity updatedRoom) async {
@@ -344,7 +370,13 @@ class MatchController extends ChangeNotifier {
         _nextTurn(room);
         break;
       case .matchEnded:
-      //
+        await _triggerRedDie(
+          col: lastMove.col,
+          diceValue: diceValue,
+          boardController: localPlayer.boardController,
+        );
+        room = updatedRoom;
+        _triggerEndGame();
     }
   }
 
