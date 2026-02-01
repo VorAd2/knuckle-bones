@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:knuckle_bones/core/domain/user_entity.dart';
 
 class UserRepository {
@@ -56,6 +57,20 @@ class UserRepository {
       await user.reload();
     } catch (e) {
       throw Exception('Erro ao atualizar dados: $e');
+    }
+  }
+
+  Future<void> incrementUserStats({
+    required String userId,
+    required bool isWinner,
+  }) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'gamesPlayed': FieldValue.increment(1),
+        'wins': isWinner ? FieldValue.increment(1) : FieldValue.increment(0),
+      });
+    } catch (e) {
+      debugPrint('Falha ao atualizar stats no servidor: $e');
     }
   }
 }

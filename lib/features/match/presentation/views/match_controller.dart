@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:knuckle_bones/core/data/user_repository.dart';
 import 'package:knuckle_bones/core/domain/player_role.dart';
 import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/store/user_store.dart';
@@ -18,7 +19,8 @@ import 'match_ui_state.dart';
 class MatchController extends ChangeNotifier {
   late final MatchUiState state;
   final _userStore = GetIt.I<UserStore>();
-  final _repository = GetIt.I<MatchRepository>();
+  final _userRepository = GetIt.I<UserRepository>();
+  final _matchRepository = GetIt.I<MatchRepository>();
 
   late RoomEntity room;
   final String roomCode;
@@ -57,8 +59,8 @@ class MatchController extends ChangeNotifier {
       currentTurnPlayerId: localPlayerRole == .host ? getUser().id : null,
     );
     _connectionHandler = localPlayerRole == .host
-        ? HostConnectionHandler(_repository)
-        : GuestConnectionHandler(_repository);
+        ? HostConnectionHandler(_matchRepository)
+        : GuestConnectionHandler(_matchRepository);
     localPlayer = MatchPlayer(
       id: getUser().id,
       name: getUser().name,
@@ -201,7 +203,7 @@ class MatchController extends ChangeNotifier {
       }
     }
 
-    _matchSubscription = _repository
+    _matchSubscription = _matchRepository
         .streamMatch(roomId)
         .listen(
           (updatedRoom) async {
@@ -249,7 +251,7 @@ class MatchController extends ChangeNotifier {
         room = room.copyWith(guestBoard: oldGuestBoard!.copyWith(omen: omen));
       }
 
-      await _repository.echoOmen(
+      await _matchRepository.echoOmen(
         room: room,
         role: localPlayer.role,
         omen: omen,
@@ -359,7 +361,7 @@ class MatchController extends ChangeNotifier {
       turnPlayerId: isOnGoing ? remotePlayer!.id : null,
     );
     if (isOnGoing) _nextTurn(room);
-    await _repository.echoMove(room: room);
+    await _matchRepository.echoMove(room: room);
   }
 
   Future<void> _handleRemoteMove(RoomEntity updatedRoom) async {
@@ -442,5 +444,26 @@ class MatchController extends ChangeNotifier {
   void _triggerEndGame() {
     isEndGame = true;
     notifyListeners();
+    _finalizeStats();
+  }
+
+  void _finalizeStats() {
+    int finalLocalScore;
+    int finalRemoteScore;
+
+    if (localPlayer.role == PlayerRole.host) {
+      finalLocalScore = room.hostBoard.score!;
+      finalRemoteScore = room.guestBoard?.score ?? 0;
+    } else {
+      finalLocalScore = room.guestBoard?.score ?? 0;
+      finalRemoteScore = room.hostBoard.score!;
+    }
+
+    final isWinner = finalLocalScore > finalRemoteScore;
+    _userStore.updateStats(isWinner: isWinner);
+    _userRepository.incrementUserStats(
+      userId: localPlayer.id,
+      isWinner: isWinner,
+    );
   }
 }

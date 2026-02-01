@@ -13,4 +13,12 @@ class UserStore extends ValueNotifier<UserEntity?> {
   void clearUser() {
     value = null;
   }
+
+  void updateStats({required bool isWinner}) {
+    if (value == null) return;
+    value = value!.copyWith(
+      gamesPlayed: value!.gamesPlayed + 1,
+      wins: isWinner ? value!.wins + 1 : value!.wins,
+    );
+  }
 }
