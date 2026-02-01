@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:knuckle_bones/core/domain/user_entity.dart';
 import 'package:knuckle_bones/core/domain/i_auth_repository.dart';
+import 'package:knuckle_bones/core/utils/auth_error_mapper.dart';
 
 class FirebaseAuthRepository implements IAuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -27,7 +28,7 @@ class FirebaseAuthRepository implements IAuthRepository {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
     } catch (e) {
-      throw Exception('Erro ao logar: $e');
+      throw Exception(AuthErrorMapper.getMessage(e));
     }
   }
 
@@ -38,7 +39,7 @@ class FirebaseAuthRepository implements IAuthRepository {
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      throw Exception('O nome "$name" já está em uso. Escolha outro.');
+      throw Exception('The name "$name" is already in use');
     }
   }
 
@@ -69,7 +70,7 @@ class FirebaseAuthRepository implements IAuthRepository {
       await credential.user!.updateDisplayName(name);
       await credential.user!.reload();
     } catch (e) {
-      throw Exception('Erro no cadastro: $e');
+      throw Exception(AuthErrorMapper.getMessage(e));
     }
   }
 
