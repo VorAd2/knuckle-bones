@@ -58,30 +58,63 @@ class BoardController extends ChangeNotifier {
     return MoveResult.ongoing;
   }
 
+  int _calculateColumnScoreFromDie(List<int> die) {
+    if (die.isEmpty) return 0;
+    int columnScore = 0;
+    final frequency = <int, int>{};
+    for (var dice in die) {
+      frequency[dice] = (frequency[dice] ?? 0) + 1;
+    }
+    frequency.forEach((dice, count) {
+      columnScore += (dice * count) * count;
+    });
+    return columnScore;
+  }
+
+  int predictScoreAfterRedDie(int colIndex, int valueToDestroy) {
+    int totalPredictedScore = 0;
+
+    for (int i = 0; i < 3; i++) {
+      if (i == colIndex) {
+        final hypotheticalDie = <int>[];
+        for (int r = 0; r < 3; r++) {
+          final dice = state.tileStates[r][colIndex].value;
+          if (dice != null && dice != valueToDestroy) {
+            hypotheticalDie.add(dice);
+          }
+        }
+        totalPredictedScore += _calculateColumnScoreFromDie(hypotheticalDie);
+      } else {
+        totalPredictedScore += state.scores[i];
+      }
+    }
+    return totalPredictedScore;
+  }
+
   void _evaluateColumn(int colIndex) {
     final tiles = state.tileStates;
+    final valuesInColumn = <int>[];
     final Map<int, List<TileUiState>> families = {};
-    int newColScore = 0;
 
     for (int row = 0; row < 3; row++) {
       final tile = tiles[row][colIndex];
-      final value = tile.value;
-      if (value != null) {
-        if (families[value] == null) families[value] = [];
-        families[value]!.add(tile);
+      final dice = tile.value;
+      if (dice != null) {
+        valuesInColumn.add(dice);
+        if (families[dice] == null) families[dice] = [];
+        families[dice]!.add(tile);
       }
     }
 
-    families.forEach((value, members) {
+    families.forEach((dice, members) {
       final length = members.length;
       final status = length > 1 ? TileStatus.stacked : TileStatus.single;
       for (var tile in members) {
         tile.status = status;
       }
-      newColScore += (length * value) * length;
     });
 
-    state.scores[colIndex] = newColScore;
+    state.scores[colIndex] = _calculateColumnScoreFromDie(valuesInColumn);
   }
 
   Future<void> destroyDieWithValue({
@@ -115,6 +148,7 @@ class BoardController extends ChangeNotifier {
       tile.isDestroying = false;
       tile.status = TileStatus.single;
     }
+
     _evaluateColumn(colIndex);
     notifyListeners();
   }

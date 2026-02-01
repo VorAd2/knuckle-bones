@@ -286,40 +286,51 @@ class MatchController extends ChangeNotifier {
       case .occupied:
         return;
       case .ongoing:
-        _triggerRedDie(
+        final projectedRemoteScore = remotePlayer!.boardController
+            .predictScoreAfterRedDie(col, diceValue);
+        final animationFuture = _triggerRedDie(
           col: col,
           diceValue: diceValue,
           boardController: remotePlayer!.boardController,
         );
+
         try {
           await _echoMove(
             col: col,
             row: row,
             diceValue: diceValue,
             isOnGoing: true,
+            remoteScoreOverride: projectedRemoteScore,
           );
         } catch (e) {
           // _revertTurn();
           print("Erro ao sincronizar: $e");
         }
+        await animationFuture;
         break;
       case .matchEnded:
-        await _triggerRedDie(
-          col: col,
-          diceValue: diceValue,
-          boardController: remotePlayer!.boardController,
-        );
+        final projectedRemoteScore = remotePlayer!.boardController
+            .predictScoreAfterRedDie(col, diceValue);
+
         try {
           await _echoMove(
             col: col,
             row: row,
             diceValue: diceValue,
             isOnGoing: false,
+            remoteScoreOverride: projectedRemoteScore,
           );
         } catch (e) {
           // _revertTurn();
           print("Erro ao sincronizar: $e");
         }
+
+        await _triggerRedDie(
+          col: col,
+          diceValue: diceValue,
+          boardController: remotePlayer!.boardController,
+        );
+
         _triggerEndGame();
     }
   }
@@ -329,8 +340,11 @@ class MatchController extends ChangeNotifier {
     required int row,
     required int diceValue,
     required bool isOnGoing,
+    int? remoteScoreOverride,
   }) async {
-    final newBoards = _getNewBoards();
+    final newBoards = _getNewBoards(
+      remoteFullScoreOverride: remoteScoreOverride,
+    );
     room = room.copyWith(
       status: isOnGoing ? .playing : .finished,
       isOmen: false,
@@ -392,11 +406,16 @@ class MatchController extends ChangeNotifier {
     );
   }
 
-  Map<String, BoardEntity> _getNewBoards() {
+  Map<String, BoardEntity> _getNewBoards({int? remoteFullScoreOverride}) {
     final oldBoards = {'host': room.hostBoard, 'guest': room.guestBoard};
+    final currentRemoteFullScore = remoteFullScoreOverride ?? remoteFullScore;
     final newScores = {
-      'host': localPlayer.role == .host ? localFullScore : remoteFullScore,
-      'guest': localPlayer.role == .guest ? localFullScore : remoteFullScore,
+      'host': localPlayer.role == .host
+          ? localFullScore
+          : currentRemoteFullScore,
+      'guest': localPlayer.role == .guest
+          ? localFullScore
+          : currentRemoteFullScore,
     };
 
     final oldHostBoard = oldBoards['host']!;
