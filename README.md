@@ -13,19 +13,17 @@ using Firebase Authentication and Cloud Firestore.
 
 * PS: This project uses Firebase's Spark (free) plan and some features, not necessarily linked to a paid Firebase plan, have not been implemented 
 
-# 🧩 Previews and Features
+# 🧩 Some Previews and Features
 
-## Welcome and Authentication
+## Authentication
 <p align="center">
-  <img src="docs/welcome.png" width="300" alt="Welcome screen"/>
   <img src="docs/signin.png" width="300" alt="Sign in screen"/>
   <img src="docs/signup.png" width="300" alt="Sign up screen"/>
 </p>
 
-## Home and Match
+## Lobby and Match
 <p align="center">
   <img src="docs/lobby.png" width="300" alt="Lobby screen"/>
-  <img src="docs/profile.png" width="300" alt="Profile screen"/>
   <img src="docs/match.png" width="300" alt="Match screen"/>
 </p>
 
