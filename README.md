@@ -3,7 +3,7 @@
 
 > 📚 **Project Status: MVP Completed.**
 > This project was developed as a study case for **Flutter** and **Firebase Realtime**.
-> The core gameplay loop is functional, but there are known technical debts (documented in Issues) regarding architecture and scaling.
+> The core gameplay is functional, but there are known technical debts (documented in Issues) regarding architecture and scaling.
 
  ---
 
