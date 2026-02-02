@@ -10,13 +10,13 @@ final colorScheme = ColorScheme.fromSeed(
 
 @immutable
 class DiceColors extends ThemeExtension<DiceColors> {
-  final Color? redDice;
+  final Color? redDie;
 
-  const DiceColors({required this.redDice});
+  const DiceColors({required this.redDie});
 
   @override
   DiceColors copyWith({Color? redDice}) {
-    return DiceColors(redDice: redDice ?? this.redDice);
+    return DiceColors(redDie: redDice ?? this.redDie);
   }
 
   @override
@@ -24,7 +24,7 @@ class DiceColors extends ThemeExtension<DiceColors> {
     if (other is! DiceColors) {
       return this;
     }
-    return DiceColors(redDice: Color.lerp(redDice, other.redDice, t));
+    return DiceColors(redDie: Color.lerp(redDie, other.redDie, t));
   }
 }
 
@@ -34,6 +34,6 @@ ThemeData buildAppTheme() {
     colorScheme: colorScheme,
     brightness: Brightness.dark,
     fontFamily: 'Poppins',
-    extensions: <ThemeExtension<dynamic>>[const DiceColors(redDice: redDice)],
+    extensions: <ThemeExtension<dynamic>>[const DiceColors(redDie: redDice)],
   );
 }

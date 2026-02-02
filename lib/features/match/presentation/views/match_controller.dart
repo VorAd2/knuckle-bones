@@ -68,7 +68,7 @@ class MatchController extends ChangeNotifier {
       boardController: BoardController(
         onTileSelected: ({required rowIndex, required colIndex}) =>
             _handleLocalMove(row: rowIndex, col: colIndex),
-        onRedDieEnd: () {
+        onRedDiceEnd: () {
           if (_isDisposed) return;
           isDestroying = false;
         },
@@ -106,7 +106,7 @@ class MatchController extends ChangeNotifier {
       role: role,
       boardController: BoardController(
         onTileSelected: ({required rowIndex, required colIndex}) {},
-        onRedDieEnd: () => isDestroying = false,
+        onRedDiceEnd: () => isDestroying = false,
       ),
     );
   }
@@ -289,8 +289,8 @@ class MatchController extends ChangeNotifier {
         return;
       case .ongoing:
         final projectedRemoteScore = remotePlayer!.boardController
-            .predictScoreAfterRedDie(col, diceValue);
-        final animationFuture = _triggerRedDie(
+            .predictScoreAfterRedDice(col, diceValue);
+        final animationFuture = _triggerRedDice(
           col: col,
           diceValue: diceValue,
           boardController: remotePlayer!.boardController,
@@ -312,7 +312,7 @@ class MatchController extends ChangeNotifier {
         break;
       case .matchEnded:
         final projectedRemoteScore = remotePlayer!.boardController
-            .predictScoreAfterRedDie(col, diceValue);
+            .predictScoreAfterRedDice(col, diceValue);
 
         try {
           await _echoMove(
@@ -327,7 +327,7 @@ class MatchController extends ChangeNotifier {
           print("Erro ao sincronizar: $e");
         }
 
-        await _triggerRedDie(
+        await _triggerRedDice(
           col: col,
           diceValue: diceValue,
           boardController: remotePlayer!.boardController,
@@ -376,7 +376,7 @@ class MatchController extends ChangeNotifier {
       case .occupied:
         return;
       case .ongoing:
-        await _triggerRedDie(
+        await _triggerRedDice(
           col: lastMove.col,
           diceValue: diceValue,
           boardController: localPlayer.boardController,
@@ -386,7 +386,7 @@ class MatchController extends ChangeNotifier {
         _nextTurn(room);
         break;
       case .matchEnded:
-        await _triggerRedDie(
+        await _triggerRedDice(
           col: lastMove.col,
           diceValue: diceValue,
           boardController: localPlayer.boardController,
@@ -396,13 +396,13 @@ class MatchController extends ChangeNotifier {
     }
   }
 
-  Future<void> _triggerRedDie({
+  Future<void> _triggerRedDice({
     required int col,
     required int diceValue,
     required BoardController boardController,
   }) async {
     isDestroying = true;
-    await boardController.destroyDieWithValue(
+    await boardController.destroyDiceWithValue(
       colIndex: col,
       valueToDestroy: diceValue,
     );

@@ -34,7 +34,7 @@ class Tile extends StatelessWidget {
             builder: (context, _) {
               final value = state.value;
               return AnimatedScale(
-                onEnd: boardController.onRedDieEnd,
+                onEnd: boardController.onRedDiceEnd,
                 duration: const Duration(milliseconds: 1200),
                 curve: Curves.easeInOut,
                 scale: state.isDestroying ? 0.0 : 1.0,
@@ -43,7 +43,7 @@ class Tile extends StatelessWidget {
                     : _getIconForValue(
                         val: value,
                         color: state.isDestroying
-                            ? diceColors.redDice!
+                            ? diceColors.redDie!
                             : _getColor(cs: cs, status: state.status),
                       ),
               );

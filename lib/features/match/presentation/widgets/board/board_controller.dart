@@ -5,13 +5,13 @@ import 'board_ui_state.dart';
 
 class BoardController extends ChangeNotifier {
   final TileSelectionCallback onTileSelected;
-  final VoidCallback onRedDieEnd;
+  final VoidCallback onRedDiceEnd;
   late final BoardUiState state;
   bool _isDisposed = false;
 
   int get fullScore => state.fullScore;
 
-  BoardController({required this.onTileSelected, required this.onRedDieEnd}) {
+  BoardController({required this.onTileSelected, required this.onRedDiceEnd}) {
     state = _createInitialState(onTileSelected);
   }
 
@@ -58,32 +58,32 @@ class BoardController extends ChangeNotifier {
     return MoveResult.ongoing;
   }
 
-  int _calculateColumnScoreFromDie(List<int> die) {
-    if (die.isEmpty) return 0;
+  int _calculateColumnScoreFromDice(List<int> dice) {
+    if (dice.isEmpty) return 0;
     int columnScore = 0;
     final frequency = <int, int>{};
-    for (var dice in die) {
-      frequency[dice] = (frequency[dice] ?? 0) + 1;
+    for (var die in dice) {
+      frequency[die] = (frequency[die] ?? 0) + 1;
     }
-    frequency.forEach((dice, count) {
-      columnScore += (dice * count) * count;
+    frequency.forEach((die, count) {
+      columnScore += (die * count) * count;
     });
     return columnScore;
   }
 
-  int predictScoreAfterRedDie(int colIndex, int valueToDestroy) {
+  int predictScoreAfterRedDice(int colIndex, int valueToDestroy) {
     int totalPredictedScore = 0;
 
     for (int i = 0; i < 3; i++) {
       if (i == colIndex) {
-        final hypotheticalDie = <int>[];
+        final hypotheticalDice = <int>[];
         for (int r = 0; r < 3; r++) {
-          final dice = state.tileStates[r][colIndex].value;
-          if (dice != null && dice != valueToDestroy) {
-            hypotheticalDie.add(dice);
+          final die = state.tileStates[r][colIndex].value;
+          if (die != null && die != valueToDestroy) {
+            hypotheticalDice.add(die);
           }
         }
-        totalPredictedScore += _calculateColumnScoreFromDie(hypotheticalDie);
+        totalPredictedScore += _calculateColumnScoreFromDice(hypotheticalDice);
       } else {
         totalPredictedScore += state.scores[i];
       }
@@ -98,15 +98,15 @@ class BoardController extends ChangeNotifier {
 
     for (int row = 0; row < 3; row++) {
       final tile = tiles[row][colIndex];
-      final dice = tile.value;
-      if (dice != null) {
-        valuesInColumn.add(dice);
-        if (families[dice] == null) families[dice] = [];
-        families[dice]!.add(tile);
+      final die = tile.value;
+      if (die != null) {
+        valuesInColumn.add(die);
+        if (families[die] == null) families[die] = [];
+        families[die]!.add(tile);
       }
     }
 
-    families.forEach((dice, members) {
+    families.forEach((die, members) {
       final length = members.length;
       final status = length > 1 ? TileStatus.stacked : TileStatus.single;
       for (var tile in members) {
@@ -114,10 +114,10 @@ class BoardController extends ChangeNotifier {
       }
     });
 
-    state.scores[colIndex] = _calculateColumnScoreFromDie(valuesInColumn);
+    state.scores[colIndex] = _calculateColumnScoreFromDice(valuesInColumn);
   }
 
-  Future<void> destroyDieWithValue({
+  Future<void> destroyDiceWithValue({
     required int colIndex,
     required int valueToDestroy,
   }) async {
@@ -130,7 +130,7 @@ class BoardController extends ChangeNotifier {
     }
 
     if (targets.isEmpty) {
-      onRedDieEnd();
+      onRedDiceEnd();
       return;
     }
 
