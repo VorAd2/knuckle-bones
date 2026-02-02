@@ -24,7 +24,7 @@ using Firebase Authentication and Cloud Firestore.
 </p>
 
 # 📖 How to Play
-Check out the [**Rules & Scoring Mechanics**](GAME_RULES.md).
+Check out the [**Rules & Scoring Mechanics**](docs/GAME_RULES.md).
 
 # 🧰 Toolbox
 
