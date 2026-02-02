@@ -16,7 +16,7 @@ class DiceColors extends ThemeExtension<DiceColors> {
 
   @override
   DiceColors copyWith({Color? redDice}) {
-    return DiceColors(redDie: redDice ?? this.redDie);
+    return DiceColors(redDie: redDice ?? redDie);
   }
 
   @override
