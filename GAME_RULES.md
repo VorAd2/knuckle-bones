@@ -12,7 +12,6 @@ The game ends immediately when one player fills all 9 slots on their board.
 3. **Score:** The value of the die is added to that column's score.
 
 ---
-
 ## ⚔️ The Twist: Destroying Dice
 
 This is the most critical mechanic. If you place a die in a column that matches the value of your opponent's die **in that same column**:
@@ -21,7 +20,11 @@ This is the most critical mechanic. If you place a die in a column that matches 
 
 They are removed from the board immediately, reducing their score. This allows for aggressive plays (clearing the enemy board) or defensive plays (preventing them from building combos).
 
----
+> **💡 Pro Tip: The "Last-Second" Comeback**
+>
+> This rule applies even on the **very last move** of the game!
+>
+> If the move that fills your board (ending the game) also triggers a destruction, your opponent loses those points *before* the winner is decided. Saving a matching die for the final turn can be a game-winning surprise strategy.
 
 ## 📊 Scoring System (Combos)
 
