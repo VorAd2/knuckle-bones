@@ -23,6 +23,9 @@ using Firebase Authentication and Cloud Firestore.
   <img src="docs/match.png" width="300" alt="Match screen"/>
 </p>
 
+# 📖 How to Play
+Check out the [**Rules & Scoring Mechanics**](GAME_RULES.md).
+
 # 🧰 Toolbox
 
 <p align="center">
