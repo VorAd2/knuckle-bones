@@ -1,7 +1,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Flutter SDK](https://img.shields.io/badge/Flutter_SDK-3.38.5-grey?style=flat&labelColor=02569B)
 
-> 📚 **Project Status: MVP Completed**
+> 📚 **Project Status: MVP Completed.**
 > This project was developed as a study case for **Flutter** and **Firebase Realtime**.
 > The core gameplay loop is functional, but there are known technical debts (documented in Issues) regarding architecture and scaling.
 
