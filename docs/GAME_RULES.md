@@ -37,6 +37,8 @@ Here is how the score scales up (using the number **6** as an example):
   <video src="https://github.com/user-attachments/assets/817c8fc1-cf6e-432c-afb5-259669d168c5" width="300" controls />
 </div>
 
+ ---
+
 ## ⚔️ The Twist: Destroying Dice
 
 This is the most critical mechanic. If you place a die in a column that matches the value of your opponent's die **in that same column**:
