@@ -1,7 +1,7 @@
 # 🎲 Game Rules & Mechanics
 
 The goal is simple: **finish the match with the highest total score.**
-The game ends immediately when one player fills all 9 slots on their board.
+The game ends when one player fills all 9 slots on their board.
 
 ---
 
