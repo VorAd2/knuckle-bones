@@ -97,6 +97,7 @@ class _SigninViewState extends State<SigninView> {
           GestureDetector(
             onTap: () => FocusScope.of(context).unfocus(),
             child: AuthScaffold(
+              title: 'Sign in',
               componentsColumn: _ComponentsColumn(
                 formKey: _formKey,
                 getConfigs: _getConfigs,

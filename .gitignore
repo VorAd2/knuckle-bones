@@ -53,3 +53,5 @@ app.*.map.json
 firebase_options.dart
 /firebase.json
 /android/app/google-services.json
+
+.vscode

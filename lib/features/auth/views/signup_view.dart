@@ -150,6 +150,7 @@ class _SignupViewState extends State<SignupView> {
           GestureDetector(
             onTap: () => FocusScope.of(context).unfocus(),
             child: AuthScaffold(
+              title: 'Sign up',
               componentsColumn: _ComponentsColumn(
                 avatarSelector: avatarSelector,
                 formKey: _formKey,
