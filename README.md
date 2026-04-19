@@ -1,30 +1,34 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Flutter SDK](https://img.shields.io/badge/Flutter_SDK-3.38.5-grey?style=flat&labelColor=02569B)
 
+> 📚 **Project Status: MVP Completed.**
+> This project was developed as a study case for **Flutter** and **Firebase Realtime**.
+> The core gameplay is functional, but there are known technical debts (documented in Issues) regarding architecture and scaling.
+
+ ---
+
 # KnuckleBones
 KnuckleBones is a multiplayer dice game developed with Flutter, based on the mechanics of the minigame of the same name featured in Cult of the Lamb, with real-time online matches,
 using Firebase Authentication and Cloud Firestore. 
 
 * PS: This project uses Firebase's Spark (free) plan and some features, not necessarily linked to a paid Firebase plan, have not been implemented 
 
-# 🧩 Previews and Features
+# 🧩 Some Previews and Features
 
-## Welcome and Authentication
+## Authentication
 <p align="center">
-  <img src="docs/welcome.png" width="300" alt="Welcome screen"/>
   <img src="docs/signin.png" width="300" alt="Sign in screen"/>
   <img src="docs/signup.png" width="300" alt="Sign up screen"/>
 </p>
 
-## Home and Match
+## Lobby and Match
 <p align="center">
   <img src="docs/lobby.png" width="300" alt="Lobby screen"/>
-  <img src="docs/profile.png" width="300" alt="Profile screen"/>
   <img src="docs/match.png" width="300" alt="Match screen"/>
 </p>
 
 # 📖 How to Play
-Check out the [**Rules & Scoring Mechanics**](docs/GAME_RULES.md).
+Check out the [**Rules & Scoring Mechanics**](docs/GAME_RULES.md)
 
 # 🧰 Toolbox
 

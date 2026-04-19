@@ -1,7 +1,7 @@
 # 🎲 Game Rules & Mechanics
 
-The goal is simple: **Finish the match with the highest total score.**
-The game ends immediately when one player fills all 9 slots on their board.
+The goal is simple: **finish the match with the highest total score.**
+The game ends when one player fills all 9 slots on their board.
 
 ---
 
@@ -10,6 +10,10 @@ The game ends immediately when one player fills all 9 slots on their board.
 1. **Roll:** Each turn, you roll a 6-sided die (D6).
 2. **Place:** You must choose one of the **3 columns** to place your die.
 3. **Score:** The value of the die is added to that column's score.
+
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/a1520ddb-8f57-4b0d-ab59-9e722bf8bb5f" width="300" />
+</div>
 
 ---
 
@@ -29,6 +33,12 @@ Here is how the score scales up (using the number **6** as an example):
 > **Note:** Different numbers in the same column are simply added together.
 > *Example:* A `[6]` and a `[5]` in the same column are worth **11 points** (6 + 5).
 
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/817c8fc1-cf6e-432c-afb5-259669d168c5" width="300" controls />
+</div>
+
+ ---
+
 ## ⚔️ The Twist: Destroying Dice
 
 This is the most critical mechanic. If you place a die in a column that matches the value of your opponent's die **in that same column**:
@@ -42,6 +52,10 @@ They are removed from the board immediately, reducing their score. This allows f
 > This rule applies even on the **very last move** of the game!
 >
 > If the move that fills your board (ending the game) also triggers a destruction, your opponent loses those points *before* the winner is decided. Saving a matching die for the final turn can be a game-winning surprise strategy.
+
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/29d22c28-9b82-4fb7-bc06-2734ddf06a3d" width="300" controls />
+</div>
 
 ---
 
